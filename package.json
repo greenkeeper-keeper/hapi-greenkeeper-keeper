@@ -1,5 +1,6 @@
 {
   "name": "hapi-greenkeeper-keeper",
+  "version": "0.0.1",
   "license": "MIT",
   "author": "Kurtis Kemple <kurtiskemple@gmail.com>",
   "maintainers": [
