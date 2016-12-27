@@ -1,8 +1,21 @@
 {
   "name": "hapi-greenkeeper-keeper",
   "license": "MIT",
-  "author": "Kurtis Kemple",
+  "author": "Kurtis Kemple <kurtiskemple@gmail.com>",
+  "maintainers": [
+    "Kurtis Kemple <kurtiskemple@gmail.com>",
+    "Matt Travi <npm@travi.org> (https://matt.travi.org/)"
+  ],
   "description": "hapi plugin to automatically merge and clean up passing greenkeeper PRs",
+  "repository": "greenkeeper-keeper/hapi-greenkeeper-keeper",
+  "bugs": "https://github.com/greenkeeper-keeper/hapi-greenkeeper-keeper/issues",
+  "homepage": "https://github.com/greenkeeper-keeper/hapi-greenkeeper-keeper#readme",
+  "keywords": [
+    "greenkeeper.io",
+    "github",
+    "hapi",
+    "plugin"
+  ],
   "scripts": {
     "lint:md": "globstar --node -- markdownlint **/*.md",
     "tests:unit": "mocha --recursive test/unit",
