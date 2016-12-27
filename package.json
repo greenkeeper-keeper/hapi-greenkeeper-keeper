@@ -35,6 +35,9 @@
       "path": "./node_modules/cz-conventional-changelog"
     }
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "devDependencies": {
     "@travi/any": "1.0.1",
     "babel-preset-es2015-rollup": "3.0.0",
