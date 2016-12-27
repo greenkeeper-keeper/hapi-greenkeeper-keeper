@@ -1,6 +1,8 @@
 {
   "name": "hapi-greenkeeper-keeper",
   "version": "0.0.1",
+  "main": "lib/plugin.cjs.js",
+  "module": "lib/plugin.es.js",
   "license": "MIT",
   "author": "Kurtis Kemple <kurtiskemple@gmail.com>",
   "maintainers": [
@@ -23,7 +25,10 @@
     "test": "run-s lint:* coverage",
     "coverage": "nyc run-s tests:unit",
     "commitmsg": "validate-commit-msg",
-    "precommit": "npm test"
+    "precommit": "npm test",
+    "build": "rollup -c",
+    "preversion": "npm test",
+    "prepublish": "run-s build"
   },
   "config": {
     "commitizen": {
@@ -32,6 +37,7 @@
   },
   "devDependencies": {
     "@travi/any": "1.0.1",
+    "babel-preset-es2015-rollup": "3.0.0",
     "chai": "3.5.0",
     "cz-conventional-changelog": "1.2.0",
     "globstar": "1.0.0",
@@ -40,6 +46,8 @@
     "mocha": "3.2.0",
     "npm-run-all": "3.1.2",
     "nyc": "10.0.0",
+    "rollup": "0.38.0",
+    "rollup-plugin-babel": "2.7.1",
     "validate-commit-msg": "2.8.2"
   }
 }
