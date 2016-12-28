@@ -3,8 +3,8 @@ const groupBy = require('lodash.groupby')
 const highwire = require('highwire')
 const values = require('lodash.values')
 
-const FailedStatusFoundError = require('./failed-status-found-error')
-const PendingTimeoutError = require('./pending-timeout-error')
+import FailedStatusFoundError from './failed-status-found-error'
+import PendingTimeoutError from './pending-timeout-error'
 
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN
 const GITHUB_USER = process.env.GITHUB_USER

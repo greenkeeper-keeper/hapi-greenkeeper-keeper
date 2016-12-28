@@ -52,5 +52,10 @@
     "rollup": "0.38.1",
     "rollup-plugin-babel": "2.7.1",
     "validate-commit-msg": "2.8.2"
+  },
+  "dependencies": {
+    "btoa": "1.1.2",
+    "highwire": "1.1.6",
+    "lodash.groupby": "4.6.0"
   }
 }
