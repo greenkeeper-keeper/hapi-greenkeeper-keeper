@@ -9,7 +9,9 @@ src/
 .eslintignore
 .eslintrc.yml
 .gitattributes
+.markdownlintrc
 .npmrc
 .nvmrc
+.nycrc
 .travis.yml
 rollup.config.js
