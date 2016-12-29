@@ -22,7 +22,9 @@
   "scripts": {
     "lint:md": "globstar --node -- markdownlint **/*.md",
     "tests:unit": "mocha --recursive test/unit",
-    "test": "run-s lint:* coverage",
+    "tests:integration": "cucumber.js test/integration --compiler js:babel-register --tags 'not @wip'",
+    "tests:integration:wip": "cucumber.js test/integration --compiler js:babel-register --tags @wip",
+    "test": "run-s lint:* coverage tests:integration",
     "coverage": "nyc run-s tests:unit",
     "commitmsg": "validate-commit-msg",
     "precommit": "npm test",
@@ -42,6 +44,7 @@
     "@travi/any": "1.0.1",
     "babel-preset-es2015-rollup": "3.0.0",
     "chai": "3.5.0",
+    "cucumber": "2.0.0-rc.5",
     "cz-conventional-changelog": "1.2.0",
     "globstar": "1.0.0",
     "husky": "0.12.0",
