@@ -58,7 +58,7 @@
     "nock": "9.0.2",
     "npm-run-all": "3.1.2",
     "nyc": "10.0.0",
-    "rollup": "0.39.0",
+    "rollup": "0.39.2",
     "rollup-plugin-babel": "2.7.1",
     "sinon": "1.17.7",
     "validate-commit-msg": "2.8.2"
