@@ -1,1 +1,3 @@
 --ui tdd
+--compilers js:babel-register
+-r ./scripts/mocha-setup.js
