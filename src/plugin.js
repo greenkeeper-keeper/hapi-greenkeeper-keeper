@@ -1,20 +1,19 @@
-const btoa = require('btoa')
-const groupBy = require('lodash.groupby')
-const highwire = require('highwire')
-const values = require('lodash.values')
-
+import btoa from 'btoa'
+import groupBy from 'lodash.groupby'
+import highwire from 'highwire'
+import values from 'lodash.values'
 import FailedStatusFoundError from './failed-status-found-error'
 import PendingTimeoutError from './pending-timeout-error'
 
-const GITHUB_TOKEN = process.env.GITHUB_TOKEN
-const GITHUB_USER = process.env.GITHUB_USER
 const GREENKEEPER_BOT_GITHUB_URL = 'https://github.com/greenkeeperio-bot'
 const GREENKEEPER_INTEGRATION_GITHUB_URL = 'https://github.com/integration/greenkeeper'
-const SQUASH_MERGES = process.env.SQUASH_MERGES || false
-const DELETE_BRANCHES = process.env.DELETE_BRANCHES || true
-
 const MINUTE = 1000 * 60
 const HOUR = MINUTE * 60
+
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN
+const GITHUB_USER = process.env.GITHUB_USER
+const SQUASH_MERGES = process.env.SQUASH_MERGES || false
+const DELETE_BRANCHES = process.env.DELETE_BRANCHES || true
 
 const { get, put, post, del } = highwire
 
@@ -94,7 +93,7 @@ const commentWithError = (commentsUrl, prNumber, error) => {
   post(`${commentsUrl}`, buildErrorComment(error.message, prNumber), { headers })
 }
 
-module.exports.register = (server, options, next) => {
+export function register (server, options, next) {
   server.route({
     method: 'POST',
     path: '/payload',
@@ -133,6 +132,6 @@ module.exports.register = (server, options, next) => {
   next()
 }
 
-module.exports.register.attributes = {
+register.attributes = {
   pkg: require('../package.json')
 }
