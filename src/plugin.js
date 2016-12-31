@@ -2,6 +2,7 @@ import btoa from 'btoa'
 import groupBy from 'lodash.groupby'
 import highwire from 'highwire'
 import values from 'lodash.values'
+import {ACCEPTED} from 'http-status-codes'
 import FailedStatusFoundError from './failed-status-found-error'
 import PendingTimeoutError from './pending-timeout-error'
 
@@ -98,7 +99,7 @@ export function register (server, options, next) {
     method: 'POST',
     path: '/payload',
     handler (request, response) {
-      response('ok')
+      response('ok').code(ACCEPTED);
 
       const { action, sender, pull_request, number } = request.payload
 

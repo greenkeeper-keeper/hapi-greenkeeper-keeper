@@ -1,7 +1,7 @@
 import {defineSupportCode} from 'cucumber';
 import {World} from '../support/world';
 import {assert} from 'chai';
-import {OK} from 'http-status-codes';
+import {ACCEPTED} from 'http-status-codes';
 
 defineSupportCode(({When, Then, setWorldConstructor}) => {
   setWorldConstructor(World);
@@ -12,8 +12,8 @@ defineSupportCode(({When, Then, setWorldConstructor}) => {
     });
   });
 
-  Then(/^a successful response is returned$/, function (callback) {
-    assert.equal(this.getResponseStatus(), OK);
+  Then(/^the webhook response confirms that it will be processed$/, function (callback) {
+    assert.equal(this.getResponseStatus(), ACCEPTED);
 
     callback();
   });

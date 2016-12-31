@@ -4,5 +4,5 @@ Feature: Greenkeeper PR
     Given statuses exist for the PR
     And the PR can be merged
     When the PR webhook is received
-    Then a successful response is returned
+    Then the webhook response confirms that it will be processed
     And the PR is merged
