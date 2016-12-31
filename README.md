@@ -6,6 +6,8 @@ hapi plugin to automatically merge and clean up passing greenkeeper PRs
 [![license](https://img.shields.io/github/license/greenkeeper-keeper/hapi-greenkeeper-keeper.svg)](LICENSE)
 
 [![Build Status](https://img.shields.io/travis/greenkeeper-keeper/hapi-greenkeeper-keeper.svg?style=flat&branch=master)](https://travis-ci.org/greenkeeper-keeper/hapi-greenkeeper-keeper)
+[![Codecov](https://img.shields.io/codecov/c/github/greenkeeper-keeper/hapi-greenkeeper-keeper.svg)](https://codecov.io/github/greenkeeper-keeper/hapi-greenkeeper-keeper)
+
 [![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli/)
 ![greenkeeper badge](https://badges.greenkeeper.io/greenkeeper-keeper/hapi-greenkeeper-keeper.svg)
 

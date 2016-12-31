@@ -26,6 +26,7 @@
     "tests:integration:wip": "cucumber.js test/integration --compiler js:babel-register --tags @wip",
     "test": "run-s lint:* coverage tests:integration",
     "coverage": "nyc run-s tests:unit",
+    "report-coverage": "nyc report --reporter=text-lcov > coverage.lcov && codecov",
     "commitmsg": "validate-commit-msg",
     "precommit": "npm test",
     "build": "rollup -c",
