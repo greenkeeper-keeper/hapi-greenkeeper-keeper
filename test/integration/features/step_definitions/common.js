@@ -8,6 +8,8 @@ defineSupportCode(({When, Then, setWorldConstructor}) => {
 
   When(/^the PR webhook is received$/, function () {
     return this.receiveWebhook({
+      event: this.webhookEventName,
+      action: this.webhookAction,
       sender: this.prSender
     }).then(response => {
       this.serverResponse = response;

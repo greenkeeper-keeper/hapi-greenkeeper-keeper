@@ -86,7 +86,11 @@ const buildErrorComment = (message, prNumber) => {
 }
 
 const commentWithError = (commentsUrl, prNumber, error) => {
-  post(`${commentsUrl}`, buildErrorComment(error.message, prNumber), { headers })
+  return post(`${commentsUrl}`, buildErrorComment(error.message, prNumber), { headers })
+}
+
+function isValidGreenkeeperUpdate({event, action, sender}) {
+  return event === 'pull_request' && action === 'opened' && openedByGreenkeeperBot(sender.html_url);
 }
 
 export function register (server, options, next) {
@@ -96,7 +100,7 @@ export function register (server, options, next) {
     handler (request, response) {
       const { action, sender, pull_request, number } = request.payload
 
-      if (action === 'opened' && openedByGreenkeeperBot(sender.html_url)) {
+      if (isValidGreenkeeperUpdate({event: request.headers['x-github-event'], action, sender})) {
         response('ok').code(ACCEPTED);
 
         request.log(['info', 'PR', 'validating'], pull_request.url)
@@ -117,7 +121,10 @@ export function register (server, options, next) {
           })
           .catch((error) => {
             request.log(['error', 'PR'], error)
-            commentWithError(pull_request.comments_url, number, error)
+            commentWithError(pull_request.comments_url, number, error).catch(e => request.log(
+              ['error', 'PR'],
+              `failed to post comment: ${e}`
+            ))
           })
       } else {
         response('skipping').code(BAD_REQUEST);

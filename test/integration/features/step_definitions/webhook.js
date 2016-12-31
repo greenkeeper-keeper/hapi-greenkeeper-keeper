@@ -24,4 +24,11 @@ defineSupportCode(({Before, After, Given, Then, setWorldConstructor}) => {
 
     callback();
   });
+
+  Given('the webhook is for a {event:stringInDoubleQuotes} event and a {action:stringInDoubleQuotes} action', function (event, action, callback) {
+    this.webhookAction = action;
+    this.webhookEventName = event;
+
+    callback();
+  });
 });

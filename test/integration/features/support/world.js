@@ -1,9 +1,12 @@
 export function World() {
-  this.receiveWebhook = ({sender}) => this.server.inject({
+  this.receiveWebhook = ({event, action, sender}) => this.server.inject({
     method: 'POST',
     url: '/payload',
+    headers: {
+      'X-GitHub-Event': event
+    },
     payload: {
-      action: 'opened',
+      action,
       sender: {
         html_url: sender
       },
