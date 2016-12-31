@@ -14,7 +14,6 @@ defineSupportCode(({Before, After, Given, Then, setWorldConstructor}) => {
     process.env.DELETE_BRANCHES = false;
 
     githubScope = nock('https://api.github.com').log(console.log);
-    githubScope.delete('/repos/test-repo/git/refs/heads/baz').reply(OK);
   });
 
   After(() => {
@@ -30,6 +29,7 @@ defineSupportCode(({Before, After, Given, Then, setWorldConstructor}) => {
   });
 
   Given(/^the PR can be merged$/, function (callback) {
+    githubScope.delete('/repos/test-repo/git/refs/heads/baz').reply(OK);
     githubScope.put('/123/merge').reply(OK, (uri) => {
       this.mergeUri = uri;
     });

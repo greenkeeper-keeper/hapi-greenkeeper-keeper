@@ -1,11 +1,11 @@
 export function World() {
-  this.receiveWebhook = () => this.server.inject({
+  this.receiveWebhook = ({sender}) => this.server.inject({
     method: 'POST',
     url: '/payload',
     payload: {
       action: 'opened',
       sender: {
-        html_url: 'https://github.com/integration/greenkeeper'
+        html_url: sender
       },
       pull_request: {
         statuses_url: 'https://api.github.com/foo',

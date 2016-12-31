@@ -2,12 +2,11 @@ import btoa from 'btoa'
 import groupBy from 'lodash.groupby'
 import highwire from 'highwire'
 import values from 'lodash.values'
-import {ACCEPTED} from 'http-status-codes'
+import {ACCEPTED, BAD_REQUEST} from 'http-status-codes'
 import FailedStatusFoundError from './failed-status-found-error'
 import PendingTimeoutError from './pending-timeout-error'
+import openedByGreenkeeperBot from './greenkeeper';
 
-const GREENKEEPER_BOT_GITHUB_URL = 'https://github.com/greenkeeperio-bot'
-const GREENKEEPER_INTEGRATION_GITHUB_URL = 'https://github.com/integration/greenkeeper'
 const MINUTE = 1000 * 60
 const HOUR = MINUTE * 60
 
@@ -80,10 +79,6 @@ const deleteBranch = (head) => {
   return del(url, { headers })
 }
 
-const openedByGreenKeeperBot = (sender) => {
-  return sender.html_url === GREENKEEPER_BOT_GITHUB_URL || sender.html_url === GREENKEEPER_INTEGRATION_GITHUB_URL
-}
-
 const buildErrorComment = (message, prNumber) => {
   return {
     body: `greenkeeper-keeper(pr: ${prNumber}): :x: \`${message}\``
@@ -99,11 +94,11 @@ export function register (server, options, next) {
     method: 'POST',
     path: '/payload',
     handler (request, response) {
-      response('ok').code(ACCEPTED);
-
       const { action, sender, pull_request, number } = request.payload
 
-      if (action === 'opened' && openedByGreenKeeperBot(sender)) {
+      if (action === 'opened' && openedByGreenkeeperBot(sender.html_url)) {
+        response('ok').code(ACCEPTED);
+
         request.log(['info', 'PR', 'validating'], pull_request.url)
         validatePR(pull_request.statuses_url)
           .then(() => request.log(['info', 'PR', 'validated']))
@@ -125,6 +120,7 @@ export function register (server, options, next) {
             commentWithError(pull_request.comments_url, number, error)
           })
       } else {
+        response('skipping').code(BAD_REQUEST);
         request.log(['PR', 'skipping'])
       }
     }
