@@ -46,6 +46,7 @@
     "babel-preset-es2015-node": "6.1.1",
     "babel-preset-es2015-rollup": "3.0.0",
     "chai": "3.5.0",
+    "codecov": "1.0.1",
     "cucumber": "2.0.0-rc.5",
     "cz-conventional-changelog": "1.2.0",
     "globstar": "1.0.0",
