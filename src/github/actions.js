@@ -1,7 +1,7 @@
 import clientFactory from './request-methods';
 
 export default function (githubCredentials) {
-  const {put, del} = clientFactory(githubCredentials);
+  const {post, put, del} = clientFactory(githubCredentials);
 
   return {
     acceptPR: (url, sha, prNumber, squash = false) => put(`${url}/merge`, {
@@ -15,6 +15,10 @@ export default function (githubCredentials) {
       if (deleteBranches) return del(`https://api.github.com/repos/${repo.full_name}/git/refs/heads/${ref}`);
 
       return Promise.resolve();
-    }
+    },
+
+    postErrorComment: (url, error) => post(url, {
+      body: `:x: greenkeeper-keeper failed to merge the pull-request \n \`${error.message}\``
+    })
   }
 }

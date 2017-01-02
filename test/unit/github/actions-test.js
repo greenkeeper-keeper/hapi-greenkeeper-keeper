@@ -56,9 +56,19 @@ suite('github actions', () => {
     });
 
     test('that the branch is not deleted if the config is not to delete', () => {
-      return actions.deleteBranch({}, false).then(() => {
-        assert.notCalled(del);
-      });
+      return actions.deleteBranch({}, false).then(() => assert.notCalled(del));
+    });
+  });
+
+  suite('comments', () => {
+    test('that an error comment is posted', () => {
+      const message = any.string();
+      const error = new Error(message);
+      post.withArgs(url, {
+        body: `:x: greenkeeper-keeper failed to merge the pull-request \n \`${message}\``
+      }).resolves(response);
+
+      return assert.becomes(actions.postErrorComment(url, error), response);
     });
   });
 });
