@@ -11,6 +11,10 @@ export default function (githubCredentials) {
       squash
     }),
 
-    deleteBranch: ({repo, ref}) => del(`https://api.github.com/repos/${repo.full_name}/git/refs/heads/${ref}`)
+    deleteBranch: ({repo, ref}, deleteBranches) => {
+      if (deleteBranches) return del(`https://api.github.com/repos/${repo.full_name}/git/refs/heads/${ref}`);
+
+      return Promise.resolve();
+    }
   }
 }

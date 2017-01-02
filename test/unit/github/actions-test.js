@@ -47,12 +47,18 @@ suite('github actions', () => {
   });
 
   suite('delete branch', () => {
-    test('that the branch gets deleted', () => {
+    test('that the branch gets deleted if config is to delete', () => {
       const ref = any.string();
       const repoName = any.word();
       del.withArgs(`https://api.github.com/repos/${repoName}/git/refs/heads/${ref}`).resolves(response);
 
-      return assert.becomes(actions.deleteBranch({repo: {full_name: repoName}, ref}), response);
+      return assert.becomes(actions.deleteBranch({repo: {full_name: repoName}, ref}, true), response);
+    });
+
+    test('that the branch is not deleted if the config is not to delete', () => {
+      return actions.deleteBranch({}, false).then(() => {
+        assert.notCalled(del);
+      });
     });
   });
 });
