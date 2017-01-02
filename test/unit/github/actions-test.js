@@ -27,20 +27,32 @@ suite('github actions', () => {
 
   teardown(() => sandbox.restore());
 
-  test('that the referenced PR gets merged', () => {
-    put.withArgs(`${url}/merge`, {
-      sha,
-      commit_title: `greenkeeper-keeper(pr: ${prNumber}): :white_check_mark:`,
-      commit_message: `greenkeeper-keeper(pr: ${prNumber}): :white_check_mark:`,
-      squash: false
-    }).resolves(response);
+  suite('accept PR', () => {
+    test('that the referenced PR gets merged', () => {
+      put.withArgs(`${url}/merge`, {
+        sha,
+        commit_title: `greenkeeper-keeper(pr: ${prNumber}): :white_check_mark:`,
+        commit_message: `greenkeeper-keeper(pr: ${prNumber}): :white_check_mark:`,
+        squash: false
+      }).resolves(response);
 
-    return assert.becomes(actions.acceptPR(url, sha, prNumber), response);
+      return assert.becomes(actions.acceptPR(url, sha, prNumber), response);
+    });
+
+    test('that the referenced PR gets squashed and merged', () => {
+      put.withArgs(`${url}/merge`, sinon.match({squash: true})).resolves(response);
+
+      return assert.becomes(actions.acceptPR(url, sha, prNumber, true), response);
+    });
   });
 
-  test('that the referenced PR gets squashed and merged', () => {
-    put.withArgs(`${url}/merge`, sinon.match({squash: true})).resolves(response);
+  suite('delete branch', () => {
+    test('that the branch gets deleted', () => {
+      const ref = any.string();
+      const repoName = any.word();
+      del.withArgs(`https://api.github.com/repos/${repoName}/git/refs/heads/${ref}`).resolves(response);
 
-    return assert.becomes(actions.acceptPR(url, sha, prNumber, true), response);
+      return assert.becomes(actions.deleteBranch({repo: {full_name: repoName}, ref}), response);
+    });
   });
 });
