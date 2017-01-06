@@ -51,7 +51,7 @@
     "chai": "3.5.0",
     "chai-as-promised": "6.0.0",
     "codecov": "1.0.1",
-    "cucumber": "2.0.0-rc.5",
+    "cucumber": "2.0.0-rc.6",
     "cz-conventional-changelog": "1.2.0",
     "debug": "2.6.0",
     "eslint": "3.14.1",
