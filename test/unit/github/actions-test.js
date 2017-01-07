@@ -2,15 +2,19 @@ import {assert} from 'chai';
 import sinon from 'sinon';
 import any from '@travi/any';
 import * as clientFactory from '../../../src/github/request-methods';
+import * as poll from '../../../src/github/poller';
 import actionsFactory from '../../../src/github/actions';
+import FailedStatusFoundError from '../../../src/failed-status-found-error';
 
 suite('github actions', () => {
   let actions, sandbox, get, post, put, del;
   const githubCredentials = any.simpleObject();
   const url = any.url();
   const sha = any.string();
+  const ref = any.string();
+  const repoName = any.word();
   const prNumber = any.string();
-  const response = any.simpleObject();
+  const response = {body: any.simpleObject()};
 
   setup(() => {
     sandbox = sinon.sandbox.create();
@@ -20,12 +24,46 @@ suite('github actions', () => {
     put = sinon.stub();
     del = sinon.stub();
 
+    sandbox.stub(poll, 'default');
     sandbox.stub(clientFactory, 'default').withArgs(githubCredentials).returns({get, post, put, del});
 
     actions = actionsFactory(githubCredentials);
   });
 
   teardown(() => sandbox.restore());
+
+  suite('ensure PR can be merged', () => {
+    test('that the passing status is acceptable', () => {
+      get.withArgs(`https://api.github.com/repos/${repoName}/commits/${ref}/status`).resolves({
+        body: {
+          state: 'success'
+        }
+      });
+
+      return assert.becomes(
+        actions.ensureAcceptability({repo: {full_name: repoName}, ref}),
+        'All commit statuses passed'
+      );
+    });
+
+    test('that the failing status results in rejection', () => {
+      get.resolves({body: {state: 'failure'}});
+
+      return assert.isRejected(
+        actions.ensureAcceptability({repo: {full_name: repoName}, ref}),
+        FailedStatusFoundError,
+        /A failed status was found for this PR\./
+      );
+    });
+
+    test('that the pending status delegates to poller', () => {
+      const result = any.string();
+      get.resolves({body: {state: 'pending'}});
+      poll.default.withArgs({repo: {full_name: repoName}, ref}).resolves(result);
+
+      return assert.becomes(actions.ensureAcceptability({repo: {full_name: repoName}, ref}), result);
+    });
+  });
 
   suite('accept PR', () => {
     test('that the referenced PR gets merged', () => {
@@ -48,8 +86,6 @@ suite('github actions', () => {
 
   suite('delete branch', () => {
     test('that the branch gets deleted if config is to delete', () => {
-      const ref = any.string();
-      const repoName = any.word();
       del.withArgs(`https://api.github.com/repos/${repoName}/git/refs/heads/${ref}`).resolves(response);
 
       return assert.becomes(actions.deleteBranch({repo: {full_name: repoName}, ref}, true), response);
