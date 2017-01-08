@@ -11,7 +11,17 @@ defineSupportCode(({Before, setWorldConstructor}) => {
       this.server.connection();
 
       return new Promise((resolve, reject) => {
-        this.server.register(require('../../../../src/plugin'), err => {
+        this.server.register({
+          register: require('../../../../src/plugin'),
+          options: {
+            squash: false,
+            deleteBranches: true,
+            github: {
+              user: this.githubUser,
+              token: this.githubToken
+            }
+          }
+        }, err => {
           if (err) reject(err);
           else resolve();
         });

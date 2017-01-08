@@ -5,6 +5,7 @@ Feature: Greenkeeper PR
     And the PR was submitted by the greenkeeper integration
     And statuses exist for the PR
     And the PR can be merged
+    And the branch can be deleted
     When the PR webhook is received
     Then the webhook response confirms that it will be processed
     And the PR is merged
@@ -14,6 +15,7 @@ Feature: Greenkeeper PR
     And the PR was submitted by the greenkeeper legacy bot
     And statuses exist for the PR
     And the PR can be merged
+    And the branch can be deleted
     When the PR webhook is received
     Then the webhook response confirms that it will be processed
     And the PR is merged

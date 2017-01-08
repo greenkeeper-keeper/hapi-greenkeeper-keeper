@@ -1,5 +1,12 @@
+import any from '@travi/any';
+
 export function World() {
-  this.receiveWebhook = ({event, action, sender}) => this.server.inject({
+  this.githubUser = any.word();
+  this.githubToken = any.word();
+  this.ref = 'baz';
+  this.repo = 'test-repo';
+
+  this.receiveWebhook = ({event, action, sender, comments}) => this.server.inject({
     method: 'POST',
     url: '/payload',
     headers: {
@@ -11,13 +18,13 @@ export function World() {
         html_url: sender
       },
       pull_request: {
-        statuses_url: 'https://api.github.com/foo',
+        comments_url: `https://api.github.com${comments}`,
         url: 'https://api.github.com/123',
         head: {
           sha: 'adlkfahfah',
-          ref: 'baz',
+          ref: this.ref,
           repo: {
-            full_name: 'test-repo'
+            full_name: this.repo
           }
         }
       }
