@@ -10,7 +10,8 @@ suite('process', () => {
   const url = any.url();
   const sha = any.string();
   const ref = any.string();
-  const head = {sha, ref};
+  const repo = any.simpleObject();
+  const head = {sha, ref, repo};
   const number = any.integer();
   const squash = any.boolean();
   const deleteBranches = any.boolean();
@@ -34,13 +35,12 @@ suite('process', () => {
   teardown(() => sandbox.restore());
 
   test('that processing a greenkeeper PR confirms that it can be merged, merges, and deletes the branch', () => {
-    const repo = any.simpleObject();
     ensureAcceptability.withArgs({repo, ref}).resolves();
     acceptPR.withArgs(url, sha, number, squash).resolves();
     deleteBranch.resolves();
 
     return processPR(
-      {payload: {number, pull_request: {url, head, repo}}},
+      {payload: {number, pull_request: {url, head}}},
       {github: githubCredentials, squash, deleteBranches}
     ).then(() => {
       assert.calledOnce(ensureAcceptability);
