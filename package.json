@@ -1,6 +1,6 @@
 {
   "name": "hapi-greenkeeper-keeper",
-  "version": "0.0.3",
+  "version": "0.1.0",
   "main": "lib/plugin.cjs.js",
   "module": "lib/plugin.es.js",
   "license": "MIT",
