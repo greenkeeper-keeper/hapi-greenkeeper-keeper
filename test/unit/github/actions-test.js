@@ -5,6 +5,7 @@ import * as clientFactory from '../../../src/github/request-methods';
 import * as poll from '../../../src/github/poller';
 import actionsFactory from '../../../src/github/actions';
 import FailedStatusFoundError from '../../../src/failed-status-found-error';
+import InvalidStatusFoundError from '../../../src/invalid-status-found-error';
 import MergeFailureError from '../../../src/merge-failure-error';
 import BranchDeletionFailureError from '../../../src/branch-deletion-failure-error';
 
@@ -74,6 +75,16 @@ suite('github actions', () => {
       poll.default.withArgs({repo: {full_name: repoName}, ref}, timeout).resolves(result);
 
       return assert.becomes(actions.ensureAcceptability({repo: {full_name: repoName}, ref}, timeout), result);
+    });
+
+    test('that an invalid status results in rejection', () => {
+      get.resolves({body: {state: any.string()}});
+
+      return assert.isRejected(
+        actions.ensureAcceptability({repo: {full_name: repoName}, ref}),
+        InvalidStatusFoundError,
+        /An invalid status was found for this PR\./
+      );
     });
   });
 

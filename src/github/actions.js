@@ -2,6 +2,7 @@ import {minutes} from 'milliseconds';
 import clientFactory from './request-methods';
 import poll from './poller';
 import FailedStatusFoundError from '../failed-status-found-error';
+import InvalidStatusFoundError from '../invalid-status-found-error';
 import MergeFailureError from '../merge-failure-error';
 import BranchDeletionFailureError from '../branch-deletion-failure-error';
 
@@ -15,6 +16,8 @@ export default function (githubCredentials) {
         if ('pending' === state) return poll({repo, ref}, timeout, ensureAcceptability);
         if ('success' === state) return Promise.resolve('All commit statuses passed');
         if ('failure' === state) return Promise.reject(new FailedStatusFoundError());
+
+        return Promise.reject(new InvalidStatusFoundError());
       })
   }
 
