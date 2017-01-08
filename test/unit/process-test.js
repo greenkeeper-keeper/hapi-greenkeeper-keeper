@@ -43,9 +43,22 @@ suite('process', () => {
       {payload: {number, pull_request: {url, head}}},
       {github: githubCredentials, squash, deleteBranches}
     ).then(() => {
+      assert.calledWith(deleteBranch, head, deleteBranches);
+    });
+  });
+
+  test('that deleteBranches defaults to false when not supplied', () => {
+    ensureAcceptability.resolves();
+    acceptPR.resolves();
+    deleteBranch.resolves();
+
+    return processPR(
+      {payload: {number, pull_request: {url, head}}},
+      {github: githubCredentials, squash}
+    ).then(() => {
       assert.calledOnce(ensureAcceptability);
       assert.calledOnce(acceptPR);
-      assert.calledWith(deleteBranch, head, deleteBranches);
+      assert.calledWith(deleteBranch, head, false);
     });
   });
 

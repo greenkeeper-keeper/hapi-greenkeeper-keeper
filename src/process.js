@@ -1,6 +1,6 @@
 import createActions from './github/actions';
 
-export default function ({payload}, {github, squash, deleteBranches}) {
+export default function ({payload}, {github, squash, deleteBranches = false}) {
   const {pull_request, number} = payload;
   const {ensureAcceptability, acceptPR, deleteBranch, postErrorComment} = createActions(github);
 
