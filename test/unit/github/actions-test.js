@@ -5,6 +5,7 @@ import * as clientFactory from '../../../src/github/request-methods';
 import * as poll from '../../../src/github/poller';
 import actionsFactory from '../../../src/github/actions';
 import FailedStatusFoundError from '../../../src/failed-status-found-error';
+import MergeFailureError from '../../../src/merge-failure-error';
 
 suite('github actions', () => {
   let actions, sandbox, get, post, put, del;
@@ -91,6 +92,16 @@ suite('github actions', () => {
       put.withArgs(`${url}/merge`, sinon.match({squash: true})).resolves(response);
 
       return assert.becomes(actions.acceptPR(url, sha, prNumber, true), response);
+    });
+
+    test('that a merge failure is reported appropriately', () => {
+      put.rejects(new Error('error from PUT request in test'));
+
+      return assert.isRejected(
+        actions.acceptPR(),
+        MergeFailureError,
+        /An attempt to merge this PR failed. Error: error from PUT request in test$/
+      );
     });
   });
 
