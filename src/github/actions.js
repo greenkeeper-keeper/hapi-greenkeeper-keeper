@@ -3,6 +3,7 @@ import clientFactory from './request-methods';
 import poll from './poller';
 import FailedStatusFoundError from '../failed-status-found-error';
 import MergeFailureError from '../merge-failure-error';
+import BranchDeletionFailureError from '../branch-deletion-failure-error';
 
 export default function (githubCredentials) {
   const {get, post, put, del} = clientFactory(githubCredentials);
@@ -26,7 +27,11 @@ export default function (githubCredentials) {
     }).catch(err => Promise.reject(new MergeFailureError(err))),
 
     deleteBranch: ({repo, ref}, deleteBranches) => {
-      if (deleteBranches) return del(`https://api.github.com/repos/${repo.full_name}/git/refs/heads/${ref}`);
+      if (deleteBranches) {
+        return del(`https://api.github.com/repos/${repo.full_name}/git/refs/heads/${ref}`).catch(err => Promise.reject(
+          new BranchDeletionFailureError(err)
+        ));
+      }
 
       return Promise.resolve();
     },

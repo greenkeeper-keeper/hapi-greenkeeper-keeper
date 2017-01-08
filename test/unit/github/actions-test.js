@@ -6,6 +6,7 @@ import * as poll from '../../../src/github/poller';
 import actionsFactory from '../../../src/github/actions';
 import FailedStatusFoundError from '../../../src/failed-status-found-error';
 import MergeFailureError from '../../../src/merge-failure-error';
+import BranchDeletionFailureError from '../../../src/branch-deletion-failure-error';
 
 suite('github actions', () => {
   let actions, sandbox, get, post, put, del;
@@ -114,6 +115,16 @@ suite('github actions', () => {
 
     test('that the branch is not deleted if the config is not to delete', () => {
       return actions.deleteBranch({}, false).then(() => assert.notCalled(del));
+    });
+
+    test('that a failure to delete the branch is reported appropriately', () => {
+      del.rejects(new Error('error from DELETE request in test'));
+
+      return assert.isRejected(
+        actions.deleteBranch({repo: {full_name: repoName}, ref}, true),
+        BranchDeletionFailureError,
+        /An attempt to delete this branch failed. Error: error from DELETE request in test$/
+      );
     });
   });
 
