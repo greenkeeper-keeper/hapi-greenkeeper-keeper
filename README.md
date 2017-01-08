@@ -21,3 +21,28 @@ please be aware that _minor_ releases may contain breaking changes.
 ```bash
 $ npm install hapi-greenkeeper-keeper -S
 ```
+
+## Usage
+
+This is a hapi plugin that you can load into your server instance. You can either
+[load the plugin](https://hapijs.com/tutorials/plugins#loading-a-plugin) yourself
+or use [glue](https://github.com/hapijs/glue) to compose your server configuration
+for a manifest.
+
+### Configuration
+
+This plugin has a few required options that you will need to pass when you load
+the plugin on your server.
+
+* __`github.token`__: a [personal access token](https://help.github.com/articles/creating-an-access-token-for-command-line-use/)
+  for the GitHub account that you intend to process greenkeeper PRs
+
+  _Note_: the personal access token will need the `repo` and `repo:read_hooks`
+  scopes in order to work properly
+* __`squash`__: whether or not you want the commits on the branch squashed
+  before merging
+* __`deleteBranches`__: whether or not you want greenkeeper-keeper to delete
+  branches for merged PRs
+
+  _Note_: if you are using the new GitHub integration version of Greenkeeper,
+  branches are already deleted automatically
