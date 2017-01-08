@@ -8,16 +8,18 @@ import BranchDeletionFailureError from '../branch-deletion-failure-error';
 export default function (githubCredentials) {
   const {get, post, put, del} = clientFactory(githubCredentials);
 
+  function ensureAcceptability({repo, ref}, timeout = minutes(1)) {
+    return get(`https://api.github.com/repos/${repo.full_name}/commits/${ref}/status`)
+      .then((response) => response.body)
+      .then(({state}) => {
+        if ('pending' === state) return poll({repo, ref}, timeout, ensureAcceptability);
+        if ('success' === state) return Promise.resolve('All commit statuses passed');
+        if ('failure' === state) return Promise.reject(new FailedStatusFoundError());
+      })
+  }
+
   return {
-    ensureAcceptability({repo, ref}, timeout = minutes(1)) {
-      return get(`https://api.github.com/repos/${repo.full_name}/commits/${ref}/status`)
-        .then((response) => response.body)
-        .then(({state}) => {
-          if ('pending' === state) return poll({repo, ref}, timeout);
-          if ('success' === state) return Promise.resolve('All commit statuses passed');
-          if ('failure' === state) return Promise.reject(new FailedStatusFoundError());
-        })
-    },
+    ensureAcceptability,
 
     acceptPR: (url, sha, prNumber, squash = false) => put(`${url}/merge`, {
       sha,
