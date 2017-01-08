@@ -5,6 +5,8 @@ import nock from 'nock';
 import any from '@travi/any';
 import {OK, METHOD_NOT_ALLOWED, INTERNAL_SERVER_ERROR} from 'http-status-codes';
 
+const debug = require('debug')('test');
+
 defineSupportCode(({Before, After, Given, Then, setWorldConstructor}) => {
   setWorldConstructor(World);
 
@@ -16,7 +18,7 @@ defineSupportCode(({Before, After, Given, Then, setWorldConstructor}) => {
 
     authorizationHeader = `token ${this.githubToken}`;
 
-    githubScope = nock('https://api.github.com').log(console.log);
+    githubScope = nock('https://api.github.com').log(debug);
   });
 
   After(() => {
