@@ -24,10 +24,10 @@ $ npm install hapi-greenkeeper-keeper -S
 
 ## Usage
 
-This is a hapi plugin that you can load into your server instance. You can either
-[load the plugin](https://hapijs.com/tutorials/plugins#loading-a-plugin) yourself
-or use [glue](https://github.com/hapijs/glue) to compose your server configuration
-for a manifest.
+This is a [hapi](https://hapijs.com/) plugin that you can load into your server
+instance. You can either [load the plugin](https://hapijs.com/tutorials/plugins#loading-a-plugin)
+yourself or use [glue](https://github.com/hapijs/glue) to compose your server
+configuration for a manifest.
 
 ### Configuration
 
