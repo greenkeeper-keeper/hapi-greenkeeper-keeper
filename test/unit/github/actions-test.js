@@ -8,6 +8,7 @@ import FailedStatusFoundError from '../../../src/failed-status-found-error';
 
 suite('github actions', () => {
   let actions, sandbox, get, post, put, del;
+  const MINUTE = 1000 * 60;
   const githubCredentials = any.simpleObject();
   const url = any.url();
   const sha = any.string();
@@ -59,9 +60,18 @@ suite('github actions', () => {
     test('that the pending status delegates to poller', () => {
       const result = any.string();
       get.resolves({body: {state: 'pending'}});
-      poll.default.withArgs({repo: {full_name: repoName}, ref}).resolves(result);
+      poll.default.withArgs({repo: {full_name: repoName}, ref}, MINUTE).resolves(result);
 
       return assert.becomes(actions.ensureAcceptability({repo: {full_name: repoName}, ref}), result);
+    });
+
+    test('that the timeout is passed along to the poller', () => {
+      const timeout = any.integer();
+      const result = any.string();
+      get.resolves({body: {state: 'pending'}});
+      poll.default.withArgs({repo: {full_name: repoName}, ref}, timeout).resolves(result);
+
+      return assert.becomes(actions.ensureAcceptability({repo: {full_name: repoName}, ref}, timeout), result);
     });
   });
 
