@@ -11,6 +11,11 @@ hapi plugin to automatically merge and clean up passing greenkeeper PRs
 [![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli/)
 ![greenkeeper badge](https://badges.greenkeeper.io/greenkeeper-keeper/hapi-greenkeeper-keeper.svg)
 
+## Version
+
+Until we release a [stable `v1.0.0`](https://github.com/greenkeeper-keeper/hapi-greenkeeper-keeper/milestone/1),
+please be aware that _minor_ releases may contain breaking changes.
+
 ## Installation
 
 ```bash
