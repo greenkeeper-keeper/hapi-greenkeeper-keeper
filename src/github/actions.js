@@ -1,10 +1,12 @@
 import {minutes} from 'milliseconds';
 import clientFactory from './request-methods';
 import poll from './poller';
-import FailedStatusFoundError from '../failed-status-found-error';
-import InvalidStatusFoundError from '../invalid-status-found-error';
-import MergeFailureError from '../merge-failure-error';
-import BranchDeletionFailureError from '../branch-deletion-failure-error';
+import {
+  BranchDeletionFailureError,
+  FailedStatusFoundError,
+  InvalidStatusFoundError,
+  MergeFailureError
+} from '../errors';
 
 export default function (githubCredentials) {
   const {get, post, put, del} = clientFactory(githubCredentials);

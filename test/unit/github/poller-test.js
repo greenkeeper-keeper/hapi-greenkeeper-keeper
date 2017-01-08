@@ -2,7 +2,7 @@ import sinon from 'sinon';
 import {assert} from 'chai';
 import any from '@travi/any';
 import proxyquire from 'proxyquire';
-import PendingTimeoutError from '../../../src/pending-timeout-error';
+import {PendingTimeoutError} from '../../../src/errors';
 
 const MINUTE = 1000 * 60;
 const HOUR = MINUTE * 60;

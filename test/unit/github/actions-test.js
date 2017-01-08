@@ -4,10 +4,12 @@ import any from '@travi/any';
 import * as clientFactory from '../../../src/github/request-methods';
 import * as poll from '../../../src/github/poller';
 import actionsFactory from '../../../src/github/actions';
-import FailedStatusFoundError from '../../../src/failed-status-found-error';
-import InvalidStatusFoundError from '../../../src/invalid-status-found-error';
-import MergeFailureError from '../../../src/merge-failure-error';
-import BranchDeletionFailureError from '../../../src/branch-deletion-failure-error';
+import {
+  BranchDeletionFailureError,
+  FailedStatusFoundError,
+  InvalidStatusFoundError,
+  MergeFailureError
+} from '../../../src/errors';
 
 suite('github actions', () => {
   let actions, sandbox, get, post, put, del;
