@@ -52,28 +52,43 @@ suite('process', () => {
   test('that failing status checks causes a comment to be logged against the PR and prevents PR acceptance', () => {
     const error = new Error(any.string());
     ensureAcceptability.rejects(error);
+    postErrorComment.resolves(error);
 
     return processPR(
-      {payload: {number, pull_request: {url, head}}},
+      {payload: {number, pull_request: {comments_url: url, head}}},
       {github: githubCredentials, squash, deleteBranches}
     ).then(() => {
       assert.notCalled(acceptPR);
       assert.notCalled(deleteBranch);
       assert.calledWith(postErrorComment, url, error);
-    })
+    });
   });
 
   test('that failing to merge the PR causes a comment to be logged against the PR and prevents branch deletion', () => {
     const error = new Error(any.string());
     ensureAcceptability.resolves();
     acceptPR.rejects(error);
+    postErrorComment.resolves(error);
 
     return processPR(
-      {payload: {number, pull_request: {url, head}}},
+      {payload: {number, pull_request: {comments_url: url, head}}},
       {github: githubCredentials, squash, deleteBranches}
     ).then(() => {
       assert.notCalled(deleteBranch);
       assert.calledWith(postErrorComment, url, error);
     })
+  });
+
+  test('that a rejection from the comment call is caught', () => {
+    const error = new Error(any.string());
+    ensureAcceptability.rejects(error);
+    postErrorComment.rejects(error);
+
+    return processPR(
+      {payload: {number, pull_request: {url, head}}},
+      {github: githubCredentials, squash, deleteBranches}
+    ).then(() => {
+      assert.calledOnce(postErrorComment);
+    });
   });
 });
