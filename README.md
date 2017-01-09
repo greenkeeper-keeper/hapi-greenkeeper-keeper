@@ -34,15 +34,15 @@ configuration for a manifest.
 This plugin has a few required options that you will need to pass when you load
 the plugin on your server.
 
-* __`github.token`__: a [personal access token](https://help.github.com/articles/creating-an-access-token-for-command-line-use/)
+* __`github.token`__ _required_: a [personal access token](https://help.github.com/articles/creating-an-access-token-for-command-line-use/)
   for the GitHub account that you intend to process greenkeeper PRs
 
   _Note_: the personal access token will need the `repo` and `repo:read_hooks`
   scopes in order to work properly
-* __`squash`__: whether or not you want the commits on the branch squashed
-  before merging
-* __`deleteBranches`__: whether or not you want greenkeeper-keeper to delete
-  branches for merged PRs
+* __`squash`__ _required_: whether or not you want the commits on the branch
+  squashed before merging
+* __`deleteBranches`__ _defaults to `false`_: whether or not you want
+  greenkeeper-keeper to delete branches for merged PRs
 
   _Note_: if you are using the new GitHub integration version of Greenkeeper,
   branches are already deleted automatically
