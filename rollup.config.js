@@ -8,7 +8,9 @@ export default {
     'http-status-codes',
     'milliseconds',
     'highwire',
-    'delay'
+    'delay',
+    'joi',
+    'hoek'
   ],
   plugins: [
     nodeResolve({
