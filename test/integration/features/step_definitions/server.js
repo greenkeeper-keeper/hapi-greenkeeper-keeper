@@ -17,7 +17,6 @@ defineSupportCode(({Before, setWorldConstructor}) => {
             squash: false,
             deleteBranches: true,
             github: {
-              user: this.githubUser,
               token: this.githubToken
             }
           }
