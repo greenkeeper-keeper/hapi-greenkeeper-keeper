@@ -8,5 +8,5 @@ export default function ({payload}, {github, squash, deleteBranches = false}) {
     .then(() => acceptPR(pull_request.url, pull_request.head.sha, number, squash))
     .then(() => deleteBranch(pull_request.head, deleteBranches))
     .catch(err => postErrorComment(pull_request.comments_url, err)
-      .catch(e => console.log(`failed to log comment against the PR: ${e}`)));
+      .catch(e => console.log(`failed to log comment against the PR: ${e}`)));  // eslint-disable-line no-console
 }

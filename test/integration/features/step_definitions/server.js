@@ -1,6 +1,6 @@
 import {defineSupportCode} from 'cucumber';
-import {World} from '../support/world';
 import hapi from 'hapi';
+import {World} from '../support/world';
 
 defineSupportCode(({Before, setWorldConstructor}) => {
   setWorldConstructor(World);
@@ -28,5 +28,5 @@ defineSupportCode(({Before, setWorldConstructor}) => {
     }
 
     return Promise.resolve();
-  })
+  });
 });

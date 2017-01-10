@@ -89,7 +89,7 @@ suite('process', () => {
     ).then(() => {
       assert.notCalled(deleteBranch);
       assert.calledWith(postErrorComment, url, error);
-    })
+    });
   });
 
   test('that a rejection from the comment call is caught', () => {

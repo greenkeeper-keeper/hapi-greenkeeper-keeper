@@ -1,0 +1,24 @@
+extends: airbnb/base
+
+rules:
+  comma-dangle:
+    - error
+    - never
+  max-len:
+    - error
+    - 120
+  one-var:
+    - error
+    - uninitialized: always
+      initialized: never
+  one-var-declaration-per-line:
+    - error
+    - initializations
+  object-curly-spacing:
+    - error
+    - never
+  import/prefer-default-export: off
+  arrow-parens:
+    - error
+    - as-needed
+  global-require: off

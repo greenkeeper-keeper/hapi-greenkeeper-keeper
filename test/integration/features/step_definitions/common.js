@@ -1,7 +1,7 @@
 import {defineSupportCode} from 'cucumber';
-import {World} from '../support/world';
 import {assert} from 'chai';
 import {ACCEPTED, BAD_REQUEST} from 'http-status-codes';
+import {World} from '../support/world';
 
 defineSupportCode(({When, Then, setWorldConstructor}) => {
   setWorldConstructor(World);

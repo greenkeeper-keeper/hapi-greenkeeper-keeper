@@ -20,7 +20,7 @@ function isValidGreenkeeperUpdate({event, action, sender}) {
   return event === 'pull_request' && action === 'opened' && openedByGreenkeeperBot(sender.html_url);
 }
 
-export function register (server, options, next) {
+export function register(server, options, next) {
   const settings = validate(options);
 
   server.route({
@@ -34,10 +34,12 @@ export function register (server, options, next) {
 
         request.log(['info', 'PR', 'validating'], request.payload.pull_request.url);
         return process(request, settings);
-      } else {
-        reply('skipping').code(BAD_REQUEST);
-        request.log(['PR', 'skipping'])
       }
+
+      reply('skipping').code(BAD_REQUEST);
+      request.log(['PR', 'skipping']);
+
+      return Promise.resolve();
     }
   });
 

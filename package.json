@@ -20,6 +20,7 @@
     "plugin"
   ],
   "scripts": {
+    "lint:js": "eslint .",
     "lint:md": "globstar --node -- markdownlint **/*.md",
     "tests:unit": "mocha --recursive test/unit",
     "tests:integration": "cucumber.js test/integration --compiler js:babel-register --tags 'not @wip'",
@@ -52,6 +53,11 @@
     "cucumber": "2.0.0-rc.5",
     "cz-conventional-changelog": "1.2.0",
     "debug": "2.6.0",
+    "eslint": "3.13.1",
+    "eslint-config-airbnb": "14.0.0",
+    "eslint-plugin-import": "2.2.0",
+    "eslint-plugin-jsx-a11y": "3.0.2",
+    "eslint-plugin-mocha": "4.8.0",
     "globstar": "1.0.0",
     "hapi": "16.1.0",
     "husky": "0.12.0",

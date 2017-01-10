@@ -1,9 +1,9 @@
 import {defineSupportCode} from 'cucumber';
-import {World} from '../support/world';
 import {assert} from 'chai';
 import nock from 'nock';
 import any from '@travi/any';
 import {OK, METHOD_NOT_ALLOWED, INTERNAL_SERVER_ERROR} from 'http-status-codes';
+import {World} from '../support/world';
 
 const debug = require('debug')('test');
 
@@ -42,7 +42,7 @@ defineSupportCode(({Before, After, Given, Then, setWorldConstructor}) => {
     githubScope
       .matchHeader('Authorization', authorizationHeader)
       .put('/123/merge')
-      .reply(OK, (uri) => {
+      .reply(OK, uri => {
         this.mergeUri = uri;
       });
 
@@ -73,8 +73,8 @@ defineSupportCode(({Before, After, Given, Then, setWorldConstructor}) => {
       .matchHeader('Authorization', authorizationHeader)
       .put('/123/merge')
       .reply(METHOD_NOT_ALLOWED, {
-        "message": "Pull Request is not mergeable",
-        "documentation_url": "https://developer.github.com/v3/pulls/#merge-a-pull-request-merge-button"
+        message: 'Pull Request is not mergeable',
+        documentation_url: 'https://developer.github.com/v3/pulls/#merge-a-pull-request-merge-button'
       });
     githubScope
       .matchHeader('Authorization', authorizationHeader)
@@ -92,7 +92,7 @@ defineSupportCode(({Before, After, Given, Then, setWorldConstructor}) => {
       .delete(`/repos/${this.repo}/git/refs/heads/${this.ref}`)
       .reply(OK);
 
-    callback()
+    callback();
   });
 
   Given('the branch cannot be deleted', function (callback) {

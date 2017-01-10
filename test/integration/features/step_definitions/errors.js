@@ -1,6 +1,6 @@
 import {defineSupportCode} from 'cucumber';
-import {World} from '../support/world';
 import {assert} from 'chai';
+import {World} from '../support/world';
 
 defineSupportCode(({Then, setWorldConstructor}) => {
   setWorldConstructor(World);

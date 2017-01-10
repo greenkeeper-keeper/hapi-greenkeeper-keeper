@@ -126,9 +126,9 @@ suite('github actions', () => {
       return assert.becomes(actions.deleteBranch({repo: {full_name: repoName}, ref}, true), response);
     });
 
-    test('that the branch is not deleted if the config is not to delete', () => {
-      return actions.deleteBranch({}, false).then(() => assert.notCalled(del));
-    });
+    test('that the branch is not deleted if the config is not to delete', () => actions.deleteBranch({}, false).then(
+      () => assert.notCalled(del)
+    ));
 
     test('that a failure to delete the branch is reported appropriately', () => {
       del.rejects(new Error('error from DELETE request in test'));

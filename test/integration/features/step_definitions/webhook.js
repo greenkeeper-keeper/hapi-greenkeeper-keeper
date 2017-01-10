@@ -1,10 +1,9 @@
 import {defineSupportCode} from 'cucumber';
-import {World} from '../support/world';
-import {assert} from 'chai';
 import any from '@travi/any';
+import {World} from '../support/world';
 import {GREENKEEPER_INTEGRATION_GITHUB_URL, GREENKEEPER_BOT_GITHUB_URL} from '../../../../src/greenkeeper';
 
-defineSupportCode(({Before, After, Given, Then, setWorldConstructor}) => {
+defineSupportCode(({Given, setWorldConstructor}) => {
   setWorldConstructor(World);
 
   Given(/^the PR was submitted by the greenkeeper integration$/, function (callback) {
@@ -25,7 +24,11 @@ defineSupportCode(({Before, After, Given, Then, setWorldConstructor}) => {
     callback();
   });
 
-  Given('the webhook is for a {event:stringInDoubleQuotes} event and a {action:stringInDoubleQuotes} action', function (event, action, callback) {
+  Given('the webhook is for a {event:stringInDoubleQuotes} event and a {action:stringInDoubleQuotes} action', function (
+    event,
+    action,
+    callback
+  ) {
     this.webhookAction = action;
     this.webhookEventName = event;
 

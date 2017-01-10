@@ -2,7 +2,7 @@ import sinon from 'sinon';
 import {assert} from 'chai';
 import {ACCEPTED, BAD_REQUEST} from 'http-status-codes';
 import any from '@travi/any';
-import {register, processPR} from '../../src/plugin';
+import {register} from '../../src/plugin';
 import * as greenkeeper from '../../src/greenkeeper';
 import * as process from '../../src/process';
 

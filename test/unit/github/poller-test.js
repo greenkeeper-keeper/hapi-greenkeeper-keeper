@@ -23,7 +23,9 @@ suite('poller', () => {
     });
   });
 
-  test('that the poller rejects if the timeout is beyond an hour', () => {
-    return assert.isRejected(poll({}, HOUR + 1), PendingTimeoutError, /Pending statuses timeout/);
-  });
+  test('that the poller rejects if the timeout is beyond an hour', () => assert.isRejected(
+    poll({}, HOUR + 1),
+    PendingTimeoutError,
+    /Pending statuses timeout/
+  ));
 });
