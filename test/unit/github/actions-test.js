@@ -146,7 +146,7 @@ suite('github actions', () => {
       const message = any.string();
       const error = new Error(message);
       post.withArgs(url, {
-        body: `:x: greenkeeper-keeper failed to merge the pull-request \n \`${message}\``
+        body: `:x: greenkeeper-keeper failed to merge the pull-request \n> ${message}`
       }).resolves(response);
 
       return assert.becomes(actions.postErrorComment(url, error), response);

@@ -44,7 +44,7 @@ export default function (githubCredentials) {
     },
 
     postErrorComment: (url, error) => post(url, {
-      body: `:x: greenkeeper-keeper failed to merge the pull-request \n \`${error.message}\``
+      body: `:x: greenkeeper-keeper failed to merge the pull-request \n> ${error.message}`
     })
   };
 }
