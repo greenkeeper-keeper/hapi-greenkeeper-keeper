@@ -35,15 +35,26 @@ suite('process', () => {
   teardown(() => sandbox.restore());
 
   test('that processing a greenkeeper PR confirms that it can be merged, merges, and deletes the branch', () => {
-    ensureAcceptability.withArgs({repo, ref}).resolves();
-    acceptPR.withArgs(url, sha, number, squash).resolves();
+    const log = sinon.stub();
+    ensureAcceptability.resolves();
+    acceptPR.resolves();
     deleteBranch.resolves();
 
     return processPR(
-      {payload: {number, pull_request: {url, head}}},
+      {payload: {number, pull_request: {url, head}}, log},
       {github: githubCredentials, squash, deleteBranches}
     ).then(() => {
+      const message = any.string();
+      const message2 = any.string();
+      assert.calledWith(ensureAcceptability, {repo, ref, url});
+      assert.calledWith(acceptPR, url, sha, number, squash);
       assert.calledWith(deleteBranch, head, deleteBranches);
+
+      ensureAcceptability.getCall(0).args[1](message2);
+      assert.calledWith(log, message2);
+
+      acceptPR.getCall(0).args[4](message);
+      assert.calledWith(log, message);
     });
   });
 
@@ -68,7 +79,7 @@ suite('process', () => {
     postErrorComment.resolves(error);
 
     return processPR(
-      {payload: {number, pull_request: {comments_url: url, head}}},
+      {payload: {number, pull_request: {comments_url: url, head}}, log: () => undefined},
       {github: githubCredentials, squash, deleteBranches}
     ).then(() => {
       assert.notCalled(acceptPR);
@@ -84,7 +95,7 @@ suite('process', () => {
     postErrorComment.resolves(error);
 
     return processPR(
-      {payload: {number, pull_request: {comments_url: url, head}}},
+      {payload: {number, pull_request: {comments_url: url, head}}, log: () => undefined},
       {github: githubCredentials, squash, deleteBranches}
     ).then(() => {
       assert.notCalled(deleteBranch);
@@ -98,7 +109,7 @@ suite('process', () => {
     postErrorComment.rejects(error);
 
     return processPR(
-      {payload: {number, pull_request: {url, head}}},
+      {payload: {number, pull_request: {url, head}}, log: () => undefined},
       {github: githubCredentials, squash, deleteBranches}
     ).then(() => {
       assert.calledOnce(postErrorComment);
