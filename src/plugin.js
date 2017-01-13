@@ -32,7 +32,6 @@ export function register(server, options, next) {
       if (isValidGreenkeeperUpdate({event: request.headers['x-github-event'], action, sender})) {
         reply('ok').code(ACCEPTED);
 
-        request.log(['info', 'PR', 'validating'], request.payload.pull_request.url);
         return process(request, settings);
       }
 

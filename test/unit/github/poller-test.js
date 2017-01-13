@@ -15,16 +15,17 @@ suite('poller', () => {
     const options = any.simpleObject();
     const timeout = any.integer({max: HOUR});
     const callback = sinon.stub();
+    const log = () => undefined;
     callback.resolves();
     delay.withArgs(timeout).resolves();
 
-    return poll(options, timeout, callback).then(() => {
-      assert.calledWith(callback, options, timeout * 2);
+    return poll(options, log, timeout, callback).then(() => {
+      assert.calledWith(callback, options, log, timeout * 2);
     });
   });
 
   test('that the poller rejects if the timeout is beyond an hour', () => assert.isRejected(
-    poll({}, HOUR + 1),
+    poll({}, () => undefined, HOUR + 1),
     PendingTimeoutError,
     /Pending statuses timeout/
   ));

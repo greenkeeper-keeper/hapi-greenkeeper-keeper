@@ -21,6 +21,7 @@ suite('github actions', () => {
   const repoName = any.word();
   const prNumber = any.string();
   const response = {body: any.simpleObject()};
+  const log = () => undefined;
 
   setup(() => {
     sandbox = sinon.sandbox.create();
@@ -47,7 +48,7 @@ suite('github actions', () => {
       });
 
       return assert.becomes(
-        actions.ensureAcceptability({repo: {full_name: repoName}, ref}),
+        actions.ensureAcceptability({repo: {full_name: repoName}, ref}, () => undefined),
         'All commit statuses passed'
       );
     });
@@ -56,7 +57,7 @@ suite('github actions', () => {
       get.resolves({body: {state: 'failure'}});
 
       return assert.isRejected(
-        actions.ensureAcceptability({repo: {full_name: repoName}, ref}),
+        actions.ensureAcceptability({repo: {full_name: repoName}, ref}, () => undefined),
         FailedStatusFoundError,
         /A failed status was found for this PR\./
       );
@@ -65,25 +66,25 @@ suite('github actions', () => {
     test('that the pending status delegates to poller', () => {
       const result = any.string();
       get.resolves({body: {state: 'pending'}});
-      poll.default.withArgs({repo: {full_name: repoName}, ref}, MINUTE).resolves(result);
+      poll.default.withArgs({repo: {full_name: repoName}, ref}, log, MINUTE).resolves(result);
 
-      return assert.becomes(actions.ensureAcceptability({repo: {full_name: repoName}, ref}), result);
+      return assert.becomes(actions.ensureAcceptability({repo: {full_name: repoName}, ref}, log), result);
     });
 
     test('that the timeout is passed along to the poller', () => {
       const timeout = any.integer();
       const result = any.string();
       get.resolves({body: {state: 'pending'}});
-      poll.default.withArgs({repo: {full_name: repoName}, ref}, timeout).resolves(result);
+      poll.default.withArgs({repo: {full_name: repoName}, ref}, log, timeout).resolves(result);
 
-      return assert.becomes(actions.ensureAcceptability({repo: {full_name: repoName}, ref}, timeout), result);
+      return assert.becomes(actions.ensureAcceptability({repo: {full_name: repoName}, ref}, log, timeout), result);
     });
 
     test('that an invalid status results in rejection', () => {
       get.resolves({body: {state: any.string()}});
 
       return assert.isRejected(
-        actions.ensureAcceptability({repo: {full_name: repoName}, ref}),
+        actions.ensureAcceptability({repo: {full_name: repoName}, ref}, log),
         InvalidStatusFoundError,
         /An invalid status was found for this PR\./
       );
@@ -91,21 +92,16 @@ suite('github actions', () => {
   });
 
   suite('accept PR', () => {
-    test('that the referenced PR gets merged', () => {
+    test('that the referenced PR gets accepted', () => {
+      const squash = any.boolean();
       put.withArgs(`${url}/merge`, {
         sha,
         commit_title: `greenkeeper-keeper(pr: ${prNumber}): :white_check_mark:`,
         commit_message: `greenkeeper-keeper(pr: ${prNumber}): :white_check_mark:`,
-        squash: false
+        squash
       }).resolves(response);
 
-      return assert.becomes(actions.acceptPR(url, sha, prNumber), response);
-    });
-
-    test('that the referenced PR gets squashed and merged', () => {
-      put.withArgs(`${url}/merge`, sinon.match({squash: true})).resolves(response);
-
-      return assert.becomes(actions.acceptPR(url, sha, prNumber, true), response);
+      return assert.becomes(actions.acceptPR(url, sha, prNumber, squash, log), response);
     });
 
     test('that a merge failure is reported appropriately', () => {
