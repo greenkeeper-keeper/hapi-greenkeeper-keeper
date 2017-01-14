@@ -70,7 +70,7 @@
     "npm-run-all": "4.0.0",
     "nyc": "10.0.0",
     "proxyquire": "1.7.10",
-    "rollup": "0.41.3",
+    "rollup": "0.41.4",
     "rollup-plugin-babel": "2.7.1",
     "rollup-plugin-node-resolve": "2.0.0",
     "sinon": "1.17.7",
