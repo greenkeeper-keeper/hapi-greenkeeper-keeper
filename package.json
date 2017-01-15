@@ -1,6 +1,6 @@
 {
   "name": "hapi-greenkeeper-keeper",
-  "version": "1.0.0",
+  "version": "0.0.0-semantically-released",
   "main": "lib/plugin.cjs.js",
   "module": "lib/plugin.es.js",
   "license": "MIT",
@@ -33,7 +33,8 @@
     "precommit": "npm test",
     "build": "rollup -c",
     "preversion": "npm test",
-    "prepublish": "run-s build"
+    "prepublish": "run-s build",
+    "semantic-release": "semantic-release pre && npm publish && semantic-release post"
   },
   "config": {
     "commitizen": {
@@ -73,6 +74,7 @@
     "rollup": "0.41.4",
     "rollup-plugin-babel": "2.7.1",
     "rollup-plugin-node-resolve": "2.0.0",
+    "semantic-release": "6.3.2",
     "sinon": "1.17.7",
     "sinon-as-promised": "4.0.2",
     "validate-commit-msg": "2.8.2"

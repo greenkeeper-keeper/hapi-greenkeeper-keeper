@@ -1,12 +1,12 @@
 language: node_js
 notifications:
   email: false
-after_success: npm run report-coverage
-deploy:
-  provider: npm
-  email: greenkeeper.keeper@gmail.com
-  api_key:
-    secure: HGMM3wehXosWL1YqqGmXQdYwdEYxwKLicacLQ+DdsSTRQpMa2ZAPElNxmFqUhtiXU9Fkrd+dkK0KQQolHMlAHHEMAxP80//SkHTMJaEQujEJGMGBpBsab4qXA6cbYSCnLMYrH6mAy4XINfzXwh0P1xTJiJT7leGJi2BATpLyrcYkO6ks7v5M9Tx+qGUH321KeeofUBdOP/0zDSdjWTdfSoc5esq9oTMedNJrqSJZP1vU5uSpx0qHYzfNWZ9kkrLRF9b5Bk3ocjWog5CxB06wF2qts62VcU3Vl+bzJ3UZLmyic07eCEFm39cdP1xntUSGxOjl6fXeVk0ARq1itchB/RiycaZzTA3I3VHT/FPEuwdeux/vrtG2IGnQYDjazXrZR3HrdR6v9lMnnp+rXKhRRKUO56Qwq//uR6UFNS+m9wpe3TvKHydYOcZ3rHMCuWMU4khBGF2/D5BhGtPbwvcSt7SCKZrI9Aytt1srjhc5+7+ZZAdUSk390VU7RLNFmyQItgcSICvAoepceFnrZpiJ7e9TXJEDL1bV6kXzzcunOl7pqSl4IoWP7hhFyKE5QohKPr1pLqZCsnq9b9fxPVLIcgyKMk38p7rj1BmnkeMHh3YA5Xlu7Z5Pw6cUGAFNfrNKWAcL+yN8bf5+38rHHIWieMvL8md6I/kApTT4V2erD9A=
-  on:
-    tags: true
-    repo: greenkeeper-keeper/hapi-greenkeeper-keeper
+after_success:
+  - npm run report-coverage
+  - npm run semantic-release
+branches:
+  except:
+    - "/^v\\d+\\.\\d+\\.\\d+$/"
+env:
+  global:
+    secure: V3VruISncX4C8btUot3VckSq1496EnBaieVw2xBBebeNLRvfV3e4Ukil6/42Zn6xI7wLIkaJy6ICn9OUgSCcyiJzCUfYU5RRWFR+ZXvWHuiw02sl8Y7wIy7E1wkTsHDSuI1Ys+BQkjPGVy3r/eDdbK8WcTP/ZxAM78Kv46tEPPZYSfyNJTmhySHJa7+djbGQGUYWvlklHS2YFc1v6bnLzg/+yZz99nfMndZv/nKD7za7c/G/w8cLmJ7i48fPIfaXXSj//R2zt2zkA73CeWDEUAR926T6dxnmJqrJBczekt0iNdwQ1QgdO3zscq1QvUXJ9u+GTM/FJhWfojjZAIlmKyWT4crF/6EjH104OlOSCzyxpqgvXonij6WyGhLTN8HKb1E0WM3erhfx51pY4xlIkCNgqM+DXFI+rh71hdWgLaeMteAC9WPtR2/UJE2g357M+lcvJi40Yvc6fLIlkReT0QrIs6tOWgEr9loh6TOv6RfDWzslbr7PXIuXD7Mum29a5oaltNUmfq/RFAN3BrSjzOkH1QSoaA5hU6+n380YljymzMkCzIzfm9LiLkXVuze4HMghAQmCzYqJzHp0n3t5eUFv7CAr8WYZ4esNeYf+XL9XdW9ITdJaRE7HOrCOAuUFCnZWtAVOx8OsnXzpYY/ub/lKUO1ZwtriunjG7fb/VB4=
