@@ -1,6 +1,6 @@
 import sinon from 'sinon';
 import {assert} from 'chai';
-import {ACCEPTED, BAD_REQUEST} from 'http-status-codes';
+import {ACCEPTED, NO_CONTENT, BAD_REQUEST} from 'http-status-codes';
 import any from '@travi/any';
 import {register} from '../../src/plugin';
 import * as greenkeeper from '../../src/greenkeeper';
@@ -117,6 +117,48 @@ suite('plugin', () => {
         log: () => undefined
       }, reply);
       reply.withArgs('skipping').returns({code});
+
+      register({route}, options, () => undefined);
+
+      assert.calledWith(code, BAD_REQUEST);
+    });
+
+    test('that a 204 response is provided for a ping request', () => {
+      const code = sinon.spy();
+      const reply = sinon.stub();
+      const route = sinon.stub().yieldsTo('handler', {
+        payload: {
+          hook: {
+            config: {
+              content_type: 'json'
+            }
+          }
+        },
+        headers: {'x-github-event': 'ping'},
+        log: () => undefined
+      }, reply);
+      reply.withArgs('successfully configured the webhook for greenkeeper-keeper').returns({code});
+
+      register({route}, options, () => undefined);
+
+      assert.calledWith(code, NO_CONTENT);
+    });
+
+    test('that a 400 response is sent when the ping shows that the hook is not configured to send json', () => {
+      const code = sinon.spy();
+      const reply = sinon.stub();
+      const route = sinon.stub().yieldsTo('handler', {
+        payload: {
+          hook: {
+            config: {
+              content_type: 'form'
+            }
+          }
+        },
+        headers: {'x-github-event': 'ping'},
+        log: () => undefined
+      }, reply);
+      reply.withArgs('please update your webhook configuration to send application/json').returns({code});
 
       register({route}, options, () => undefined);
 

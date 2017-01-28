@@ -1,6 +1,6 @@
 import * as joi from 'joi';
 import hoek from 'hoek';
-import {ACCEPTED, BAD_REQUEST} from 'http-status-codes';
+import {ACCEPTED, NO_CONTENT, BAD_REQUEST} from 'http-status-codes';
 import openedByGreenkeeperBot from './greenkeeper';
 import process from './process';
 
@@ -28,8 +28,21 @@ export function register(server, options, next) {
     path: '/payload',
     handler(request, reply) {
       const {action, sender} = request.payload;
+      const event = request.headers['x-github-event'];
 
-      if (isValidGreenkeeperUpdate({event: request.headers['x-github-event'], action, sender})) {
+      if ('ping' === event) {
+        if('json' !== request.payload.hook.config.content_type) {
+          reply('please update your webhook configuration to send application/json').code(BAD_REQUEST);
+
+          return Promise.resolve();
+        }
+
+        reply('successfully configured the webhook for greenkeeper-keeper').code(NO_CONTENT);
+
+        return Promise.resolve();
+      }
+
+      if (isValidGreenkeeperUpdate({event, action, sender})) {
         reply('ok').code(ACCEPTED);
 
         return process(request, settings);
