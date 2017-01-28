@@ -30,8 +30,8 @@ export function register(server, options, next) {
       const {action, sender} = request.payload;
       const event = request.headers['x-github-event'];
 
-      if ('ping' === event) {
-        if('json' !== request.payload.hook.config.content_type) {
+      if (event === 'ping') {
+        if (request.payload.hook.config.content_type !== 'json') {
           reply('please update your webhook configuration to send application/json').code(BAD_REQUEST);
 
           return Promise.resolve();
