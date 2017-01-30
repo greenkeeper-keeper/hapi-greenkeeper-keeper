@@ -14,7 +14,7 @@ defineSupportCode(({When, Then, setWorldConstructor}) => {
       comments: this.comments
     }).then(response => {
       this.serverResponse = response;
-    });
+    }).then(() => this.prProcessed);
   });
 
   Then(/^the webhook response confirms that it will be processed$/, function (callback) {

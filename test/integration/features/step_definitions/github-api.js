@@ -7,6 +7,18 @@ import {World} from '../support/world';
 
 const debug = require('debug')('test');
 
+function stubTheCommentsEndpoint(githubScope, authorizationHeader) {
+  this.prProcessed = new Promise(resolve => {
+    githubScope
+      .matchHeader('Authorization', authorizationHeader)
+      .post(this.comments)
+      .reply(OK, (uri, requestBody) => {
+        this.errorComment = JSON.parse(requestBody).body;
+        resolve();
+      });
+  });
+}
+
 defineSupportCode(({Before, After, Given, Then, setWorldConstructor}) => {
   setWorldConstructor(World);
 
@@ -57,12 +69,7 @@ defineSupportCode(({Before, After, Given, Then, setWorldConstructor}) => {
       .reply(OK, {
         state: status
       });
-    githubScope
-      .matchHeader('Authorization', authorizationHeader)
-      .post(this.comments)
-      .reply(OK, (uri, requestBody) => {
-        this.errorComment = JSON.parse(requestBody).body;
-      });
+    stubTheCommentsEndpoint.call(this, githubScope, authorizationHeader);
 
     callback();
   });
@@ -76,21 +83,18 @@ defineSupportCode(({Before, After, Given, Then, setWorldConstructor}) => {
         message: 'Pull Request is not mergeable',
         documentation_url: 'https://developer.github.com/v3/pulls/#merge-a-pull-request-merge-button'
       });
-    githubScope
-      .matchHeader('Authorization', authorizationHeader)
-      .post(this.comments)
-      .reply(OK, (uri, requestBody) => {
-        this.errorComment = JSON.parse(requestBody).body;
-      });
+    stubTheCommentsEndpoint.call(this, githubScope, authorizationHeader);
 
     callback();
   });
 
   Given('the branch can be deleted', function (callback) {
-    githubScope
-      .matchHeader('Authorization', authorizationHeader)
-      .delete(`/repos/${this.repo}/git/refs/heads/${this.ref}`)
-      .reply(OK);
+    this.prProcessed = new Promise(resolve => {
+      githubScope
+        .matchHeader('Authorization', authorizationHeader)
+        .delete(`/repos/${this.repo}/git/refs/heads/${this.ref}`)
+        .reply(OK, resolve);
+    });
 
     callback();
   });
@@ -101,12 +105,7 @@ defineSupportCode(({Before, After, Given, Then, setWorldConstructor}) => {
       .matchHeader('Authorization', authorizationHeader)
       .delete(`/repos/${this.repo}/git/refs/heads/${this.ref}`)
       .reply(INTERNAL_SERVER_ERROR, {});
-    githubScope
-      .matchHeader('Authorization', authorizationHeader)
-      .post(this.comments)
-      .reply(OK, (uri, requestBody) => {
-        this.errorComment = JSON.parse(requestBody).body;
-      });
+    stubTheCommentsEndpoint.call(this, githubScope, authorizationHeader);
 
     callback();
   });
