@@ -57,7 +57,7 @@
     "eslint": "3.15.0",
     "eslint-config-airbnb": "14.0.0",
     "eslint-plugin-import": "2.2.0",
-    "eslint-plugin-jsx-a11y": "3.0.2",
+    "eslint-plugin-jsx-a11y": "4.0.0",
     "eslint-plugin-mocha": "4.8.0",
     "globstar": "1.0.0",
     "good": "7.1.0",
