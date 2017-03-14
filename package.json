@@ -53,7 +53,7 @@
     "codecov": "1.0.1",
     "cucumber": "2.0.0-rc.8",
     "cz-conventional-changelog": "2.0.0",
-    "debug": "2.6.2",
+    "debug": "2.6.3",
     "eslint": "3.17.0",
     "eslint-config-airbnb": "14.1.0",
     "eslint-plugin-import": "2.2.0",
