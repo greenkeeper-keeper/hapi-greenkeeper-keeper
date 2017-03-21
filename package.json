@@ -76,7 +76,7 @@
     "rollup-plugin-node-resolve": "2.0.0",
     "semantic-release": "6.3.2",
     "sinon": "2.1.0",
-    "sinon-as-promised": "4.0.2",
+    "sinon-as-promised": "4.0.3",
     "validate-commit-msg": "2.11.2"
   },
   "dependencies": {
