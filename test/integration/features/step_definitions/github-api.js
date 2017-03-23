@@ -39,6 +39,14 @@ defineSupportCode(({Before, After, Given, Then, setWorldConstructor}) => {
     nock.cleanAll();
   });
 
+  Given('a PR exists for the commit', function (callback) {
+    githubScope
+      .matchHeader('Authorization', authorizationHeader)
+      .get(`/repos/${this.repo}/pulls?head=${this.repoOwner}:${this.ref}`);
+
+    callback();
+  });
+
   Given(/^statuses exist for the PR$/, function (callback) {
     githubScope
       .matchHeader('Authorization', authorizationHeader)

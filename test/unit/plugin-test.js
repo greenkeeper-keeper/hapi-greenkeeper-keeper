@@ -63,7 +63,22 @@ suite('plugin', () => {
       assert.calledWith(process.default, request, options);
     });
 
-    test('that response is bad-request when the webhook event is not `pull_request`', () => {
+    test('that the response is accepted when the event is a successful status', () => {
+      const code = sinon.spy();
+      const reply = sinon.stub();
+      const route = sinon.stub().yieldsTo('handler', {
+        payload: {state: 'success'},
+        headers: {'x-github-event': 'status'},
+        log: () => undefined
+      }, reply);
+      reply.withArgs('ok').returns({code});
+
+      register({route}, options, () => undefined);
+
+      assert.calledWith(code, ACCEPTED);
+    });
+
+    test('that response is bad-request when the webhook event is not `pull_request` or `status', () => {
       const code = sinon.spy();
       const reply = sinon.stub();
       const route = sinon.stub().yieldsTo('handler', {
@@ -94,6 +109,21 @@ suite('plugin', () => {
           }
         },
         headers: {'x-github-event': 'pull_request'},
+        log: () => undefined
+      }, reply);
+      reply.withArgs('skipping').returns({code});
+
+      register({route}, options, () => undefined);
+
+      assert.calledWith(code, BAD_REQUEST);
+    });
+
+    test('that the response is bad-request when the state is not `success`', () => {
+      const code = sinon.spy();
+      const reply = sinon.stub();
+      const route = sinon.stub().yieldsTo('handler', {
+        payload: {state: any.string()},
+        headers: {'x-github-event': 'status'},
         log: () => undefined
       }, reply);
       reply.withArgs('skipping').returns({code});

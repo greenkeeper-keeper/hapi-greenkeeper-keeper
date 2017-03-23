@@ -27,7 +27,7 @@ export function register(server, options, next) {
     method: 'POST',
     path: '/payload',
     handler(request, reply) {
-      const {action, sender} = request.payload;
+      const {action, sender, state} = request.payload;
       const event = request.headers['x-github-event'];
 
       if (event === 'ping') {
@@ -46,6 +46,12 @@ export function register(server, options, next) {
         reply('ok').code(ACCEPTED);
 
         return process(request, settings);
+      }
+
+      if (event === 'status' && state === 'success') {
+        reply('ok').code(ACCEPTED);
+
+        return Promise.resolve();
       }
 
       reply('skipping').code(BAD_REQUEST);
