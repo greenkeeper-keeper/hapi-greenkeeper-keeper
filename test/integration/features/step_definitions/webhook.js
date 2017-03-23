@@ -24,7 +24,7 @@ defineSupportCode(({Given, setWorldConstructor}) => {
     callback();
   });
 
-  Given('the webhook is for a {event:stringInDoubleQuotes} event and a {action:stringInDoubleQuotes} action', function (
+  Given('the webhook is for a {stringInDoubleQuotes} event and a {stringInDoubleQuotes} action', function (
     event,
     action,
     callback
