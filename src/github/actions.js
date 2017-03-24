@@ -68,6 +68,10 @@ export default function (githubCredentials) {
 
     postErrorComment: (url, error) => post(url, {
       body: `:x: greenkeeper-keeper failed to merge the pull-request \n> ${error.message}`
-    })
+    }),
+
+    getPullRequestsForCommit: ({repo, ref}) => get(
+      `https://api.github.com/repos/${repo.full_name}/pulls?head=${repo.owner.login}:${ref}`
+    )
   };
 }
