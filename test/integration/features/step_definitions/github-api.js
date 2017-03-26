@@ -39,10 +39,19 @@ defineSupportCode(({Before, After, Given, Then, setWorldConstructor}) => {
     nock.cleanAll();
   });
 
-  Given('a PR exists for the commit', function (callback) {
+  Given('an open PR exists for the commit', function (callback) {
     githubScope
       .matchHeader('Authorization', authorizationHeader)
       .get(`/repos/${this.repo}/pulls?head=${this.repoOwner}:${this.ref}`);
+
+    callback();
+  });
+
+  Given('no open PRs exist for the commit', function (callback) {
+    githubScope
+      .matchHeader('Authorization', authorizationHeader)
+      .get(`/repos/${this.repo}/pulls?head=${this.repoOwner}:${this.commitBranches[0]}`)
+      .reply(OK, []);
 
     callback();
   });

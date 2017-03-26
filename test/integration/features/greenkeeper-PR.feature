@@ -6,7 +6,7 @@ Feature: Greenkeeper PR
     And statuses exist for the PR
     And the PR can be merged
     And the branch can be deleted
-    When the PR webhook is received
+    When the webhook is received
     Then the webhook response confirms that it will be processed
     And the PR is merged
 
@@ -16,6 +16,6 @@ Feature: Greenkeeper PR
     And statuses exist for the PR
     And the PR can be merged
     And the branch can be deleted
-    When the PR webhook is received
+    When the webhook is received
     Then the webhook response confirms that it will be processed
     And the PR is merged

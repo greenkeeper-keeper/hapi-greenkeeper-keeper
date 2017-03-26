@@ -21,15 +21,20 @@ function buildWebhookPayload(event, {action, prDetails, statusEventDetails, ref,
     };
   }
 
-  return {
-    state: statusEventDetails.state,
-    repository: {
-      full_name: repo,
-      owner: {
-        login: statusEventDetails.repoOwner
-      }
-    }
-  };
+  if (event === 'status') {
+    return {
+      state: statusEventDetails.state,
+      repository: {
+        full_name: repo,
+        owner: {
+          login: statusEventDetails.repoOwner
+        }
+      },
+      ...statusEventDetails.branches && {branches: statusEventDetails.branches.map(branch => ({name: branch}))}
+    };
+  }
+
+  return {};
 }
 
 export function World() {

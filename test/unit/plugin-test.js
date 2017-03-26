@@ -1,13 +1,11 @@
 import sinon from 'sinon';
 import {assert} from 'chai';
-import {ACCEPTED, NO_CONTENT, BAD_REQUEST} from 'http-status-codes';
 import any from '@travi/any';
+import * as joi from 'joi';
 import {register} from '../../src/plugin';
-import * as greenkeeper from '../../src/greenkeeper';
-import * as process from '../../src/process';
+import * as validatePayloadAndProcess from '../../src/handler';
 
 suite('plugin', () => {
-  const greenkeeperSender = any.url();
   const options = {
     github: {token: any.string()},
     squash: any.boolean()
@@ -17,10 +15,7 @@ suite('plugin', () => {
   setup(() => {
     sandbox = sinon.sandbox.create();
 
-    sandbox.stub(greenkeeper, 'default')
-      .returns(false)
-      .withArgs(greenkeeperSender).returns(true);
-    sandbox.stub(process, 'default');
+    sandbox.stub(validatePayloadAndProcess, 'default');
   });
 
   teardown(() => sandbox.restore());
@@ -40,160 +35,43 @@ suite('plugin', () => {
   });
 
   suite('responses', () => {
-    test('that response is accepted when pr was opened by greenkeeper and is then processed', () => {
-      const code = sinon.spy();
+    const settings = any.simpleObject();
+
+    setup(() => sandbox.stub(joi.default, 'validate').withArgs(options).returns({value: settings}));
+
+    test('that the payload gets validated and processed', () => {
+      const request = {};
       const reply = sinon.stub();
-      const request = {
-        payload: {
-          action: 'opened',
-          sender: {
-            html_url: greenkeeperSender
-          },
-          pull_request: {}
-        },
-        headers: {'x-github-event': 'pull_request'},
-        log: () => undefined
-      };
       const route = sinon.stub().yieldsTo('handler', request, reply);
-      reply.withArgs('ok').returns({code});
 
       register({route}, options, () => undefined);
 
-      assert.calledWith(code, ACCEPTED);
-      assert.calledWith(process.default, request, options);
+      assert.calledWith(validatePayloadAndProcess.default, request, reply, settings);
     });
 
-    test('that the response is accepted when the event is a successful status', () => {
-      const code = sinon.spy();
-      const reply = sinon.stub();
-      const route = sinon.stub().yieldsTo('handler', {
-        payload: {state: 'success'},
-        headers: {'x-github-event': 'status'},
-        log: () => undefined
-      }, reply);
-      reply.withArgs('ok').returns({code});
 
-      register({route}, options, () => undefined);
-
-      assert.calledWith(code, ACCEPTED);
-    });
-
-    test('that response is bad-request when the webhook event is not `pull_request` or `status', () => {
-      const code = sinon.spy();
-      const reply = sinon.stub();
-      const route = sinon.stub().yieldsTo('handler', {
-        payload: {
-          action: 'opened',
-          sender: {
-            html_url: greenkeeperSender
-          }
-        },
-        headers: {'x-github-event': any.word()},
-        log: () => undefined
-      }, reply);
-      reply.withArgs('skipping').returns({code});
-
-      register({route}, options, () => undefined);
-
-      assert.calledWith(code, BAD_REQUEST);
-    });
-
-    test('that response is bad-request when the webhook action is not `opened`', () => {
-      const code = sinon.spy();
-      const reply = sinon.stub();
-      const route = sinon.stub().yieldsTo('handler', {
-        payload: {
-          action: any.word(),
-          sender: {
-            html_url: greenkeeperSender
-          }
-        },
-        headers: {'x-github-event': 'pull_request'},
-        log: () => undefined
-      }, reply);
-      reply.withArgs('skipping').returns({code});
-
-      register({route}, options, () => undefined);
-
-      assert.calledWith(code, BAD_REQUEST);
-    });
-
-    test('that the response is bad-request when the state is not `success`', () => {
-      const code = sinon.spy();
-      const reply = sinon.stub();
-      const route = sinon.stub().yieldsTo('handler', {
-        payload: {state: any.string()},
-        headers: {'x-github-event': 'status'},
-        log: () => undefined
-      }, reply);
-      reply.withArgs('skipping').returns({code});
-
-      register({route}, options, () => undefined);
-
-      assert.calledWith(code, BAD_REQUEST);
-    });
-
-    test('that response is bad-request when pr not opened by greenkeeper', () => {
-      const code = sinon.spy();
-      const reply = sinon.stub();
-      const route = sinon.stub().yieldsTo('handler', {
-        payload: {
-          action: 'opened',
-          sender: {
-            html_url: any.url()
-          }
-        },
-        headers: {'x-github-event': 'pull_request'},
-        log: () => undefined
-      }, reply);
-      reply.withArgs('skipping').returns({code});
-
-      register({route}, options, () => undefined);
-
-      assert.calledWith(code, BAD_REQUEST);
-    });
-
-    test('that a 204 response is provided for a ping request', () => {
-      const code = sinon.spy();
-      const reply = sinon.stub();
-      const route = sinon.stub().yieldsTo('handler', {
-        payload: {
-          hook: {
-            config: {
-              content_type: 'json'
-            }
-          }
-        },
-        headers: {'x-github-event': 'ping'},
-        log: () => undefined
-      }, reply);
-      reply.withArgs('successfully configured the webhook for greenkeeper-keeper').returns({code});
-
-      register({route}, options, () => undefined);
-
-      assert.calledWith(code, NO_CONTENT);
-    });
-
-    test('that a 400 response is sent when the ping shows that the hook is not configured to send json', () => {
-      const code = sinon.spy();
-      const reply = sinon.stub();
-      const route = sinon.stub().yieldsTo('handler', {
-        payload: {
-          hook: {
-            config: {
-              content_type: 'form'
-            }
-          }
-        },
-        headers: {'x-github-event': 'ping'},
-        log: () => undefined
-      }, reply);
-      reply.withArgs('please update your webhook configuration to send application/json').returns({code});
-
-      register({route}, options, () => undefined);
-
-      assert.calledWith(code, BAD_REQUEST);
-    });
+    // test('that response is accepted when pr was opened by greenkeeper and is then processed', () => {
+    //   const code = sinon.spy();
+    //   const reply = sinon.stub();
+    //   const request = {
+    //     payload: {
+    //       action: 'opened',
+    //       sender: {
+    //         html_url: greenkeeperSender
+    //       },
+    //       pull_request: {}
+    //     },
+    //     headers: {'x-github-event': 'pull_request'},
+    //     log: () => undefined
+    //   };
+    //   const route = sinon.stub().yieldsTo('handler', request, reply);
+    //   reply.withArgs('ok').returns({code});
+    //
+    //   register({route}, options, () => undefined);
+    //
+    //   assert.calledWith(code, ACCEPTED);
+    //   assert.calledWith(process.default, request, options);
+    // });
   });
 
   suite('options validation', () => {

@@ -42,36 +42,40 @@ export default function (githubCredentials) {
       });
   }
 
-  return {
-    ensureAcceptability,
-
-    acceptPR: (url, sha, prNumber, squash, log) => put(`${url}/merge`, {
+  function acceptPR(url, sha, prNumber, squash, log) {
+    return put(`${url}/merge`, {
       sha,
       commit_title: `greenkeeper-keeper(pr: ${prNumber}): :white_check_mark:`,
       commit_message: `greenkeeper-keeper(pr: ${prNumber}): :white_check_mark:`,
       squash
-    })
-      .then(result => {
-        log(['info', 'PR', 'integrated'], url);
-        return result;
-      })
-      .catch(err => Promise.reject(new MergeFailureError(err))),
+    }).then(result => {
+      log(['info', 'PR', 'integrated'], url);
+      return result;
+    }).catch(err => Promise.reject(new MergeFailureError(err)));
+  }
 
-    deleteBranch: ({repo, ref}, deleteBranches) => {
-      if (deleteBranches) {
-        return del(`https://api.github.com/repos/${repo.full_name}/git/refs/heads/${ref}`)
-          .catch(err => Promise.reject(new BranchDeletionFailureError(err)));
-      }
+  function deleteBranch({repo, ref}, deleteBranches) {
+    if (deleteBranches) {
+      return del(`https://api.github.com/repos/${repo.full_name}/git/refs/heads/${ref}`)
+        .catch(err => Promise.reject(new BranchDeletionFailureError(err)));
+    }
 
-      return Promise.resolve();
-    },
+    return Promise.resolve();
+  }
 
-    postErrorComment: (url, error) => post(url, {
-      body: `:x: greenkeeper-keeper failed to merge the pull-request \n> ${error.message}`
-    }),
+  function postErrorComment(url, error) {
+    return post(url, {body: `:x: greenkeeper-keeper failed to merge the pull-request \n> ${error.message}`});
+  }
 
-    getPullRequestsForCommit: ({repo, ref}) => get(
-      `https://api.github.com/repos/${repo.full_name}/pulls?head=${repo.owner.login}:${ref}`
-    )
+  function getPullRequestsForCommit({repo, ref}) {
+    return get(`https://api.github.com/repos/${repo.full_name}/pulls?head=${repo.owner.login}:${ref}`);
+  }
+
+  return {
+    ensureAcceptability,
+    acceptPR,
+    deleteBranch,
+    postErrorComment,
+    getPullRequestsForCommit
   };
 }
