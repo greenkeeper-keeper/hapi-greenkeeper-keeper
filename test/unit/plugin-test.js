@@ -1,7 +1,7 @@
 import sinon from 'sinon';
 import {assert} from 'chai';
 import any from '@travi/any';
-import * as joi from 'joi';
+import joi from 'joi';
 import {register} from '../../src/plugin';
 import * as validatePayloadAndProcess from '../../src/handler';
 
@@ -37,7 +37,7 @@ suite('plugin', () => {
   suite('responses', () => {
     const settings = any.simpleObject();
 
-    setup(() => sandbox.stub(joi.default, 'validate').withArgs(options).returns({value: settings}));
+    setup(() => sandbox.stub(joi, 'validate').withArgs(options).returns({value: settings}));
 
     test('that the payload gets validated and processed', () => {
       const request = {};
@@ -48,30 +48,6 @@ suite('plugin', () => {
 
       assert.calledWith(validatePayloadAndProcess.default, request, reply, settings);
     });
-
-
-    // test('that response is accepted when pr was opened by greenkeeper and is then processed', () => {
-    //   const code = sinon.spy();
-    //   const reply = sinon.stub();
-    //   const request = {
-    //     payload: {
-    //       action: 'opened',
-    //       sender: {
-    //         html_url: greenkeeperSender
-    //       },
-    //       pull_request: {}
-    //     },
-    //     headers: {'x-github-event': 'pull_request'},
-    //     log: () => undefined
-    //   };
-    //   const route = sinon.stub().yieldsTo('handler', request, reply);
-    //   reply.withArgs('ok').returns({code});
-    //
-    //   register({route}, options, () => undefined);
-    //
-    //   assert.calledWith(code, ACCEPTED);
-    //   assert.calledWith(process.default, request, options);
-    // });
   });
 
   suite('options validation', () => {

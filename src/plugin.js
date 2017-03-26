@@ -1,9 +1,9 @@
-import * as joi from 'joi';
+import joi from 'joi';
 import hoek from 'hoek';
 import validatePayloadAndProcess from './handler';
 
 function validate(options) {
-  const validated = joi.default.validate(options, joi.object({
+  const validated = joi.validate(options, joi.object({
     github: joi.object({token: joi.string().required()}).required(),
     squash: joi.boolean().required(),
     deleteBranches: joi.boolean()
