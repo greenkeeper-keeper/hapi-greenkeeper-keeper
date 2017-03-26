@@ -1,4 +1,4 @@
-import {ACCEPTED, NO_CONTENT, BAD_REQUEST} from 'http-status-codes';
+import {ACCEPTED, NO_CONTENT, BAD_REQUEST, INTERNAL_SERVER_ERROR} from 'http-status-codes';
 import openedByGreenkeeperBot from './greenkeeper';
 import createActions from './github/actions';
 import process from './process';
@@ -36,10 +36,12 @@ export default function (request, reply, settings) {
   if (successfulStatusCouldBeForGreenkeeperPR(event, state, branches)) {
     const {getPullRequestsForCommit} = createActions(settings.github);
 
-    return getPullRequestsForCommit({repo: repository, ref: branches[0].name}).then(pullRequests => {
-      if (!pullRequests.length) reply('no PRs for this commit').code(BAD_REQUEST);
-      else reply('ok').code(ACCEPTED);
-    });
+    return getPullRequestsForCommit({repo: repository, ref: branches[0].name})
+      .then(pullRequests => {
+        if (!pullRequests.length) reply('no PRs for this commit').code(BAD_REQUEST);
+        else reply('ok').code(ACCEPTED);
+      })
+      .catch(() => reply('failed to fetch PRs').code(INTERNAL_SERVER_ERROR));
   }
 
   reply('skipping').code(BAD_REQUEST);

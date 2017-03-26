@@ -1,6 +1,6 @@
 import {assert} from 'chai';
 import sinon from 'sinon';
-import {ACCEPTED, NO_CONTENT, BAD_REQUEST} from 'http-status-codes';
+import {ACCEPTED, NO_CONTENT, BAD_REQUEST, INTERNAL_SERVER_ERROR} from 'http-status-codes';
 import any from '@travi/any';
 import * as actionsFactory from '../../src/github/actions';
 import * as greenkeeper from '../../src/greenkeeper';
@@ -169,6 +169,22 @@ suite('handler', () => {
       reply.withArgs('no PRs for this commit').returns({code});
 
       return handler(request, reply, settings).then(() => assert.calledWith(code, BAD_REQUEST));
+    });
+
+    test('that a server-error is reported if the fetching of related PRs fails', () => {
+      const request = {
+        payload: {
+          state: 'success',
+          repository: any.string(),
+          branches: [{name: any.string()}]
+        },
+        headers: {'x-github-event': 'status'},
+        log: () => undefined
+      };
+      getPullRequestsForCommit.rejects(new Error(any.string()));
+      reply.withArgs('failed to fetch PRs').returns({code});
+
+      return handler(request, reply, settings).then(() => assert.calledWith(code, INTERNAL_SERVER_ERROR));
     });
   });
 
