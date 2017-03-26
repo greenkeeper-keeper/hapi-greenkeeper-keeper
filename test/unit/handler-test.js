@@ -1,6 +1,6 @@
 import {assert} from 'chai';
 import sinon from 'sinon';
-import {ACCEPTED, NO_CONTENT, BAD_REQUEST} from 'http-status-codes';
+import {ACCEPTED, NO_CONTENT, BAD_REQUEST, UNSUPPORTED_MEDIA_TYPE} from 'http-status-codes';
 import any from '@travi/any';
 import boom from 'boom';
 import * as actionsFactory from '../../src/github/actions';
@@ -225,7 +225,7 @@ suite('handler', () => {
       };
       reply.withArgs('please update your webhook configuration to send application/json').returns({code});
 
-      return handler(request, reply, settings).then(() => assert.calledWith(code, BAD_REQUEST));
+      return handler(request, reply, settings).then(() => assert.calledWith(code, UNSUPPORTED_MEDIA_TYPE));
     });
   });
 

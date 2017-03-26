@@ -1,4 +1,4 @@
-import {ACCEPTED, NO_CONTENT, BAD_REQUEST} from 'http-status-codes';
+import {ACCEPTED, NO_CONTENT, BAD_REQUEST, UNSUPPORTED_MEDIA_TYPE} from 'http-status-codes';
 import boom from 'boom';
 import openedByGreenkeeperBot from './greenkeeper';
 import createActions from './github/actions';
@@ -18,7 +18,7 @@ export default function (request, reply, settings) {
 
   if (event === 'ping') {
     if (request.payload.hook.config.content_type !== 'json') {
-      reply('please update your webhook configuration to send application/json').code(BAD_REQUEST);
+      reply('please update your webhook configuration to send application/json').code(UNSUPPORTED_MEDIA_TYPE);
 
       return Promise.resolve();
     }
