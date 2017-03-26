@@ -1,7 +1,8 @@
 import {assert} from 'chai';
 import sinon from 'sinon';
-import {ACCEPTED, NO_CONTENT, BAD_REQUEST, INTERNAL_SERVER_ERROR} from 'http-status-codes';
+import {ACCEPTED, NO_CONTENT, BAD_REQUEST} from 'http-status-codes';
 import any from '@travi/any';
+import boom from 'boom';
 import * as actionsFactory from '../../src/github/actions';
 import * as greenkeeper from '../../src/greenkeeper';
 import * as process from '../../src/process';
@@ -20,6 +21,8 @@ suite('handler', () => {
     sandbox = sinon.sandbox.create();
 
     reply.withArgs('skipping').returns({code});
+
+    sandbox.stub(boom, 'internal');
   });
 
   teardown(() => {
@@ -181,10 +184,12 @@ suite('handler', () => {
         headers: {'x-github-event': 'status'},
         log: () => undefined
       };
-      getPullRequestsForCommit.rejects(new Error(any.string()));
-      reply.withArgs('failed to fetch PRs').returns({code});
+      const error = new Error(any.simpleObject());
+      const wrappedError = any.simpleObject();
+      getPullRequestsForCommit.rejects(error);
+      boom.internal.withArgs('failed to fetch PRs', error).returns(wrappedError);
 
-      return handler(request, reply, settings).then(() => assert.calledWith(code, INTERNAL_SERVER_ERROR));
+      return handler(request, reply, settings).then(() => assert.calledWith(reply, wrappedError));
     });
   });
 

@@ -1,4 +1,5 @@
-import {ACCEPTED, NO_CONTENT, BAD_REQUEST, INTERNAL_SERVER_ERROR} from 'http-status-codes';
+import {ACCEPTED, NO_CONTENT, BAD_REQUEST} from 'http-status-codes';
+import boom from 'boom';
 import openedByGreenkeeperBot from './greenkeeper';
 import createActions from './github/actions';
 import process from './process';
@@ -41,7 +42,7 @@ export default function (request, reply, settings) {
         if (!pullRequests.length) reply('no PRs for this commit').code(BAD_REQUEST);
         else reply('ok').code(ACCEPTED);
       })
-      .catch(() => reply('failed to fetch PRs').code(INTERNAL_SERVER_ERROR));
+      .catch(e => reply(boom.internal('failed to fetch PRs', e)));
   }
 
   reply('skipping').code(BAD_REQUEST);
