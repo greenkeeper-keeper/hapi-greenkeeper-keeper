@@ -10,7 +10,8 @@ export default {
     'highwire',
     'delay',
     'joi',
-    'hoek'
+    'hoek',
+    'boom'
   ],
   plugins: [
     nodeResolve({
