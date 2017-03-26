@@ -1,4 +1,4 @@
-import joi from 'joi';
+import * as joi from 'joi';
 import hoek from 'hoek';
 import validatePayloadAndProcess from './handler';
 
