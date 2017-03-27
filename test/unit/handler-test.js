@@ -10,6 +10,7 @@ import handler from '../../src/handler';
 
 suite('handler', () => {
   let sandbox, reply, code;
+  const greenkeeperSender = any.url();
   const githubCredentials = {token: any.string()};
   const settings = {...any.simpleObject(), github: githubCredentials};
   const log = sinon.spy();
@@ -23,6 +24,9 @@ suite('handler', () => {
     reply.withArgs('skipping').returns({code});
 
     sandbox.stub(boom, 'internal');
+    sandbox.stub(greenkeeper, 'default')
+      .returns(false)
+      .withArgs(greenkeeperSender).returns(true);
   });
 
   teardown(() => {
@@ -31,14 +35,7 @@ suite('handler', () => {
   });
 
   suite('`pull_request` event', () => {
-    const greenkeeperSender = any.url();
-
-    setup(() => {
-      sandbox.stub(process, 'default').resolves();
-      sandbox.stub(greenkeeper, 'default')
-        .returns(false)
-        .withArgs(greenkeeperSender).returns(true);
-    });
+    setup(() => sandbox.stub(process, 'default').resolves());
 
     test('that response is accepted when pr was opened by greenkeeper and is then processed', () => {
       const request = {
@@ -98,6 +95,8 @@ suite('handler', () => {
 
   suite('`status` event', () => {
     let getPullRequestsForCommit;
+    const error = new Error(any.simpleObject());
+    const wrappedError = any.simpleObject();
 
     setup(() => {
       getPullRequestsForCommit = sinon.stub();
@@ -118,7 +117,10 @@ suite('handler', () => {
         log: () => undefined
       };
       reply.withArgs('ok').returns({code});
-      getPullRequestsForCommit.withArgs({repo: repository, ref: branch}).resolves([{}]);
+      getPullRequestsForCommit.withArgs({
+        repo: repository,
+        ref: branch
+      }).resolves([{user: {html_url: greenkeeperSender}}]);
 
       return handler(request, reply, settings).then(() => assert.calledWith(code, ACCEPTED));
     });
@@ -174,6 +176,30 @@ suite('handler', () => {
       return handler(request, reply, settings).then(() => assert.calledWith(code, BAD_REQUEST));
     });
 
+    test('that a server-error is returned if the list of PRs for the commit is greater than one', () => {
+      const request = {
+        payload: {state: 'success', branches: [{name: any.string()}]},
+        headers: {'x-github-event': 'status'},
+        log: () => undefined
+      };
+      getPullRequestsForCommit.resolves([{}, {}]);
+      boom.internal.withArgs('too many PRs exist for this commit').returns(error);
+
+      return handler(request, reply, settings).then(() => assert.calledWith(reply, error));
+    });
+
+    test('that the response is bad-request if the PR is not from greenkeeper', () => {
+      const request = {
+        payload: {state: 'success', branches: [{name: any.string()}]},
+        headers: {'x-github-event': 'status'},
+        log: () => undefined
+      };
+      getPullRequestsForCommit.resolves([{user: {html_url: any.url()}}]);
+      reply.withArgs('PR is not from greenkeeper').returns({code});
+
+      return handler(request, reply, settings).then(() => assert.calledWith(code, BAD_REQUEST));
+    });
+
     test('that a server-error is reported if the fetching of related PRs fails', () => {
       const request = {
         payload: {
@@ -184,8 +210,6 @@ suite('handler', () => {
         headers: {'x-github-event': 'status'},
         log: () => undefined
       };
-      const error = new Error(any.simpleObject());
-      const wrappedError = any.simpleObject();
       getPullRequestsForCommit.rejects(error);
       boom.internal.withArgs('failed to fetch PRs', error).returns(wrappedError);
 
@@ -211,7 +235,7 @@ suite('handler', () => {
       return handler(request, reply, settings).then(() => assert.calledWith(code, NO_CONTENT));
     });
 
-    test('that a 400 response is sent when the ping shows that the hook is not configured to send json', () => {
+    test('that a 415 response is sent when the ping shows that the hook is not configured to send json', () => {
       const request = {
         payload: {
           hook: {

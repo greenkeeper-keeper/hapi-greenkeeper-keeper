@@ -40,7 +40,9 @@ export default function (request, reply, settings) {
     return getPullRequestsForCommit({repo: repository, ref: branches[0].name})
       .then(pullRequests => {
         if (!pullRequests.length) reply('no PRs for this commit').code(BAD_REQUEST);
-        else reply('ok').code(ACCEPTED);
+        else if (pullRequests.length > 1) reply(boom.internal('too many PRs exist for this commit'));
+        else if (openedByGreenkeeperBot(pullRequests[0].user.html_url)) reply('ok').code(ACCEPTED);
+        else reply('PR is not from greenkeeper').code(BAD_REQUEST);
       })
       .catch(e => reply(boom.internal('failed to fetch PRs', e)));
   }

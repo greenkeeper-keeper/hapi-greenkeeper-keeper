@@ -4,7 +4,7 @@ Feature: Commit status event webhook
   Scenario: Success status-event for head commit of greenkeeper PR
     Given the webhook is for a status event and a "success" state
     And the commit is only on one, non-master branch
-    And a PR exists for the commit
+    And an open PR exists for the commit
     And the PR was submitted by the greenkeeper integration
     And statuses exist for the PR
     And the PR can be merged

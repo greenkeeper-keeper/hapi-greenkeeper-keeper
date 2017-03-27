@@ -153,7 +153,9 @@ suite('github actions', () => {
     test('that PRs with HEAD matching a commit are fetched', () => {
       const pullRequests = any.listOf(any.simpleObject);
       const ownerLogin = any.word();
-      get.withArgs(`https://api.github.com/repos/${repoName}/pulls?head=${ownerLogin}:${ref}`).resolves(pullRequests);
+      get.withArgs(`https://api.github.com/repos/${repoName}/pulls?head=${ownerLogin}:${ref}`).resolves({
+        body: pullRequests
+      });
 
       return assert.becomes(
         actions.getPullRequestsForCommit({repo: {full_name: repoName, owner: {login: ownerLogin}}, ref}),

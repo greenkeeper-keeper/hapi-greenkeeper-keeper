@@ -40,3 +40,11 @@ Feature: Non-matching webhooks
     And the commit is on multiple branches
     When the webhook is received
     Then the webhook response indicates that the webhook will be skipped
+
+  Scenario: Success status-event for head commit of non-greenkeeper PR
+    Given the webhook is for a status event and a "success" state
+    And the commit is only on one, non-master branch
+    And an open PR exists for the commit
+    But the PR was submitted by a non-greenkeeper user
+    When the webhook is received
+    Then the webhook response indicates that the webhook will be skipped

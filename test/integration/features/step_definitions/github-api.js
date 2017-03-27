@@ -42,7 +42,10 @@ defineSupportCode(({Before, After, Given, Then, setWorldConstructor}) => {
   Given('an open PR exists for the commit', function (callback) {
     githubScope
       .matchHeader('Authorization', authorizationHeader)
-      .get(`/repos/${this.repo}/pulls?head=${this.repoOwner}:${this.ref}`);
+      .get(`/repos/${this.repo}/pulls?head=${this.repoOwner}:${this.commitBranches[0]}`)
+      .reply(OK, [{
+        user: {html_url: any.url()}
+      }]);
 
     callback();
   });

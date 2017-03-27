@@ -68,7 +68,8 @@ export default function (githubCredentials) {
   }
 
   function getPullRequestsForCommit({repo, ref}) {
-    return get(`https://api.github.com/repos/${repo.full_name}/pulls?head=${repo.owner.login}:${ref}`);
+    return get(`https://api.github.com/repos/${repo.full_name}/pulls?head=${repo.owner.login}:${ref}`)
+      .then(response => response.body);
   }
 
   return {
