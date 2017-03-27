@@ -36,17 +36,18 @@ suite('process', () => {
 
   test('that processing a greenkeeper PR confirms that it can be merged, merges, and deletes the branch', () => {
     const log = sinon.stub();
+    const pollWhenPending = any.boolean();
     ensureAcceptability.resolves();
     acceptPR.resolves();
     deleteBranch.resolves();
 
     return processPR(
       {payload: {number, pull_request: {url, head}}, log},
-      {github: githubCredentials, squash, deleteBranches}
+      {github: githubCredentials, squash, deleteBranches, pollWhenPending}
     ).then(() => {
       const message = any.string();
       const message2 = any.string();
-      assert.calledWith(ensureAcceptability, {repo, ref, url});
+      assert.calledWith(ensureAcceptability, {repo, ref, url, pollWhenPending});
       assert.calledWith(acceptPR, url, sha, number, squash);
       assert.calledWith(deleteBranch, head, deleteBranches);
 

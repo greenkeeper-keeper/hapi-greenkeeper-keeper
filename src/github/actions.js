@@ -11,19 +11,25 @@ import {
 export default function (githubCredentials) {
   const {get, post, put, del} = clientFactory(githubCredentials);
 
-  function ensureAcceptability({repo, ref, url}, log, timeout = minutes(1)) {
+  function ensureAcceptability({repo, ref, url, pollWhenPending}, log, timeout = minutes(1)) {
     log(['info', 'PR', 'validating'], url);
 
     return get(`https://api.github.com/repos/${repo.full_name}/commits/${ref}/status`)
       .then(response => response.body)
       .then(({state}) => {
         switch (state) {
-          case 'pending':
-            return poll({repo, ref}, log, timeout, ensureAcceptability)
-              .then(message => {
-                log(['info', 'PR', 'pending-status'], `retrying statuses for: ${url}`);
-                return message;
-              });
+          case 'pending': {
+            if (pollWhenPending) {
+              return poll({repo, ref, pollWhenPending}, log, timeout, ensureAcceptability)
+                .then(message => {
+                  log(['info', 'PR', 'pending-status'], `retrying statuses for: ${url}`);
+                  return message;
+                });
+            }
+
+            log(['info', 'PR', 'pending-status'], `not configured to poll: ${url}`);
+            return Promise.resolve();
+          }
           case 'success':
             return Promise.resolve('All commit statuses passed')
               .then(message => {

@@ -66,18 +66,30 @@ suite('github actions', () => {
     test('that the pending status delegates to poller', () => {
       const result = any.string();
       get.resolves({body: {state: 'pending'}});
-      poll.default.withArgs({repo: {full_name: repoName}, ref}, log, MINUTE).resolves(result);
+      poll.default.withArgs({repo: {full_name: repoName}, ref, pollWhenPending: true}, log, MINUTE).resolves(result);
 
-      return assert.becomes(actions.ensureAcceptability({repo: {full_name: repoName}, ref}, log), result);
+      return assert.becomes(
+        actions.ensureAcceptability({repo: {full_name: repoName}, ref, pollWhenPending: true}, log),
+        result
+      );
     });
 
     test('that the timeout is passed along to the poller', () => {
       const timeout = any.integer();
       const result = any.string();
       get.resolves({body: {state: 'pending'}});
-      poll.default.withArgs({repo: {full_name: repoName}, ref}, log, timeout).resolves(result);
+      poll.default.withArgs({repo: {full_name: repoName}, ref, pollWhenPending: true}, log, timeout).resolves(result);
 
-      return assert.becomes(actions.ensureAcceptability({repo: {full_name: repoName}, ref}, log, timeout), result);
+      return assert.becomes(
+        actions.ensureAcceptability({repo: {full_name: repoName}, ref, pollWhenPending: true}, log, timeout),
+        result
+      );
+    });
+
+    test('that the polling does not happen without the `pollWhenPending` flag', () => {
+      get.resolves({body: {state: 'pending'}});
+
+      return assert.isFulfilled(actions.ensureAcceptability({repo: {full_name: repoName}, ref}, log, any.integer()));
     });
 
     test('that an invalid status results in rejection', () => {

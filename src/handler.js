@@ -31,7 +31,7 @@ export default function (request, reply, settings) {
   if (isValidGreenkeeperUpdate({event, action, sender})) {
     reply('ok').code(ACCEPTED);
 
-    return process(request, settings);
+    return process(request, {...settings, pollWhenPending: true});
   }
 
   if (successfulStatusCouldBeForGreenkeeperPR(event, state, branches)) {

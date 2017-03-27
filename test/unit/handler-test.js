@@ -52,7 +52,7 @@ suite('handler', () => {
 
       return handler(request, reply, settings).then(() => {
         assert.calledWith(code, ACCEPTED);
-        assert.calledWith(process.default, request, settings);
+        assert.calledWith(process.default, request, {...settings, pollWhenPending: true});
       });
     });
 
