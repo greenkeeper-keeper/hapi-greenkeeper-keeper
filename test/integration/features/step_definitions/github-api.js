@@ -44,7 +44,8 @@ defineSupportCode(({Before, After, Given, Then, setWorldConstructor}) => {
       .matchHeader('Authorization', authorizationHeader)
       .get(`/repos/${this.repo}/pulls?head=${this.repoOwner}:${this.commitBranches[0]}`)
       .reply(OK, [{
-        user: {html_url: any.url()}
+        user: {html_url: this.prSender || any.url()},
+        number: this.prNumber
       }]);
 
     callback();
@@ -73,7 +74,12 @@ defineSupportCode(({Before, After, Given, Then, setWorldConstructor}) => {
   Given(/^the PR can be merged$/, function (callback) {
     githubScope
       .matchHeader('Authorization', authorizationHeader)
-      .put('/123/merge')
+      .put('/123/merge', {
+        sha: this.sha,
+        commit_title: `greenkeeper-keeper(pr: ${this.prNumber}): :white_check_mark:`,
+        commit_message: `greenkeeper-keeper(pr: ${this.prNumber}): :white_check_mark:`,
+        squash: this.squash
+      })
       .reply(OK, uri => {
         this.mergeUri = uri;
       });

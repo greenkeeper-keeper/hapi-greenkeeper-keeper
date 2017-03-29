@@ -12,7 +12,9 @@ defineSupportCode(({When, Then, setWorldConstructor}) => {
       action: this.webhookAction,
       prDetails: {
         sender: this.prSender,
-        comments: this.comments
+        comments: this.comments,
+        number: this.prNumber,
+        sha: this.sha
       },
       statusEventDetails: {
         state: this.statusEventState,

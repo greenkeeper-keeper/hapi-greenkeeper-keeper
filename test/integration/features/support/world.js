@@ -7,11 +7,13 @@ function buildWebhookPayload(event, {action, prDetails, statusEventDetails, ref,
       sender: {
         html_url: prDetails.sender
       },
+      number: prDetails.number,
       pull_request: {
+        number: prDetails.number,
         comments_url: `https://api.github.com${prDetails.comments}`,
         url: 'https://api.github.com/123',
         head: {
-          sha: 'adlkfahfah',
+          sha: prDetails.sha,
           ref,
           repo: {
             full_name: repo
@@ -40,7 +42,9 @@ function buildWebhookPayload(event, {action, prDetails, statusEventDetails, ref,
 export function World() {
   this.githubUser = any.word();
   this.githubToken = any.word();
-  this.ref = 'baz';
+  this.sha = any.string();
+  this.ref = any.word();
+  this.prNumber = any.integer();
   this.repo = 'test-repo';
 
   this.receiveWebhook = ({event, action, prDetails, statusEventDetails}) => this.server.inject({
