@@ -27,6 +27,7 @@ suite('handler', () => {
     sandbox.stub(greenkeeper, 'default')
       .returns(false)
       .withArgs(greenkeeperSender).returns(true);
+    sandbox.stub(process, 'default').resolves();
   });
 
   teardown(() => {
@@ -35,15 +36,15 @@ suite('handler', () => {
   });
 
   suite('`pull_request` event', () => {
-    setup(() => sandbox.stub(process, 'default').resolves());
-
     test('that response is accepted when pr was opened by greenkeeper and is then processed', () => {
+      const pullRequest = any.simpleObject();
       const request = {
         payload: {
           action: 'opened',
           sender: {
             html_url: greenkeeperSender
-          }
+          },
+          pull_request: pullRequest
         },
         headers: {'x-github-event': 'pull_request'},
         log: () => undefined
@@ -52,7 +53,7 @@ suite('handler', () => {
 
       return handler(request, reply, settings).then(() => {
         assert.calledWith(code, ACCEPTED);
-        assert.calledWith(process.default, request, {...settings, pollWhenPending: true});
+        assert.calledWith(process.default, request, pullRequest, {...settings, pollWhenPending: true});
       });
     });
 
@@ -104,9 +105,10 @@ suite('handler', () => {
       sandbox.stub(actionsFactory, 'default').withArgs(githubCredentials).returns({getPullRequestsForCommit});
     });
 
-    test('that the response is accepted when the event is a successful status and a matching greenkeeper PR', () => {
+    test('that the webhook is accepted and processed for a successful status and a matching greenkeeper PR', () => {
       const repository = any.simpleObject();
       const branch = any.string();
+      const pullRequest = {user: {html_url: greenkeeperSender}};
       const request = {
         payload: {
           state: 'success',
@@ -120,9 +122,12 @@ suite('handler', () => {
       getPullRequestsForCommit.withArgs({
         repo: repository,
         ref: branch
-      }).resolves([{user: {html_url: greenkeeperSender}}]);
+      }).resolves([pullRequest]);
 
-      return handler(request, reply, settings).then(() => assert.calledWith(code, ACCEPTED));
+      return handler(request, reply, settings).then(() => {
+        assert.calledWith(code, ACCEPTED);
+        assert.calledWith(process.default, request, pullRequest, settings);
+      });
     });
 
     test('that the response is bad-request when the state is not `success`', () => {

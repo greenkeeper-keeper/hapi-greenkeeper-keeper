@@ -42,7 +42,8 @@ suite('process', () => {
     deleteBranch.resolves();
 
     return processPR(
-      {payload: {number, pull_request: {url, head}}, log},
+      {log},
+      {url, head, number},
       {github: githubCredentials, squash, deleteBranches, pollWhenPending}
     ).then(() => {
       const message = any.string();
@@ -65,7 +66,8 @@ suite('process', () => {
     deleteBranch.resolves();
 
     return processPR(
-      {payload: {number, pull_request: {url, head}}},
+      {},
+      {url, head},
       {github: githubCredentials, squash}
     ).then(() => {
       assert.calledOnce(ensureAcceptability);
@@ -80,7 +82,8 @@ suite('process', () => {
     postErrorComment.resolves(error);
 
     return processPR(
-      {payload: {number, pull_request: {comments_url: url, head}}, log: () => undefined},
+      {log: () => undefined},
+      {comments_url: url, head},
       {github: githubCredentials, squash, deleteBranches}
     ).then(() => {
       assert.notCalled(acceptPR);
@@ -96,7 +99,8 @@ suite('process', () => {
     postErrorComment.resolves(error);
 
     return processPR(
-      {payload: {number, pull_request: {comments_url: url, head}}, log: () => undefined},
+      {log: () => undefined},
+      {comments_url: url, head},
       {github: githubCredentials, squash, deleteBranches}
     ).then(() => {
       assert.notCalled(deleteBranch);
@@ -110,7 +114,8 @@ suite('process', () => {
     postErrorComment.rejects(error);
 
     return processPR(
-      {payload: {number, pull_request: {url, head}}, log: () => undefined},
+      {log: () => undefined},
+      {url, head},
       {github: githubCredentials, squash, deleteBranches}
     ).then(() => {
       assert.calledOnce(postErrorComment);

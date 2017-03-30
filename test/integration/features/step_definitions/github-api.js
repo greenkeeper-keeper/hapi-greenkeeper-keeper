@@ -19,7 +19,7 @@ function stubTheCommentsEndpoint(githubScope, authorizationHeader) {
   });
 }
 
-defineSupportCode(({Before, After, Given, Then, setWorldConstructor}) => {
+defineSupportCode(({Before, After, Given, setWorldConstructor}) => {
   setWorldConstructor(World);
 
   let githubScope, authorizationHeader;
@@ -44,8 +44,16 @@ defineSupportCode(({Before, After, Given, Then, setWorldConstructor}) => {
       .matchHeader('Authorization', authorizationHeader)
       .get(`/repos/${this.repo}/pulls?head=${this.repoOwner}:${this.commitBranches[0]}`)
       .reply(OK, [{
+        url: 'https://api.github.com/123',
         user: {html_url: this.prSender || any.url()},
-        number: this.prNumber
+        number: this.prNumber,
+        head: {
+          sha: this.sha,
+          ref: this.ref,
+          repo: {
+            full_name: this.repo
+          }
+        }
       }]);
 
     callback();
@@ -72,7 +80,8 @@ defineSupportCode(({Before, After, Given, Then, setWorldConstructor}) => {
   });
 
   Given(/^the PR can be merged$/, function (callback) {
-    githubScope
+    this.prProcessed = new Promise(resolve => {
+      githubScope
       .matchHeader('Authorization', authorizationHeader)
       .put('/123/merge', {
         sha: this.sha,
@@ -82,7 +91,9 @@ defineSupportCode(({Before, After, Given, Then, setWorldConstructor}) => {
       })
       .reply(OK, uri => {
         this.mergeUri = uri;
+        resolve();
       });
+    });
 
     callback();
   });
@@ -132,12 +143,6 @@ defineSupportCode(({Before, After, Given, Then, setWorldConstructor}) => {
       .delete(`/repos/${this.repo}/git/refs/heads/${this.ref}`)
       .reply(INTERNAL_SERVER_ERROR, {});
     stubTheCommentsEndpoint.call(this, githubScope, authorizationHeader);
-
-    callback();
-  });
-
-  Then(/^the PR is merged$/, function (callback) {
-    assert.equal(this.mergeUri, '/123/merge');
 
     callback();
   });

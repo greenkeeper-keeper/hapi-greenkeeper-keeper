@@ -31,7 +31,7 @@ export default function (request, reply, settings) {
   if (isValidGreenkeeperUpdate({event, action, sender})) {
     reply('ok').code(ACCEPTED);
 
-    return process(request, {...settings, pollWhenPending: true});
+    return process(request, request.payload.pull_request, {...settings, pollWhenPending: true});
   }
 
   if (successfulStatusCouldBeForGreenkeeperPR(event, state, branches)) {
@@ -41,8 +41,10 @@ export default function (request, reply, settings) {
       .then(pullRequests => {
         if (!pullRequests.length) reply('no PRs for this commit').code(BAD_REQUEST);
         else if (pullRequests.length > 1) reply(boom.internal('too many PRs exist for this commit'));
-        else if (openedByGreenkeeperBot(pullRequests[0].user.html_url)) reply('ok').code(ACCEPTED);
-        else reply('PR is not from greenkeeper').code(BAD_REQUEST);
+        else if (openedByGreenkeeperBot(pullRequests[0].user.html_url)) {
+          reply('ok').code(ACCEPTED);
+          process(request, pullRequests[0], settings);
+        } else reply('PR is not from greenkeeper').code(BAD_REQUEST);
       })
       .catch(e => reply(boom.internal('failed to fetch PRs', e)));
   }
