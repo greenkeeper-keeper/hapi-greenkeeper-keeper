@@ -89,7 +89,10 @@ suite('github actions', () => {
     test('that the polling does not happen without the `pollWhenPending` flag', () => {
       get.resolves({body: {state: 'pending'}});
 
-      return assert.isFulfilled(actions.ensureAcceptability({repo: {full_name: repoName}, ref}, log, any.integer()));
+      return assert.isRejected(
+        actions.ensureAcceptability({repo: {full_name: repoName}, ref}, log, any.integer()),
+        'pending'
+      );
     });
 
     test('that an invalid status results in rejection', () => {

@@ -1,10 +1,8 @@
 import createActions from './github/actions';
 
-export default function (
-  request,
+export default function (request,
   {head, url, number, comments_url},
-  {github, squash, deleteBranches = false, pollWhenPending}
-) {
+  {github, squash, deleteBranches = false, pollWhenPending}) {
   const {ensureAcceptability, acceptPR, deleteBranch, postErrorComment} = createActions(github);
 
   return ensureAcceptability({
@@ -16,9 +14,13 @@ export default function (
     .then(() => acceptPR(url, head.sha, number, squash, message => request.log(message)))
     .then(() => deleteBranch(head, deleteBranches))
     .catch(err => {
-      request.log(['error', 'PR'], err);
+      if (err.message !== 'pending') {
+        request.log(['error', 'PR'], err);
 
-      return postErrorComment(comments_url, err)
-        .catch(e => request.log(`failed to log comment against the PR: ${e}`));
+        return postErrorComment(comments_url, err)
+          .catch(e => request.log(`failed to log comment against the PR: ${e}`));
+      }
+
+      return Promise.resolve();
     });
 }

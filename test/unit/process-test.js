@@ -92,6 +92,20 @@ suite('process', () => {
     });
   });
 
+  test('that pending statuses when polling is disabled does not result in a comment', () => {
+    ensureAcceptability.rejects(new Error('pending'));
+
+    return processPR(
+      {log: () => undefined},
+      {comments_url: url, head},
+      {github: githubCredentials, squash, deleteBranches}
+    ).then(() => {
+      assert.notCalled(acceptPR);
+      assert.notCalled(deleteBranch);
+      assert.notCalled(postErrorComment);
+    });
+  });
+
   test('that failing to merge the PR causes a comment to be logged against the PR and prevents branch deletion', () => {
     const error = new Error(any.string());
     ensureAcceptability.resolves();

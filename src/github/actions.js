@@ -20,15 +20,14 @@ export default function (githubCredentials) {
         switch (state) {
           case 'pending': {
             if (pollWhenPending) {
-              return poll({repo, ref, pollWhenPending}, log, timeout, ensureAcceptability)
-                .then(message => {
-                  log(['info', 'PR', 'pending-status'], `retrying statuses for: ${url}`);
-                  return message;
-                });
+              return poll({repo, ref, pollWhenPending}, log, timeout, ensureAcceptability).then(message => {
+                log(['info', 'PR', 'pending-status'], `retrying statuses for: ${url}`);
+                return message;
+              });
             }
 
             log(['info', 'PR', 'pending-status'], `not configured to poll: ${url}`);
-            return Promise.resolve();
+            return Promise.reject(new Error('pending'));
           }
           case 'success':
             return Promise.resolve('All commit statuses passed')
