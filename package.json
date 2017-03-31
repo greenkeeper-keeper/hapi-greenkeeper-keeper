@@ -84,7 +84,7 @@
     "btoa": "1.1.2",
     "delay": "2.0.0",
     "highwire": "1.1.6",
-    "hoek": "4.1.0",
+    "hoek": "4.1.1",
     "http-status-codes": "1.1.6",
     "joi": "10.3.3",
     "lodash.groupby": "4.6.0",
