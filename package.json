@@ -55,7 +55,7 @@
     "cucumber": "2.0.0-rc.9",
     "cz-conventional-changelog": "2.0.0",
     "debug": "2.6.3",
-    "eslint": "3.18.0",
+    "eslint": "3.19.0",
     "eslint-config-airbnb": "14.1.0",
     "eslint-plugin-import": "2.2.0",
     "eslint-plugin-jsx-a11y": "4.0.0",
