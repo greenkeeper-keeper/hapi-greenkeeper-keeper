@@ -68,7 +68,7 @@
     "husky": "0.13.3",
     "markdownlint-cli": "0.2.0",
     "mocha": "3.2.0",
-    "nock": "9.0.12",
+    "nock": "9.0.13",
     "npm-run-all": "4.0.2",
     "nyc": "10.2.0",
     "proxyquire": "1.7.11",
