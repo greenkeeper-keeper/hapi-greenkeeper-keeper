@@ -66,7 +66,7 @@
     "good-squeeze": "5.0.2",
     "hapi": "16.1.1",
     "husky": "0.13.3",
-    "markdownlint-cli": "0.2.0",
+    "markdownlint-cli": "0.3.0",
     "mocha": "3.2.0",
     "nock": "9.0.13",
     "npm-run-all": "4.0.2",
