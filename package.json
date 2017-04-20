@@ -54,7 +54,7 @@
     "codecov": "2.1.0",
     "cucumber": "2.0.0-rc.9",
     "cz-conventional-changelog": "2.0.0",
-    "debug": "2.6.3",
+    "debug": "2.6.4",
     "eslint": "3.19.0",
     "eslint-config-airbnb": "14.1.0",
     "eslint-plugin-import": "2.2.0",
