@@ -45,7 +45,7 @@
     "access": "public"
   },
   "devDependencies": {
-    "@travi/any": "1.0.4",
+    "@travi/any": "1.0.5",
     "babel-preset-es2015-node": "6.1.1",
     "babel-preset-es2015-rollup": "3.0.0",
     "babel-preset-stage-3": "6.24.1",
