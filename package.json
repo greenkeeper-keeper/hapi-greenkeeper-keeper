@@ -52,7 +52,7 @@
     "babel-preset-stage-3": "6.24.1",
     "chai": "3.5.0",
     "chai-as-promised": "6.0.0",
-    "codecov": "2.1.0",
+    "codecov": "2.2.0",
     "cucumber": "2.0.0-rc.9",
     "cz-conventional-changelog": "2.0.0",
     "debug": "2.6.6",
