@@ -1,10 +1,1 @@
-env:
-  mocha: true
-
-plugins:
-  - mocha
-
-extends: plugin:mocha/recommended
-
-rules:
-  mocha/no-skipped-tests: error
+extends: '@travi/travi/rules/tests/mocha'

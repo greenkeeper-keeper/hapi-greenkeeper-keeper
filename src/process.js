@@ -14,7 +14,7 @@ export default function (request,
     .then(() => acceptPR(url, head.sha, number, squash, message => request.log(message)))
     .then(() => deleteBranch(head, deleteBranches))
     .catch(err => {
-      if (err.message !== 'pending') {
+      if ('pending' !== err.message) {
         request.log(['error', 'PR'], err);
 
         return postErrorComment(comments_url, err)

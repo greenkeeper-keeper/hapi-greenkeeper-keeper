@@ -1,2 +1,1 @@
-rules:
-  func-names: off
+extends: '@travi/travi/rules/tests/cucumber'

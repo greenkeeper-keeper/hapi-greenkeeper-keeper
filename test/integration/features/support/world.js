@@ -1,7 +1,7 @@
 import any from '@travi/any';
 
 function buildWebhookPayload(event, {action, prDetails, statusEventDetails, ref, repo}) {
-  if (event === 'pull_request') {
+  if ('pull_request' === event) {
     return {
       action,
       sender: {
@@ -23,7 +23,7 @@ function buildWebhookPayload(event, {action, prDetails, statusEventDetails, ref,
     };
   }
 
-  if (event === 'status') {
+  if ('status' === event) {
     return {
       state: statusEventDetails.state,
       repository: {
