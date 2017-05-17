@@ -56,7 +56,7 @@
     "codecov": "2.2.0",
     "cucumber": "2.1.0",
     "cz-conventional-changelog": "2.0.0",
-    "debug": "2.6.6",
+    "debug": "2.6.7",
     "globstar": "1.0.0",
     "good": "7.1.0",
     "good-console": "6.4.0",
