@@ -46,7 +46,7 @@
     "access": "public"
   },
   "devDependencies": {
-    "@travi/any": "1.0.6",
+    "@travi/any": "1.0.7",
     "@travi/eslint-config-travi": "1.2.10",
     "babel-preset-es2015-node": "6.1.1",
     "babel-preset-es2015-rollup": "3.0.0",
