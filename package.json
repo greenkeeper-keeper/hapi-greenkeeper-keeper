@@ -77,7 +77,7 @@
     "validate-commit-msg": "2.12.1"
   },
   "dependencies": {
-    "boom": "4.3.1",
+    "boom": "5.0.0",
     "btoa": "1.1.2",
     "delay": "2.0.0",
     "highwire": "1.1.6",
