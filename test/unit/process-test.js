@@ -48,15 +48,16 @@ suite('process', () => {
     ).then(() => {
       const message = any.string();
       const message2 = any.string();
+      const tags = any.listOf(any.string);
       assert.calledWith(ensureAcceptability, {repo, ref, url, pollWhenPending});
       assert.calledWith(acceptPR, url, sha, number, squash);
       assert.calledWith(deleteBranch, head, deleteBranches);
 
-      ensureAcceptability.getCall(0).args[1](message2);
-      assert.calledWith(log, message2);
+      ensureAcceptability.getCall(0).args[1](tags, message2);
+      assert.calledWith(log, tags, message2);
 
-      acceptPR.getCall(0).args[4](message);
-      assert.calledWith(log, message);
+      acceptPR.getCall(0).args[4](tags, message);
+      assert.calledWith(log, tags, message);
     });
   });
 
