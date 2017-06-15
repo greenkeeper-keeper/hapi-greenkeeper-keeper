@@ -83,7 +83,7 @@
     "highwire": "1.1.6",
     "hoek": "4.1.1",
     "http-status-codes": "1.1.6",
-    "joi": "10.5.2",
+    "joi": "10.6.0",
     "lodash.groupby": "4.6.0",
     "lodash.values": "4.3.0",
     "milliseconds": "1.0.3"
