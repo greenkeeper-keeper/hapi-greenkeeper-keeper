@@ -82,17 +82,17 @@ defineSupportCode(({Before, After, Given, setWorldConstructor}) => {
   Given(/^the PR can be merged$/, function (callback) {
     this.prProcessed = new Promise(resolve => {
       githubScope
-      .matchHeader('Authorization', authorizationHeader)
-      .put('/123/merge', {
-        sha: this.sha,
-        commit_title: `greenkeeper-keeper(pr: ${this.prNumber}): :white_check_mark:`,
-        commit_message: `greenkeeper-keeper(pr: ${this.prNumber}): :white_check_mark:`,
-        squash: this.squash
-      })
-      .reply(OK, uri => {
-        this.mergeUri = uri;
-        resolve();
-      });
+        .matchHeader('Authorization', authorizationHeader)
+        .put('/123/merge', {
+          sha: this.sha,
+          commit_title: `greenkeeper-keeper(pr: ${this.prNumber}): :white_check_mark:`,
+          commit_message: `greenkeeper-keeper(pr: ${this.prNumber}): :white_check_mark:`,
+          squash: this.squash
+        })
+        .reply(OK, uri => {
+          this.mergeUri = uri;
+          resolve();
+        });
     });
 
     callback();
