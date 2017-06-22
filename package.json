@@ -62,7 +62,7 @@
     "good-console": "6.4.0",
     "good-squeeze": "5.0.2",
     "hapi": "16.4.3",
-    "husky": "0.13.4",
+    "husky": "0.14.0",
     "markdownlint-cli": "0.3.0",
     "mocha": "3.4.1",
     "nock": "9.0.13",
