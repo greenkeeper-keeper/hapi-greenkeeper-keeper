@@ -52,7 +52,7 @@ export default function (githubCredentials) {
       sha,
       commit_title: `greenkeeper-keeper(pr: ${prNumber}): :white_check_mark:`,
       commit_message: `greenkeeper-keeper(pr: ${prNumber}): :white_check_mark:`,
-      squash
+      merge_method: squash ? 'squash' : 'merge'
     }).then(result => {
       log(['info', 'PR', 'integrated'], url);
       return result;

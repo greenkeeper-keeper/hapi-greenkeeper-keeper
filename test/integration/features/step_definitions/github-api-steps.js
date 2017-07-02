@@ -87,7 +87,7 @@ defineSupportCode(({Before, After, Given, setWorldConstructor}) => {
           sha: this.sha,
           commit_title: `greenkeeper-keeper(pr: ${this.prNumber}): :white_check_mark:`,
           commit_message: `greenkeeper-keeper(pr: ${this.prNumber}): :white_check_mark:`,
-          squash: this.squash
+          merge_method: this.squash ? 'squash' : 'merge'
         })
         .reply(OK, uri => {
           this.mergeUri = uri;
