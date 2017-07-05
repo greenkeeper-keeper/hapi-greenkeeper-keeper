@@ -47,7 +47,7 @@
   },
   "devDependencies": {
     "@travi/any": "1.2.1",
-    "@travi/eslint-config-travi": "1.2.16",
+    "@travi/eslint-config-travi": "1.2.17",
     "babel-preset-es2015-node": "6.1.1",
     "babel-preset-es2015-rollup": "3.0.0",
     "babel-preset-stage-3": "6.24.1",
