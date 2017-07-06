@@ -46,28 +46,66 @@ suite('plugin', () => {
   });
 
   suite('options validation', () => {
+    const next = () => undefined;
+    const route = () => undefined;
+
     test('that an error is thrown if no options are provided', () => {
-      assert.throws(() => register({}, undefined, () => undefined), '"value" is required');
+      assert.throws(() => register({}, undefined, next), '"value" is required');
     });
 
     test('that an error is thrown if the github token is not provided', () => {
-      assert.throws(() => register({}, {}, () => undefined), '"github" is required');
-      assert.throws(() => register({}, {github: ''}, () => undefined), '"github" must be an object');
-      assert.throws(() => register({}, {github: {}}, () => undefined), '"token" is required');
-      assert.throws(() => register({}, {github: {token: any.integer()}}, () => undefined), '"token" must be a string');
+      assert.throws(() => register({}, {}, next), '"github" is required');
+      assert.throws(() => register({}, {github: ''}, next), '"github" must be an object');
+      assert.throws(() => register({}, {github: {}}, next), '"token" is required');
+      assert.throws(() => register({}, {github: {token: any.integer()}}, next), '"token" must be a string');
     });
 
-    test('that an error is thrown if the flag to squash before merging is not provided', () => {
-      assert.throws(() => register({}, {github: {token: any.string()}}, () => undefined), '"squash" is required');
+    test('that an error is thrown if the accept-action is not provided', () => {
       assert.throws(
-        () => register({}, {github: {token: any.string()}, squash: any.string()}, () => undefined),
+        () => register({}, {github: {token: any.string()}}, next),
+        '"value" must contain at least one of [squash, acceptAction]'
+      );
+      assert.throws(
+        () => register({}, {github: {token: any.string()}, squash: any.string()}, next),
         '"squash" must be a boolean'
+      );
+      assert.throws(
+        () => register({}, {github: {token: any.string()}, acceptAction: any.integer()}, next),
+        'child "acceptAction" fails because ["acceptAction" must be a string]'
       );
     });
 
-    test('that an error is thrown if the flag to delete branches is not a boolean when provided', () => {
-      const route = sinon.stub();
+    test('that an error is thrown if both accept-action and squash flag are provided', () => {
+      assert.throws(
+        () => register(
+          {},
+          {
+            github: {token: any.string()},
+            acceptAction: any.fromList(['merge', 'rebase', 'squash']),
+            squash: any.boolean()
+          },
+          next
+        ),
+        '"value" contains a conflict between exclusive peers [squash, acceptAction]'
+      );
+    });
 
+    test('that an error is thrown if an invalid accept-action is not provided', () => {
+      assert.throws(
+        () => register({}, {github: {token: any.string()}, acceptAction: any.string()}, next),
+        'child "acceptAction" fails because ["acceptAction" must be one of [merge, squash, rebase]]'
+      );
+    });
+
+    test('that no error is thrown if a valid accept-type is provided', () => {
+      register({route}, {github: {token: any.string()}, acceptAction: 'merge'}, next);
+      register({route}, {github: {token: any.string()}, acceptAction: 'squash'}, next);
+      register({route}, {github: {token: any.string()}, acceptAction: 'rebase'}, next);
+      register({route}, {github: {token: any.string()}, squash: true}, next);
+      register({route}, {github: {token: any.string()}, squash: false}, next);
+    });
+
+    test('that an error is thrown if the flag to delete branches is not a boolean when provided', () => {
       assert.throws(
         () => register({}, {
           github: {token: any.string()},

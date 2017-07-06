@@ -3,50 +3,86 @@ import any from '@travi/any';
 import hapi from 'hapi';
 import {World} from '../support/world';
 
-defineSupportCode(({Before, setWorldConstructor}) => {
+defineSupportCode(({Given, setWorldConstructor}) => {
   setWorldConstructor(World);
 
-  Before(function () {
-    if (!this.server) {
-      this.server = new hapi.Server();
-      this.server.connection();
-      this.squash = any.boolean();
+  Given(/^the server is configured$/, function () {
+    this.server = new hapi.Server();
+    this.server.connection();
+    this.acceptType = any.fromList(['merge', 'squash', 'rebase']);
 
-      return new Promise((resolve, reject) => {
-        this.server.register([
-          {
-            register: require('../../../../src/plugin'),
-            options: {
-              squash: this.squash,
-              deleteBranches: true,
-              github: {
-                token: this.githubToken
-              }
-            }
-          },
-          {
-            register: require('good'),
-            options: {
-              reporters: {
-                console: [
-                  {
-                    module: 'good-squeeze',
-                    name: 'Squeeze',
-                    args: [{log: '*', request: '*', response: '*', error: '*'}]
-                  },
-                  {module: 'good-console'},
-                  'stdout'
-                ]
-              }
+    return new Promise((resolve, reject) => {
+      this.server.register([
+        {
+          register: require('../../../../src/plugin'),
+          options: {
+            acceptAction: this.acceptType,
+            deleteBranches: true,
+            github: {
+              token: this.githubToken
             }
           }
-        ], err => {
-          if (err) reject(err);
-          else resolve();
-        });
+        },
+        {
+          register: require('good'),
+          options: {
+            reporters: {
+              console: [
+                {
+                  module: 'good-squeeze',
+                  name: 'Squeeze',
+                  args: [{log: '*', request: '*', response: '*', error: '*'}]
+                },
+                {module: 'good-console'},
+                'stdout'
+              ]
+            }
+          }
+        }
+      ], err => {
+        if (err) reject(err);
+        else resolve();
       });
-    }
+    });
+  });
 
-    return Promise.resolve();
+  Given(/^the server is configured using the squash flag$/, function () {
+    this.server = new hapi.Server();
+    this.server.connection();
+    this.squash = any.boolean();
+
+    return new Promise((resolve, reject) => {
+      this.server.register([
+        {
+          register: require('../../../../src/plugin'),
+          options: {
+            squash: this.squash,
+            deleteBranches: true,
+            github: {
+              token: this.githubToken
+            }
+          }
+        },
+        {
+          register: require('good'),
+          options: {
+            reporters: {
+              console: [
+                {
+                  module: 'good-squeeze',
+                  name: 'Squeeze',
+                  args: [{log: '*', request: '*', response: '*', error: '*'}]
+                },
+                {module: 'good-console'},
+                'stdout'
+              ]
+            }
+          }
+        }
+      ], err => {
+        if (err) reject(err);
+        else resolve();
+      });
+    });
   });
 });

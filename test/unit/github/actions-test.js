@@ -107,7 +107,7 @@ suite('github actions', () => {
   });
 
   suite('accept PR', () => {
-    test('that the referenced PR gets accepted', () => {
+    test('that the referenced PR gets merged', () => {
       const squash = false;
       put.withArgs(`${url}/merge`, {
         sha,
@@ -116,7 +116,7 @@ suite('github actions', () => {
         merge_method: 'merge'
       }).resolves(response);
 
-      return assert.becomes(actions.acceptPR(url, sha, prNumber, squash, log), response);
+      return assert.becomes(actions.acceptPR(url, sha, prNumber, squash, null, log), response);
     });
 
     test('that the referenced PR gets squashed when configured to do so', () => {
@@ -128,7 +128,19 @@ suite('github actions', () => {
         merge_method: 'squash'
       }).resolves(response);
 
-      return assert.becomes(actions.acceptPR(url, sha, prNumber, squash, log), response);
+      return assert.becomes(actions.acceptPR(url, sha, prNumber, squash, null, log), response);
+    });
+
+    test('that the referenced PR gets accepted', () => {
+      const acceptAction = any.string();
+      put.withArgs(`${url}/merge`, {
+        sha,
+        commit_title: `greenkeeper-keeper(pr: ${prNumber}): :white_check_mark:`,
+        commit_message: `greenkeeper-keeper(pr: ${prNumber}): :white_check_mark:`,
+        merge_method: acceptAction
+      }).resolves(response);
+
+      return assert.becomes(actions.acceptPR(url, sha, prNumber, null, acceptAction, log), response);
     });
 
     test('that a merge failure is reported appropriately', () => {

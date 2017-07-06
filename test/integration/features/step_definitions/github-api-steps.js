@@ -98,6 +98,25 @@ defineSupportCode(({Before, After, Given, setWorldConstructor}) => {
     callback();
   });
 
+  Given(/^the PR can be accepted$/, function (callback) {
+    this.prProcessed = new Promise(resolve => {
+      githubScope
+        .matchHeader('Authorization', authorizationHeader)
+        .put('/123/merge', {
+          sha: this.sha,
+          commit_title: `greenkeeper-keeper(pr: ${this.prNumber}): :white_check_mark:`,
+          commit_message: `greenkeeper-keeper(pr: ${this.prNumber}): :white_check_mark:`,
+          merge_method: this.acceptType
+        })
+        .reply(OK, uri => {
+          this.mergeUri = uri;
+          resolve();
+        });
+    });
+
+    callback();
+  });
+
   Given('the commit statuses resolve to {stringInDoubleQuotes}', function (status, callback) {
     this.comments = `/${any.word()}`;
     githubScope

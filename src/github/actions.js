@@ -8,6 +8,11 @@ import {
   MergeFailureError
 } from '../errors';
 
+function determineMergeMethodFrom(acceptAction, squash) {
+  if (acceptAction) return acceptAction;
+  return squash ? 'squash' : 'merge';
+}
+
 export default function (githubCredentials) {
   const {get, post, put, del} = clientFactory(githubCredentials);
 
@@ -47,12 +52,12 @@ export default function (githubCredentials) {
       });
   }
 
-  function acceptPR(url, sha, prNumber, squash, log) {
+  function acceptPR(url, sha, prNumber, squash, acceptAction, log) {
     return put(`${url}/merge`, {
       sha,
       commit_title: `greenkeeper-keeper(pr: ${prNumber}): :white_check_mark:`,
       commit_message: `greenkeeper-keeper(pr: ${prNumber}): :white_check_mark:`,
-      merge_method: squash ? 'squash' : 'merge'
+      merge_method: determineMergeMethodFrom(acceptAction, squash)
     }).then(result => {
       log(['info', 'PR', 'integrated'], url);
       return result;

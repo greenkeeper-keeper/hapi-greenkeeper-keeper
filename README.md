@@ -36,8 +36,13 @@ the plugin on your server.
 
   _Note_: the personal access token will need the `repo` and `repo:read_hooks`
   scopes in order to work properly
-* __`squash`__ _required_: whether or not you want the commits on the branch
+* __`squash`__ _deprecated_: whether or not you want the commits on the branch
   squashed before merging
+* __`acceptType`__ _required if `squash` is not provided_: how the contribution
+  should be integrated, once accepted. Valid choices include:
+  * `merge`
+  * `squash`
+  * `rebase`
 * __`deleteBranches`__ _defaults to `false`_: whether or not you want
   greenkeeper-keeper to delete branches for merged PRs
 
