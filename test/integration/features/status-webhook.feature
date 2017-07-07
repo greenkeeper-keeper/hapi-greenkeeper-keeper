@@ -7,7 +7,7 @@ Feature: Commit status event webhook
     And the PR was submitted by the greenkeeper integration
     And an open PR exists for the commit
     And statuses exist for the PR
-    And the PR can be merged
+    And the PR can be accepted
     When the webhook is received
     Then the webhook response confirms that it will be processed
     And the PR is merged
