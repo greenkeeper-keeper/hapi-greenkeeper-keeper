@@ -6,7 +6,6 @@
   "license": "MIT",
   "author": "Kurtis Kemple <kurtiskemple@gmail.com>",
   "maintainers": [
-    "Kurtis Kemple <kurtiskemple@gmail.com>",
     "Matt Travi <npm@travi.org> (https://matt.travi.org/)"
   ],
   "description": "hapi plugin to automatically merge and clean up passing greenkeeper PRs",
