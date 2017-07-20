@@ -73,7 +73,7 @@
     "rollup-plugin-node-resolve": "3.0.0",
     "semantic-release": "6.3.6",
     "sinon": "2.3.8",
-    "validate-commit-msg": "2.12.2"
+    "validate-commit-msg": "2.12.3"
   },
   "dependencies": {
     "boom": "5.2.0",
