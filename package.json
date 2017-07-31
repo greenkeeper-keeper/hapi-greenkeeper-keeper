@@ -63,7 +63,7 @@
     "hapi": "16.5.0",
     "husky": "0.14.3",
     "markdownlint-cli": "0.3.0",
-    "mocha": "3.4.1",
+    "mocha": "3.5.0",
     "nock": "9.0.14",
     "npm-run-all": "4.0.2",
     "nyc": "11.1.0",
