@@ -5,7 +5,7 @@ import {World} from '../support/world';
 defineSupportCode(({Then, setWorldConstructor}) => {
   setWorldConstructor(World);
 
-  Then('a comment is made against the PR: {stringInDoubleQuotes}', function (message, callback) {
+  Then(/^a comment is made against the PR: (.*)$/, function (message, callback) {
     assert.equal(this.errorComment, `:x: greenkeeper-keeper failed to merge the pull-request \n> ${message}`);
 
     callback();

@@ -117,7 +117,7 @@ defineSupportCode(({Before, After, Given, setWorldConstructor}) => {
     callback();
   });
 
-  Given('the commit statuses resolve to {stringInDoubleQuotes}', function (status, callback) {
+  Given(/^the commit statuses resolve to (.*)$/, function (status, callback) {
     this.comments = `/${any.word()}`;
     githubScope
       .matchHeader('Authorization', authorizationHeader)
