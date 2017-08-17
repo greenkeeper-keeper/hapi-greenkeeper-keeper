@@ -73,7 +73,7 @@
     "rollup-plugin-babel": "3.0.2",
     "rollup-plugin-node-resolve": "3.0.0",
     "semantic-release": "7.0.1",
-    "sinon": "3.2.0",
+    "sinon": "3.2.1",
     "validate-commit-msg": "2.14.0"
   },
   "dependencies": {
