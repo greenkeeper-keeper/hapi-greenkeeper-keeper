@@ -19,7 +19,7 @@
     "plugin"
   ],
   "scripts": {
-    "lint:js": "eslint .",
+    "lint:js": "eslint . --cache",
     "lint:md": "globstar --node -- markdownlint **/*.md",
     "tests:unit:no-coverage": "mocha --recursive test/unit",
     "coverage": "nyc run-s tests:unit:no-coverage",
