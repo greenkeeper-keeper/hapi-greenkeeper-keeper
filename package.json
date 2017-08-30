@@ -54,7 +54,7 @@
     "chai": "4.1.1",
     "chai-as-promised": "7.1.1",
     "codecov": "2.3.0",
-    "cucumber": "3.0.0",
+    "cucumber": "3.0.1",
     "cz-conventional-changelog": "2.0.0",
     "debug": "3.0.1",
     "globstar": "1.0.0",
