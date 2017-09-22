@@ -3,7 +3,8 @@ import babel from 'rollup-plugin-babel';
 import nodeResolve from 'rollup-plugin-node-resolve';
 
 export default {
-  entry: 'src/plugin.js',
+  sourcemap: true,
+  input: 'src/plugin.js',
   external: [
     'http-status-codes',
     'milliseconds',
@@ -24,8 +25,8 @@ export default {
       presets: ['es2015-rollup', 'stage-3']
     })
   ],
-  targets: [
-    {dest: 'lib/plugin.cjs.js', format: 'cjs'},
-    {dest: 'lib/plugin.es.js', format: 'es'}
+  output: [
+    {file: 'lib/plugin.cjs.js', format: 'cjs'},
+    {file: 'lib/plugin.es.js', format: 'es'}
   ]
 };
