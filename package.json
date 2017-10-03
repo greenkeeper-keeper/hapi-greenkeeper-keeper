@@ -65,7 +65,7 @@
     "good-squeeze": "5.0.2",
     "greenkeeper-lockfile": "1.9.0",
     "hapi": "16.6.2",
-    "husky": "0.14.3",
+    "husky": "0.15.0-beta.2",
     "markdownlint-cli": "0.3.0",
     "mocha": "3.5.3",
     "nock": "9.0.21",
