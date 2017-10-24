@@ -114,13 +114,15 @@ suite('plugin', () => {
         }, () => undefined),
         '"deleteBranches" must be a boolean'
       );
-      assert.doesNotThrow(
-        () => register({route}, {
+      assert.doesNotThrow(() => register(
+        {route},
+        {
           github: {token: any.string()},
           squash: any.boolean(),
           deleteBranches: any.boolean()
-        }, () => undefined)
-      );
+        },
+        () => undefined
+      ));
     });
   });
 });
