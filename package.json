@@ -80,7 +80,7 @@
     "validate-commit-msg": "2.14.0"
   },
   "dependencies": {
-    "boom": "6.0.0",
+    "boom": "7.0.0",
     "btoa": "1.1.2",
     "delay": "2.0.0",
     "highwire": "1.1.6",
