@@ -15,20 +15,18 @@ function validate(options) {
   return validated.value;
 }
 
-export function register(server, options, next) {
-  const settings = validate(options);
 
-  server.route({
-    method: 'POST',
-    path: '/payload',
-    handler(request, reply) {
-      validatePayloadAndProcess(request, reply, settings);
-    }
-  });
+exports.plugin = {
+  register: async function (server, options) {
+    const settings = validate(options);
 
-  next();
-}
-
-register.attributes = {
+    server.route({
+      method: 'POST',
+      path: '/payload',
+      handler(request, reply) {
+        validatePayloadAndProcess(request, reply, settings);
+      }
+    });
+  },
   pkg: require('../package.json')
 };

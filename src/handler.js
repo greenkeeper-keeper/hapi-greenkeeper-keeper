@@ -18,14 +18,14 @@ export default function (request, reply, settings) {
 
   if ('ping' === event) {
     if ('json' !== request.payload.hook.config.content_type) {
-      reply('please update your webhook configuration to send application/json').code(UNSUPPORTED_MEDIA_TYPE);
+      // reply('please update your webhook configuration to send application/json').code(UNSUPPORTED_MEDIA_TYPE);
 
-      return Promise.resolve();
+      return 'please update your webhook configuration to send application/json';
     }
 
-    reply('successfully configured the webhook for greenkeeper-keeper').code(NO_CONTENT);
+    // reply('successfully configured the webhook for greenkeeper-keeper').code(NO_CONTENT);
 
-    return Promise.resolve();
+    return 'successfully configured the webhook for greenkeeper-keeper';
   }
 
   if (isValidGreenkeeperUpdate({event, action, sender})) {
@@ -49,8 +49,8 @@ export default function (request, reply, settings) {
       .catch(e => reply(boom.internal('failed to fetch PRs', e)));
   }
 
-  reply('skipping').code(BAD_REQUEST);
+  // reply('skipping').code(BAD_REQUEST);
   request.log(['PR', 'skipping']);
 
-  return Promise.resolve();
+  return 'skipping';
 }
