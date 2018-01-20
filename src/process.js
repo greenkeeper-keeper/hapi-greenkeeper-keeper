@@ -2,7 +2,7 @@ import createActions from './github/actions';
 
 export default function (
   request,
-  {head, url, number, comments_url},
+  {head, url, number, comments_url},        // eslint-disable-line camelcase
   {github, squash, deleteBranches = false, pollWhenPending, acceptAction}
 ) {
   const {ensureAcceptability, acceptPR, deleteBranch, postErrorComment} = createActions(github);
