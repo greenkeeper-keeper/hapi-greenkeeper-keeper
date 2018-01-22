@@ -16,7 +16,7 @@ function validate(options) {
 }
 
 
-exports.plugin = {
+export const plugin = {
   async register(server, options) {
     const settings = validate(options);
 
