@@ -17,14 +17,14 @@ function validate(options) {
 
 
 exports.plugin = {
-  register: async function (server, options) {
+  async register(server, options) {
     const settings = validate(options);
 
     server.route({
       method: 'POST',
       path: '/payload',
-      handler(request, reply) {
-        validatePayloadAndProcess(request, reply, settings);
+      handler(request, responseToolkit) {
+        return validatePayloadAndProcess(request, responseToolkit, settings);
       }
     });
   },
