@@ -3,7 +3,6 @@ import babel from 'rollup-plugin-babel';
 import nodeResolve from 'rollup-plugin-node-resolve';
 
 export default {
-  sourcemap: true,
   input: 'src/plugin.js',
   external: [
     'http-status-codes',
@@ -26,7 +25,7 @@ export default {
     })
   ],
   output: [
-    {file: 'lib/plugin.cjs.js', format: 'cjs'},
-    {file: 'lib/plugin.es.js', format: 'es'}
+    {file: 'lib/plugin.cjs.js', format: 'cjs', sourcemap: true},
+    {file: 'lib/plugin.es.js', format: 'es', sourcemap: true}
   ]
 };
