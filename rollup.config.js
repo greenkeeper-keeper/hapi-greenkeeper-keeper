@@ -21,7 +21,8 @@ export default {
     babel({
       babelrc: false,
       exclude: ['./node_modules/**'],
-      presets: ['es2015-rollup', 'stage-3']
+      presets: [['env', {modules: false, targets: {node: 8}}]],
+      plugins: [['transform-object-rest-spread', {useBuiltIns: true}]]
     })
   ],
   output: [
