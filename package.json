@@ -78,7 +78,7 @@
     "rollup-plugin-babel": "3.0.3",
     "rollup-plugin-node-resolve": "3.0.2",
     "semantic-release": "12.4.1",
-    "sinon": "4.2.2"
+    "sinon": "4.2.3"
   },
   "dependencies": {
     "boom": "7.1.1",
