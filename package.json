@@ -49,7 +49,7 @@
   },
   "devDependencies": {
     "@travi/any": "1.7.2",
-    "@travi/eslint-config-travi": "1.6.7",
+    "@travi/eslint-config-travi": "1.6.8",
     "babel-core": "6.26.0",
     "babel-preset-es2015-node": "6.1.1",
     "babel-preset-es2015-rollup": "3.0.0",
