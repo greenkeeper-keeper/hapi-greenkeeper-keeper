@@ -4,6 +4,9 @@
   "main": "lib/plugin.cjs.js",
   "module": "lib/plugin.es.js",
   "license": "MIT",
+  "engines": {
+    "node": ">= 8"
+  },
   "author": "Kurtis Kemple <kurtiskemple@gmail.com>",
   "maintainers": [
     "Matt Travi <npm@travi.org> (https://matt.travi.org/)"
@@ -51,9 +54,8 @@
     "@travi/any": "1.7.2",
     "@travi/eslint-config-travi": "1.6.9",
     "babel-core": "6.26.0",
-    "babel-preset-es2015-node": "6.1.1",
-    "babel-preset-es2015-rollup": "3.0.0",
-    "babel-preset-stage-3": "6.24.1",
+    "babel-plugin-transform-object-rest-spread": "6.26.0",
+    "babel-preset-env": "1.6.1",
     "chai": "4.1.2",
     "chai-as-promised": "7.1.1",
     "codecov": "3.0.0",
