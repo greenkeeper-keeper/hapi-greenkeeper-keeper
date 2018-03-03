@@ -75,7 +75,7 @@
     "nock": "9.2.3",
     "npm-run-all": "4.1.2",
     "nyc": "11.4.1",
-    "proxyquire": "1.8.0",
+    "proxyquire": "2.0.0",
     "rollup": "0.56.3",
     "rollup-plugin-babel": "3.0.3",
     "rollup-plugin-node-resolve": "3.0.3",
