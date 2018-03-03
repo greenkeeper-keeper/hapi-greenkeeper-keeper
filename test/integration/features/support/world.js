@@ -1,6 +1,6 @@
 import any from '@travi/any';
 
-function buildWebhookPayload(event, {action, prDetails, statusEventDetails, ref, repo}) {
+function buildWebhookPayload(event, {action, prDetails, statusEventDetails, ref, repoFullName, repoName, repoOwner}) {
   if ('pull_request' === event) {
     return {
       action,
@@ -16,7 +16,9 @@ function buildWebhookPayload(event, {action, prDetails, statusEventDetails, ref,
           sha: prDetails.sha,
           ref,
           repo: {
-            full_name: repo
+            full_name: repoFullName,
+            name: repoName,
+            owner: {login: repoOwner}
           }
         }
       }
@@ -27,7 +29,8 @@ function buildWebhookPayload(event, {action, prDetails, statusEventDetails, ref,
     return {
       state: statusEventDetails.state,
       repository: {
-        full_name: repo,
+        full_name: repoFullName,
+        name: repoName,
         owner: {
           login: statusEventDetails.repoOwner
         }
@@ -40,12 +43,13 @@ function buildWebhookPayload(event, {action, prDetails, statusEventDetails, ref,
 }
 
 export function World() {
-  this.githubUser = any.word();
   this.githubToken = any.word();
   this.sha = any.string();
   this.ref = any.word();
   this.prNumber = any.integer();
-  this.repo = 'test-repo';
+  this.repoOwner = any.word();
+  this.repoName = 'test-repo';
+  this.repoFullName = `${this.repoOwner}/${this.repoName}`;
 
   this.receiveWebhook = ({event, action, prDetails, statusEventDetails}) => this.server.inject({
     method: 'POST',
@@ -55,7 +59,15 @@ export function World() {
     },
     payload: buildWebhookPayload(
       event,
-      {action, prDetails, statusEventDetails, ref: this.ref, repo: this.repo}
+      {
+        action,
+        prDetails,
+        statusEventDetails,
+        ref: this.ref,
+        repoFullName: this.repoFullName,
+        repoName: this.repoName,
+        repoOwner: this.repoOwner
+      }
     )
   });
 

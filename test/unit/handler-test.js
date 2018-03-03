@@ -95,20 +95,25 @@ suite('handler', () => {
   });
 
   suite('`status` event', () => {
-    let getPullRequestsForCommit;
+    let getPullRequestsForCommit, getPullRequest;
     const error = new Error(any.simpleObject());
     const wrappedError = any.simpleObject();
 
     setup(() => {
       getPullRequestsForCommit = sinon.stub();
+      getPullRequest = sinon.stub();
 
-      sandbox.stub(actionsFactory, 'default').withArgs(githubCredentials).returns({getPullRequestsForCommit});
+      sandbox.stub(actionsFactory, 'default')
+        .withArgs(githubCredentials)
+        .returns({getPullRequestsForCommit, getPullRequest});
     });
 
     test('that the webhook is accepted and processed for a successful status and a matching greenkeeper PR', () => {
       const repository = any.simpleObject();
       const branch = any.string();
-      const pullRequest = {user: {html_url: greenkeeperSender}};
+      const prNumber = any.integer();
+      const partialPullRequest = {user: {html_url: greenkeeperSender}, number: prNumber};
+      const fullPullRequest = any.simpleObject();
       const request = {
         payload: {
           state: 'success',
@@ -119,14 +124,12 @@ suite('handler', () => {
         log: () => undefined
       };
       reply.withArgs('ok').returns({code});
-      getPullRequestsForCommit.withArgs({
-        repo: repository,
-        ref: branch
-      }).resolves([pullRequest]);
+      getPullRequestsForCommit.withArgs({ref: branch}).resolves([partialPullRequest]);
+      getPullRequest.withArgs(repository, prNumber).resolves(fullPullRequest);
 
       return handler(request, reply, settings).then(() => {
         assert.calledWith(code, ACCEPTED);
-        assert.calledWith(process.default, request, pullRequest, settings);
+        assert.calledWith(process.default, request, fullPullRequest, settings);
       });
     });
 

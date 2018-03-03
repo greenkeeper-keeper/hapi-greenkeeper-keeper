@@ -7,11 +7,7 @@ import {World} from '../support/world';
 defineSupportCode(({Given, Then, setWorldConstructor}) => {
   setWorldConstructor(World);
 
-  Given(/^the webhook is for a (.*) event and a (.*) action$/, function (
-    event,
-    action,
-    callback
-  ) {
+  Given(/^the webhook is for a (.*) event and a (.*) action$/, function (event, action, callback) {
     this.webhookAction = action;
     this.webhookEventName = event;
 
@@ -21,7 +17,6 @@ defineSupportCode(({Given, Then, setWorldConstructor}) => {
   Given(/^the webhook is for a status event and a (.*) state$/, function (state, callback) {
     this.webhookEventName = 'status';
     this.statusEventState = state;
-    this.repoOwner = any.word();
 
     callback();
   });

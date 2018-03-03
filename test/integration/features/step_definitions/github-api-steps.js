@@ -4,6 +4,7 @@ import nock from 'nock';
 import any from '@travi/any';
 import {OK, METHOD_NOT_ALLOWED, INTERNAL_SERVER_ERROR} from 'http-status-codes';
 import {World} from '../support/world';
+import {GREENKEEPER_INTEGRATION_GITHUB_URL} from '../../../../src/greenkeeper';
 
 const debug = require('debug')('test');
 
@@ -40,21 +41,35 @@ defineSupportCode(({Before, After, Given, setWorldConstructor}) => {
   });
 
   Given('an open PR exists for the commit', function (callback) {
+    if (GREENKEEPER_INTEGRATION_GITHUB_URL === this.prSender) {
+      githubScope
+        .matchHeader('Authorization', authorizationHeader)
+        .get(`/repos/${this.repoFullName}/pulls/${this.prNumber}`)
+        .reply(OK, {
+          url: 'https://api.github.com/123',
+          user: {html_url: this.prSender || any.url()},
+          number: this.prNumber,
+          head: {
+            sha: this.sha,
+            ref: this.ref,
+            repo: {
+              full_name: this.repoFullName,
+              name: 'temp-name',
+              owner: {login: this.repoOwner}
+            }
+          }
+        });
+    }
     githubScope
       .matchHeader('Authorization', authorizationHeader)
-      .get(`/repos/${this.repo}/pulls?head=${this.repoOwner}:${this.commitBranches[0]}`)
-      .reply(OK, [{
-        url: 'https://api.github.com/123',
-        user: {html_url: this.prSender || any.url()},
-        number: this.prNumber,
-        head: {
-          sha: this.sha,
-          ref: this.ref,
-          repo: {
-            full_name: this.repo
-          }
-        }
-      }]);
+      .get(`/search/issues?q=${this.commitBranches[0]}+type%3Apr`)
+      .reply(OK, {
+        items: [{
+          url: 'https://api.github.com/123',
+          user: {html_url: this.prSender || any.url()},
+          number: this.prNumber
+        }]
+      });
 
     callback();
   });
@@ -62,8 +77,8 @@ defineSupportCode(({Before, After, Given, setWorldConstructor}) => {
   Given('no open PRs exist for the commit', function (callback) {
     githubScope
       .matchHeader('Authorization', authorizationHeader)
-      .get(`/repos/${this.repo}/pulls?head=${this.repoOwner}:${this.commitBranches[0]}`)
-      .reply(OK, []);
+      .get(`/search/issues?q=${this.commitBranches[0]}+type%3Apr`)
+      .reply(OK, {items: []});
 
     callback();
   });
@@ -71,7 +86,7 @@ defineSupportCode(({Before, After, Given, setWorldConstructor}) => {
   Given(/^statuses exist for the PR$/, function (callback) {
     githubScope
       .matchHeader('Authorization', authorizationHeader)
-      .get(`/repos/${this.repo}/commits/${this.ref}/status`)
+      .get(`/repos/${this.repoFullName}/commits/${this.ref}/status`)
       .reply(OK, {
         state: 'success'
       });
@@ -121,7 +136,7 @@ defineSupportCode(({Before, After, Given, setWorldConstructor}) => {
     this.comments = `/${any.word()}`;
     githubScope
       .matchHeader('Authorization', authorizationHeader)
-      .get(`/repos/${this.repo}/commits/${this.ref}/status`)
+      .get(`/repos/${this.repoFullName}/commits/${this.ref}/status`)
       .reply(OK, {
         state: status
       });
@@ -148,7 +163,7 @@ defineSupportCode(({Before, After, Given, setWorldConstructor}) => {
     this.prProcessed = new Promise(resolve => {
       githubScope
         .matchHeader('Authorization', authorizationHeader)
-        .delete(`/repos/${this.repo}/git/refs/heads/${this.ref}`)
+        .delete(`/repos/${this.repoFullName}/git/refs/heads/${this.ref}`)
         .reply(OK, resolve);
     });
 
@@ -159,7 +174,7 @@ defineSupportCode(({Before, After, Given, setWorldConstructor}) => {
     this.comments = `/${any.word()}`;
     githubScope
       .matchHeader('Authorization', authorizationHeader)
-      .delete(`/repos/${this.repo}/git/refs/heads/${this.ref}`)
+      .delete(`/repos/${this.repoFullName}/git/refs/heads/${this.ref}`)
       .reply(INTERNAL_SERVER_ERROR, {});
     stubTheCommentsEndpoint.call(this, githubScope, authorizationHeader);
 

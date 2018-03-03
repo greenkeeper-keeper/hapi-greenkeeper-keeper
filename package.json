@@ -83,6 +83,7 @@
     "sinon": "4.4.2"
   },
   "dependencies": {
+    "@octokit/rest": "14.0.8",
     "boom": "7.2.0",
     "btoa": "1.1.2",
     "delay": "2.0.0",

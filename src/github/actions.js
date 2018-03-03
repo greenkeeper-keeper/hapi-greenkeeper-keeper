@@ -1,4 +1,5 @@
 import {minutes} from 'milliseconds';
+import octokitFactory from './octokit-factory-wrapper';
 import clientFactory from './request-methods';
 import poll from './poller';
 import {
@@ -14,6 +15,9 @@ function determineMergeMethodFrom(acceptAction, squash) {
 }
 
 export default function (githubCredentials) {
+  const octokit = octokitFactory();
+  const {token} = githubCredentials;
+  octokit.authenticate({type: 'token', token});
   const {get, post, put, del} = clientFactory(githubCredentials);
 
   function ensureAcceptability({repo, ref, url, pollWhenPending}, log, timeout = minutes(1)) {
@@ -77,9 +81,16 @@ export default function (githubCredentials) {
     return post(url, {body: `:x: greenkeeper-keeper failed to merge the pull-request \n> ${error.message}`});
   }
 
-  function getPullRequestsForCommit({repo, ref}) {
-    return get(`https://api.github.com/repos/${repo.full_name}/pulls?head=${repo.owner.login}:${ref}`)
-      .then(response => response.body);
+  async function getPullRequestsForCommit({ref}) {
+    const response = await octokit.search.issues({q: `${ref}+type:pr`});
+
+    return response.data.items;
+  }
+
+  async function getPullRequest(repository, number) {
+    const response = await octokit.pullRequests.get({owner: repository.owner.login, repo: repository.name, number});
+
+    return response.data;
   }
 
   return {
@@ -87,6 +98,7 @@ export default function (githubCredentials) {
     acceptPR,
     deleteBranch,
     postErrorComment,
-    getPullRequestsForCommit
+    getPullRequestsForCommit,
+    getPullRequest
   };
 }
