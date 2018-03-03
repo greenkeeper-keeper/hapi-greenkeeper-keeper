@@ -11,6 +11,7 @@ hapi plugin to automatically merge and clean up passing greenkeeper PRs
 [![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli/)
 ![greenkeeper badge](https://badges.greenkeeper.io/greenkeeper-keeper/hapi-greenkeeper-keeper.svg)
 [![semantic-release](https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg)](https://github.com/semantic-release/semantic-release)
+[![PRs Welcome][prs-badge]][prs]
 
 ## Installation
 
@@ -48,3 +49,6 @@ the plugin on your server.
 
   _Note_: if you are using the new GitHub integration version of Greenkeeper,
   branches are already deleted automatically
+
+[prs-badge]: https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square
+[prs]: http://makeapullrequest.com
