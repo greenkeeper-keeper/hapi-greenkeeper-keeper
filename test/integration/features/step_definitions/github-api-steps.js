@@ -12,7 +12,7 @@ function stubTheCommentsEndpoint(githubScope, authorizationHeader) {
   this.prProcessed = new Promise(resolve => {
     githubScope
       .matchHeader('Authorization', authorizationHeader)
-      .post(this.comments)
+      .post(`/repos/${this.repoFullName}/issues/${this.prNumber}/comments`)
       .reply(OK, (uri, requestBody) => {
         this.errorComment = JSON.parse(requestBody).body;
         resolve();
@@ -133,7 +133,6 @@ defineSupportCode(({Before, After, Given, setWorldConstructor}) => {
   });
 
   Given(/^the commit statuses resolve to (.*)$/, function (status, callback) {
-    this.comments = `/${any.word()}`;
     githubScope
       .matchHeader('Authorization', authorizationHeader)
       .get(`/repos/${this.repoFullName}/commits/${this.sha}/status`)
@@ -146,7 +145,6 @@ defineSupportCode(({Before, After, Given, setWorldConstructor}) => {
   });
 
   Given('the PR cannot be merged', function (callback) {
-    this.comments = `/${any.word()}`;
     githubScope
       .matchHeader('Authorization', authorizationHeader)
       .put(`/repos/${this.repoFullName}/pulls/${this.prNumber}/merge`)
@@ -171,7 +169,6 @@ defineSupportCode(({Before, After, Given, setWorldConstructor}) => {
   });
 
   Given('the branch cannot be deleted', function (callback) {
-    this.comments = `/${any.word()}`;
     githubScope
       .matchHeader('Authorization', authorizationHeader)
       .delete(`/repos/${this.repoFullName}/git/refs/${this.ref}`)

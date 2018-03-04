@@ -1,7 +1,6 @@
 import {assert} from 'chai';
 import sinon from 'sinon';
 import any from '@travi/any';
-import * as clientFactory from '../../../src/github/request-methods';
 import * as poll from '../../../src/github/poller';
 import * as octokitFactory from '../../../src/github/octokit-factory-wrapper';
 import actionsFactory from '../../../src/github/actions';
@@ -16,17 +15,16 @@ suite('github actions', () => {
   let
     sandbox,
     actions,
-    post,
     octokitAuthenticate,
     octokitIssueSearch,
     octokitGetPr,
     octokitMergePr,
     octokitCombinedStatus,
-    octokitDeleteRef;
+    octokitDeleteRef,
+    octokitCreateIssueComment;
   const MINUTE = 1000 * 60;
   const token = any.simpleObject();
   const githubCredentials = {...any.simpleObject(), token};
-  const url = any.url();
   const sha = any.string();
   const ref = any.string();
   const repoOwner = any.word();
@@ -39,17 +37,16 @@ suite('github actions', () => {
   setup(() => {
     sandbox = sinon.sandbox.create();
 
-    post = sinon.stub();
     octokitAuthenticate = sinon.spy();
     octokitIssueSearch = sinon.stub();
     octokitGetPr = sinon.stub();
     octokitCombinedStatus = sinon.stub();
     octokitMergePr = sinon.stub();
     octokitDeleteRef = sinon.stub();
+    octokitCreateIssueComment = sinon.stub();
 
     sandbox.stub(octokitFactory, 'default');
     sandbox.stub(poll, 'default');
-    sandbox.stub(clientFactory, 'default').withArgs(githubCredentials).returns({post});
 
     octokitFactory.default.returns({
       authenticate: octokitAuthenticate,
@@ -58,6 +55,7 @@ suite('github actions', () => {
         get: octokitGetPr,
         merge: octokitMergePr
       },
+      issues: {createComment: octokitCreateIssueComment},
       repos: {getCombinedStatusForRef: octokitCombinedStatus},
       gitdata: {deleteReference: octokitDeleteRef}
     });
@@ -220,11 +218,15 @@ suite('github actions', () => {
     test('that an error comment is posted', () => {
       const message = any.string();
       const error = new Error(message);
-      post.withArgs(url, {
+      octokitCreateIssueComment.withArgs({
+        owner: repoOwner,
+        repo: repoName,
+        number: prNumber,
         body: `:x: greenkeeper-keeper failed to merge the pull-request \n> ${message}`
       }).resolves(response);
 
-      return assert.becomes(actions.postErrorComment(url, error), response).then(assertAuthenticatedForOctokit);
+      return assert.becomes(actions.postErrorComment(repo, prNumber, error), response)
+        .then(assertAuthenticatedForOctokit);
     });
   });
 

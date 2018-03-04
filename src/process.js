@@ -2,7 +2,7 @@ import createActions from './github/actions';
 
 export default function (
   request,
-  {head, url, number, comments_url},        // eslint-disable-line camelcase
+  {head, url, number},
   {github, squash, deleteBranches = false, pollWhenPending, acceptAction}
 ) {
   const {ensureAcceptability, acceptPR, deleteBranch, postErrorComment} = createActions(github);
@@ -14,7 +14,7 @@ export default function (
       if ('pending' !== err.message) {
         request.log(['error', 'PR'], err);
 
-        return postErrorComment(comments_url, err)
+        return postErrorComment(head.repo, number, err)
           .catch(e => request.log(`failed to log comment against the PR: ${e}`));
       }
 

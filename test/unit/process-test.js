@@ -85,12 +85,12 @@ suite('process', () => {
 
     return processPR(
       {log: () => undefined},
-      {comments_url: url, head},
+      {head, number},
       {github: githubCredentials, squash, deleteBranches}
     ).then(() => {
       assert.notCalled(acceptPR);
       assert.notCalled(deleteBranch);
-      assert.calledWith(postErrorComment, url, error);
+      assert.calledWith(postErrorComment, repo, number, error);
     });
   });
 
@@ -116,11 +116,11 @@ suite('process', () => {
 
     return processPR(
       {log: () => undefined},
-      {comments_url: url, head},
+      {head, number},
       {github: githubCredentials, squash, deleteBranches}
     ).then(() => {
       assert.notCalled(deleteBranch);
-      assert.calledWith(postErrorComment, url, error);
+      assert.calledWith(postErrorComment, repo, number, error);
     });
   });
 

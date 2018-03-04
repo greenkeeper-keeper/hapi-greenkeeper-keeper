@@ -1,6 +1,5 @@
 import {minutes} from 'milliseconds';
 import octokitFactory from './octokit-factory-wrapper';
-import clientFactory from './request-methods';
 import poll from './poller';
 import {
   BranchDeletionFailureError,
@@ -18,7 +17,6 @@ export default function (githubCredentials) {
   const octokit = octokitFactory();
   const {token} = githubCredentials;
   octokit.authenticate({type: 'token', token});
-  const {post} = clientFactory(githubCredentials);
 
   function ensureAcceptability({repo, sha, url, pollWhenPending}, log, timeout = minutes(1)) {
     log(['info', 'PR', 'validating'], url);
@@ -84,8 +82,13 @@ export default function (githubCredentials) {
     return Promise.resolve();
   }
 
-  function postErrorComment(url, error) {
-    return post(url, {body: `:x: greenkeeper-keeper failed to merge the pull-request \n> ${error.message}`});
+  function postErrorComment(repo, prNumber, error) {
+    return octokit.issues.createComment({
+      owner: repo.owner.login,
+      repo: repo.name,
+      number: prNumber,
+      body: `:x: greenkeeper-keeper failed to merge the pull-request \n> ${error.message}`
+    });
   }
 
   async function getPullRequestsForCommit({ref}) {
