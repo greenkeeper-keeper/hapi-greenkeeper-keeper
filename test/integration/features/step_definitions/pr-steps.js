@@ -26,7 +26,7 @@ defineSupportCode(({Given, Then, setWorldConstructor}) => {
   });
 
   Then(/^the PR is merged$/, function (callback) {
-    assert.equal(this.mergeUri, '/123/merge');
+    assert.equal(this.mergeUri, `/repos/${this.repoFullName}/pulls/${this.prNumber}/merge`);
 
     callback();
   });

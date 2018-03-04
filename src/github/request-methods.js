@@ -6,8 +6,6 @@ function configureHeaders(token) {
 
 export default function ({token}) {
   return {
-    post: (url, payload) => highwire.post(url, payload, configureHeaders(token)),
-    put: (url, payload) => highwire.put(url, payload, configureHeaders(token)),
-    del: url => highwire.del(url, configureHeaders(token))
+    post: (url, payload) => highwire.post(url, payload, configureHeaders(token))
   };
 }

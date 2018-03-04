@@ -6,7 +6,9 @@ defineSupportCode(({Then, setWorldConstructor}) => {
   setWorldConstructor(World);
 
   Then(/^a comment is made against the PR: (.*)$/, function (message, callback) {
-    assert.equal(this.errorComment, `:x: greenkeeper-keeper failed to merge the pull-request \n> ${message}`);
+    assert.isTrue((
+      this.errorComment.startsWith(`:x: greenkeeper-keeper failed to merge the pull-request \n> ${message}`)
+    ));
 
     callback();
   });

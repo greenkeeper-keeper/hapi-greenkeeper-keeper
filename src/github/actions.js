@@ -18,7 +18,7 @@ export default function (githubCredentials) {
   const octokit = octokitFactory();
   const {token} = githubCredentials;
   octokit.authenticate({type: 'token', token});
-  const {post, put, del} = clientFactory(githubCredentials);
+  const {post} = clientFactory(githubCredentials);
 
   function ensureAcceptability({repo, sha, url, pollWhenPending}, log, timeout = minutes(1)) {
     log(['info', 'PR', 'validating'], url);
@@ -56,21 +56,28 @@ export default function (githubCredentials) {
       });
   }
 
-  function acceptPR(url, sha, prNumber, squash, acceptAction, log) {
-    return put(`${url}/merge`, {
-      sha,
+  function acceptPR(repo, sha, prNumber, squash, acceptAction, log) {
+    return octokit.pullRequests.merge({
+      owner: repo.owner.login,
+      repo: repo.name,
+      number: prNumber,
       commit_title: `greenkeeper-keeper(pr: ${prNumber}): :white_check_mark:`,
       commit_message: `greenkeeper-keeper(pr: ${prNumber}): :white_check_mark:`,
+      sha,
       merge_method: determineMergeMethodFrom(acceptAction, squash)
     }).then(result => {
-      log(['info', 'PR', 'integrated'], url);
-      return result;
+      log(['info', 'PR', 'accepted'], {
+        owner: repo.owner.login,
+        repo: repo.name,
+        number: prNumber
+      });
+      return result.data;
     }).catch(err => Promise.reject(new MergeFailureError(err)));
   }
 
   function deleteBranch({repo, ref}, deleteBranches) {
     if (deleteBranches) {
-      return del(`https://api.github.com/repos/${repo.full_name}/git/refs/heads/${ref}`)
+      return octokit.gitdata.deleteReference({owner: repo.owner.login, repo: repo.name, ref})
         .catch(err => Promise.reject(new BranchDeletionFailureError(err)));
     }
 

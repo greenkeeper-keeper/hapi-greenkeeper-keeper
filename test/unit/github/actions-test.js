@@ -17,12 +17,12 @@ suite('github actions', () => {
     sandbox,
     actions,
     post,
-    put,
-    del,
     octokitAuthenticate,
     octokitIssueSearch,
     octokitGetPr,
-    octokitCombinedStatus;
+    octokitMergePr,
+    octokitCombinedStatus,
+    octokitDeleteRef;
   const MINUTE = 1000 * 60;
   const token = any.simpleObject();
   const githubCredentials = {...any.simpleObject(), token};
@@ -33,29 +33,33 @@ suite('github actions', () => {
   const repoName = any.word();
   const repo = {name: repoName, owner: {login: repoOwner}};
   const prNumber = any.string();
-  const response = {body: any.simpleObject()};
+  const response = {data: any.simpleObject()};
   const log = () => undefined;
 
   setup(() => {
     sandbox = sinon.sandbox.create();
 
     post = sinon.stub();
-    put = sinon.stub();
-    del = sinon.stub();
     octokitAuthenticate = sinon.spy();
     octokitIssueSearch = sinon.stub();
     octokitGetPr = sinon.stub();
     octokitCombinedStatus = sinon.stub();
+    octokitMergePr = sinon.stub();
+    octokitDeleteRef = sinon.stub();
 
     sandbox.stub(octokitFactory, 'default');
     sandbox.stub(poll, 'default');
-    sandbox.stub(clientFactory, 'default').withArgs(githubCredentials).returns({post, put, del});
+    sandbox.stub(clientFactory, 'default').withArgs(githubCredentials).returns({post});
 
     octokitFactory.default.returns({
       authenticate: octokitAuthenticate,
       search: {issues: octokitIssueSearch},
-      pullRequests: {get: octokitGetPr},
-      repos: {getCombinedStatusForRef: octokitCombinedStatus}
+      pullRequests: {
+        get: octokitGetPr,
+        merge: octokitMergePr
+      },
+      repos: {getCombinedStatusForRef: octokitCombinedStatus},
+      gitdata: {deleteReference: octokitDeleteRef}
     });
     actions = actionsFactory(githubCredentials);
   });
@@ -132,48 +136,57 @@ suite('github actions', () => {
   suite('accept PR', () => {
     test('that the referenced PR gets merged', () => {
       const squash = false;
-      put.withArgs(`${url}/merge`, {
+      octokitMergePr.withArgs({
+        owner: repoOwner,
+        repo: repoName,
+        number: prNumber,
         sha,
         commit_title: `greenkeeper-keeper(pr: ${prNumber}): :white_check_mark:`,
         commit_message: `greenkeeper-keeper(pr: ${prNumber}): :white_check_mark:`,
         merge_method: 'merge'
       }).resolves(response);
 
-      return assert.becomes(actions.acceptPR(url, sha, prNumber, squash, null, log), response)
+      return assert.becomes(actions.acceptPR(repo, sha, prNumber, squash, null, log), response.data)
         .then(assertAuthenticatedForOctokit);
     });
 
     test('that the referenced PR gets squashed when configured to do so', () => {
       const squash = true;
-      put.withArgs(`${url}/merge`, {
+      octokitMergePr.withArgs({
+        owner: repoOwner,
+        repo: repoName,
+        number: prNumber,
         sha,
         commit_title: `greenkeeper-keeper(pr: ${prNumber}): :white_check_mark:`,
         commit_message: `greenkeeper-keeper(pr: ${prNumber}): :white_check_mark:`,
         merge_method: 'squash'
       }).resolves(response);
 
-      return assert.becomes(actions.acceptPR(url, sha, prNumber, squash, null, log), response)
+      return assert.becomes(actions.acceptPR(repo, sha, prNumber, squash, null, log), response.data)
         .then(assertAuthenticatedForOctokit);
     });
 
     test('that the referenced PR gets accepted', () => {
       const acceptAction = any.string();
-      put.withArgs(`${url}/merge`, {
+      octokitMergePr.withArgs({
+        owner: repoOwner,
+        repo: repoName,
+        number: prNumber,
         sha,
         commit_title: `greenkeeper-keeper(pr: ${prNumber}): :white_check_mark:`,
         commit_message: `greenkeeper-keeper(pr: ${prNumber}): :white_check_mark:`,
         merge_method: acceptAction
       }).resolves(response);
 
-      return assert.becomes(actions.acceptPR(url, sha, prNumber, null, acceptAction, log), response)
+      return assert.becomes(actions.acceptPR(repo, sha, prNumber, null, acceptAction, log), response.data)
         .then(assertAuthenticatedForOctokit);
     });
 
     test('that a merge failure is reported appropriately', () => {
-      put.rejects(new Error('error from PUT request in test'));
+      octokitMergePr.rejects(new Error('error from PUT request in test'));
 
       return assert.isRejected(
-        actions.acceptPR(),
+        actions.acceptPR(repo),
         MergeFailureError,
         /An attempt to merge this PR failed. Error: error from PUT request in test$/
       ).then(assertAuthenticatedForOctokit);
@@ -182,21 +195,21 @@ suite('github actions', () => {
 
   suite('delete branch', () => {
     test('that the branch gets deleted if config is to delete', () => {
-      del.withArgs(`https://api.github.com/repos/${repoName}/git/refs/heads/${ref}`).resolves(response);
+      octokitDeleteRef.withArgs({owner: repoOwner, repo: repoName, ref}).resolves(response);
 
-      return assert.becomes(actions.deleteBranch({repo: {full_name: repoName}, ref}, true), response)
+      return assert.becomes(actions.deleteBranch({repo, ref}, true), response)
         .then(assertAuthenticatedForOctokit);
     });
 
     test('that the branch is not deleted if the config is not to delete', () => {
-      actions.deleteBranch({}, false).then(() => assert.notCalled(del));
+      actions.deleteBranch({}, false).then(() => assert.notCalled(octokitDeleteRef));
     });
 
     test('that a failure to delete the branch is reported appropriately', () => {
-      del.rejects(new Error('error from DELETE request in test'));
+      octokitDeleteRef.rejects(new Error('error from DELETE request in test'));
 
       return assert.isRejected(
-        actions.deleteBranch({repo: {full_name: repoName}, ref}, true),
+        actions.deleteBranch({repo, ref}, true),
         BranchDeletionFailureError,
         /An attempt to delete this branch failed. Error: error from DELETE request in test$/
       ).then(assertAuthenticatedForOctokit);

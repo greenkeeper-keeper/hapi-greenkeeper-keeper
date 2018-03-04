@@ -98,7 +98,7 @@ defineSupportCode(({Before, After, Given, setWorldConstructor}) => {
     this.prProcessed = new Promise(resolve => {
       githubScope
         .matchHeader('Authorization', authorizationHeader)
-        .put('/123/merge', {
+        .put(`/repos/${this.repoFullName}/pulls/${this.prNumber}/merge`, {
           sha: this.sha,
           commit_title: `greenkeeper-keeper(pr: ${this.prNumber}): :white_check_mark:`,
           commit_message: `greenkeeper-keeper(pr: ${this.prNumber}): :white_check_mark:`,
@@ -117,7 +117,7 @@ defineSupportCode(({Before, After, Given, setWorldConstructor}) => {
     this.prProcessed = new Promise(resolve => {
       githubScope
         .matchHeader('Authorization', authorizationHeader)
-        .put('/123/merge', {
+        .put(`/repos/${this.repoFullName}/pulls/${this.prNumber}/merge`, {
           sha: this.sha,
           commit_title: `greenkeeper-keeper(pr: ${this.prNumber}): :white_check_mark:`,
           commit_message: `greenkeeper-keeper(pr: ${this.prNumber}): :white_check_mark:`,
@@ -149,7 +149,7 @@ defineSupportCode(({Before, After, Given, setWorldConstructor}) => {
     this.comments = `/${any.word()}`;
     githubScope
       .matchHeader('Authorization', authorizationHeader)
-      .put('/123/merge')
+      .put(`/repos/${this.repoFullName}/pulls/${this.prNumber}/merge`)
       .reply(METHOD_NOT_ALLOWED, {
         message: 'Pull Request is not mergeable',
         documentation_url: 'https://developer.github.com/v3/pulls/#merge-a-pull-request-merge-button'
@@ -163,7 +163,7 @@ defineSupportCode(({Before, After, Given, setWorldConstructor}) => {
     this.prProcessed = new Promise(resolve => {
       githubScope
         .matchHeader('Authorization', authorizationHeader)
-        .delete(`/repos/${this.repoFullName}/git/refs/heads/${this.ref}`)
+        .delete(`/repos/${this.repoFullName}/git/refs/${this.ref}`)
         .reply(OK, resolve);
     });
 
@@ -174,7 +174,7 @@ defineSupportCode(({Before, After, Given, setWorldConstructor}) => {
     this.comments = `/${any.word()}`;
     githubScope
       .matchHeader('Authorization', authorizationHeader)
-      .delete(`/repos/${this.repoFullName}/git/refs/heads/${this.ref}`)
+      .delete(`/repos/${this.repoFullName}/git/refs/${this.ref}`)
       .reply(INTERNAL_SERVER_ERROR, {});
     stubTheCommentsEndpoint.call(this, githubScope, authorizationHeader);
 
