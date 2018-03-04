@@ -32,7 +32,7 @@ suite('handler', () => {
 
   teardown(() => {
     sandbox.restore();
-    log.reset();
+    log.resetHistory();
   });
 
   suite('`pull_request` event', () => {
