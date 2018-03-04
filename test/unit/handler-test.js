@@ -112,11 +112,13 @@ suite('handler', () => {
       const repository = any.simpleObject();
       const branch = any.string();
       const prNumber = any.integer();
+      const sha = any.string();
       const partialPullRequest = {user: {html_url: greenkeeperSender}, number: prNumber};
       const fullPullRequest = any.simpleObject();
       const request = {
         payload: {
           state: 'success',
+          sha,
           repository,
           branches: [{name: branch}]
         },
@@ -124,7 +126,7 @@ suite('handler', () => {
         log: () => undefined
       };
       reply.withArgs('ok').returns({code});
-      getPullRequestsForCommit.withArgs({ref: branch}).resolves([partialPullRequest]);
+      getPullRequestsForCommit.withArgs({ref: sha}).resolves([partialPullRequest]);
       getPullRequest.withArgs(repository, prNumber).resolves(fullPullRequest);
 
       return handler(request, reply, settings).then(() => {

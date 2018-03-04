@@ -62,7 +62,7 @@ defineSupportCode(({Before, After, Given, setWorldConstructor}) => {
     }
     githubScope
       .matchHeader('Authorization', authorizationHeader)
-      .get(`/search/issues?q=${this.commitBranches[0]}+type%3Apr`)
+      .get(`/search/issues?q=${encodeURIComponent(this.sha)}+type%3Apr`)
       .reply(OK, {
         items: [{
           url: 'https://api.github.com/123',
@@ -77,7 +77,7 @@ defineSupportCode(({Before, After, Given, setWorldConstructor}) => {
   Given('no open PRs exist for the commit', function (callback) {
     githubScope
       .matchHeader('Authorization', authorizationHeader)
-      .get(`/search/issues?q=${this.commitBranches[0]}+type%3Apr`)
+      .get(`/search/issues?q=${encodeURIComponent(this.sha)}+type%3Apr`)
       .reply(OK, {items: []});
 
     callback();

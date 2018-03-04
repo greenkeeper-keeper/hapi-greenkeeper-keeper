@@ -13,7 +13,15 @@ function successfulStatusCouldBeForGreenkeeperPR(event, state, branches) {
 }
 
 export default async function (request, reply, settings) {
-  const {action, sender, state, repository, pull_request, branches} = request.payload;  // eslint-disable-line camelcase
+  const {
+    action,
+    sender,
+    state,
+    repository,
+    pull_request,         // eslint-disable-line camelcase
+    branches,
+    sha
+  } = request.payload;
   const event = request.headers['x-github-event'];
 
   if ('ping' === event) {
@@ -37,7 +45,7 @@ export default async function (request, reply, settings) {
   if (successfulStatusCouldBeForGreenkeeperPR(event, state, branches)) {
     const {getPullRequestsForCommit, getPullRequest} = createActions(settings.github);
 
-    return getPullRequestsForCommit({ref: branches[0].name})
+    return getPullRequestsForCommit({ref: sha})
       .then(async pullRequests => {
         if (!pullRequests.length) reply('no PRs for this commit').code(BAD_REQUEST);
         else if (1 < pullRequests.length) reply(boom.internal('too many PRs exist for this commit'));

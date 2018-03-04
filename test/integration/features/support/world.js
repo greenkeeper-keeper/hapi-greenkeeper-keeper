@@ -1,9 +1,13 @@
 import any from '@travi/any';
 
-function buildWebhookPayload(event, {action, prDetails, statusEventDetails, ref, repoFullName, repoName, repoOwner}) {
+function buildWebhookPayload(
+  event,
+  {action, prDetails, statusEventDetails, ref, repoFullName, repoName, repoOwner, sha}
+) {
   if ('pull_request' === event) {
     return {
       action,
+      sha,
       sender: {
         html_url: prDetails.sender
       },
@@ -13,7 +17,7 @@ function buildWebhookPayload(event, {action, prDetails, statusEventDetails, ref,
         comments_url: `https://api.github.com${prDetails.comments}`,
         url: 'https://api.github.com/123',
         head: {
-          sha: prDetails.sha,
+          sha,
           ref,
           repo: {
             full_name: repoFullName,
@@ -28,6 +32,7 @@ function buildWebhookPayload(event, {action, prDetails, statusEventDetails, ref,
   if ('status' === event) {
     return {
       state: statusEventDetails.state,
+      sha,
       repository: {
         full_name: repoFullName,
         name: repoName,
@@ -63,6 +68,7 @@ export function World() {
         action,
         prDetails,
         statusEventDetails,
+        sha: this.sha,
         ref: this.ref,
         repoFullName: this.repoFullName,
         repoName: this.repoName,
