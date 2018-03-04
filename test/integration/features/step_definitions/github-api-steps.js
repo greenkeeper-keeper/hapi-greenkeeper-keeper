@@ -54,7 +54,7 @@ defineSupportCode(({Before, After, Given, setWorldConstructor}) => {
             ref: this.ref,
             repo: {
               full_name: this.repoFullName,
-              name: 'temp-name',
+              name: this.repoName,
               owner: {login: this.repoOwner}
             }
           }
@@ -62,7 +62,7 @@ defineSupportCode(({Before, After, Given, setWorldConstructor}) => {
     }
     githubScope
       .matchHeader('Authorization', authorizationHeader)
-      .get(`/search/issues?q=${encodeURIComponent(this.sha)}+type%3Apr`)
+      .get(`/search/issues?q=${this.sha}+type%3Apr`)
       .reply(OK, {
         items: [{
           url: 'https://api.github.com/123',
@@ -86,7 +86,7 @@ defineSupportCode(({Before, After, Given, setWorldConstructor}) => {
   Given(/^statuses exist for the PR$/, function (callback) {
     githubScope
       .matchHeader('Authorization', authorizationHeader)
-      .get(`/repos/${this.repoFullName}/commits/${this.ref}/status`)
+      .get(`/repos/${this.repoFullName}/commits/${this.sha}/status`)
       .reply(OK, {
         state: 'success'
       });
@@ -136,7 +136,7 @@ defineSupportCode(({Before, After, Given, setWorldConstructor}) => {
     this.comments = `/${any.word()}`;
     githubScope
       .matchHeader('Authorization', authorizationHeader)
-      .get(`/repos/${this.repoFullName}/commits/${this.ref}/status`)
+      .get(`/repos/${this.repoFullName}/commits/${this.sha}/status`)
       .reply(OK, {
         state: status
       });

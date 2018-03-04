@@ -49,11 +49,11 @@ function buildWebhookPayload(
 
 export function World() {
   this.githubToken = any.word();
-  this.sha = any.string();
+  this.sha = any.word();
   this.ref = any.word();
   this.prNumber = any.integer();
   this.repoOwner = any.word();
-  this.repoName = 'test-repo';
+  this.repoName = any.word();
   this.repoFullName = `${this.repoOwner}/${this.repoName}`;
 
   this.receiveWebhook = ({event, action, prDetails, statusEventDetails}) => this.server.inject({

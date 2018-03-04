@@ -18,18 +18,18 @@ export default function (githubCredentials) {
   const octokit = octokitFactory();
   const {token} = githubCredentials;
   octokit.authenticate({type: 'token', token});
-  const {get, post, put, del} = clientFactory(githubCredentials);
+  const {post, put, del} = clientFactory(githubCredentials);
 
-  function ensureAcceptability({repo, ref, url, pollWhenPending}, log, timeout = minutes(1)) {
+  function ensureAcceptability({repo, sha, url, pollWhenPending}, log, timeout = minutes(1)) {
     log(['info', 'PR', 'validating'], url);
 
-    return get(`https://api.github.com/repos/${repo.full_name}/commits/${ref}/status`)
-      .then(response => response.body)
+    return octokit.repos.getCombinedStatusForRef({owner: repo.owner.login, repo: repo.name, ref: sha})
+      .then(response => response.data)
       .then(({state}) => {
         switch (state) {
           case 'pending': {
             if (pollWhenPending) {
-              return poll({repo, ref, pollWhenPending}, log, timeout, ensureAcceptability).then(message => {
+              return poll({repo, sha, pollWhenPending}, log, timeout, ensureAcceptability).then(message => {
                 log(['info', 'PR', 'pending-status'], `retrying statuses for: ${url}`);
                 return message;
               });

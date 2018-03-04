@@ -13,14 +13,25 @@ import {
 } from '../../../src/errors';
 
 suite('github actions', () => {
-  let actions, sandbox, get, post, put, del, octokitAuthenticate, octokitIssueSearch, octokitGetPr;
+  let
+    sandbox,
+    actions,
+    post,
+    put,
+    del,
+    octokitAuthenticate,
+    octokitIssueSearch,
+    octokitGetPr,
+    octokitCombinedStatus;
   const MINUTE = 1000 * 60;
   const token = any.simpleObject();
   const githubCredentials = {...any.simpleObject(), token};
   const url = any.url();
   const sha = any.string();
   const ref = any.string();
+  const repoOwner = any.word();
   const repoName = any.word();
+  const repo = {name: repoName, owner: {login: repoOwner}};
   const prNumber = any.string();
   const response = {body: any.simpleObject()};
   const log = () => undefined;
@@ -28,22 +39,23 @@ suite('github actions', () => {
   setup(() => {
     sandbox = sinon.sandbox.create();
 
-    get = sinon.stub();
     post = sinon.stub();
     put = sinon.stub();
     del = sinon.stub();
     octokitAuthenticate = sinon.spy();
     octokitIssueSearch = sinon.stub();
     octokitGetPr = sinon.stub();
+    octokitCombinedStatus = sinon.stub();
 
     sandbox.stub(octokitFactory, 'default');
     sandbox.stub(poll, 'default');
-    sandbox.stub(clientFactory, 'default').withArgs(githubCredentials).returns({get, post, put, del});
+    sandbox.stub(clientFactory, 'default').withArgs(githubCredentials).returns({post, put, del});
 
     octokitFactory.default.returns({
       authenticate: octokitAuthenticate,
       search: {issues: octokitIssueSearch},
-      pullRequests: {get: octokitGetPr}
+      pullRequests: {get: octokitGetPr},
+      repos: {getCombinedStatusForRef: octokitCombinedStatus}
     });
     actions = actionsFactory(githubCredentials);
   });
@@ -54,23 +66,19 @@ suite('github actions', () => {
 
   suite('ensure PR can be merged', () => {
     test('that the passing status is acceptable', () => {
-      get.withArgs(`https://api.github.com/repos/${repoName}/commits/${ref}/status`).resolves({
-        body: {
-          state: 'success'
-        }
-      });
+      octokitCombinedStatus.withArgs({owner: repoOwner, repo: repoName, ref: sha}).resolves({data: {state: 'success'}});
 
       return assert.becomes(
-        actions.ensureAcceptability({repo: {full_name: repoName}, ref}, () => undefined),
+        actions.ensureAcceptability({repo, sha}, () => undefined),
         'All commit statuses passed'
       ).then(assertAuthenticatedForOctokit);
     });
 
     test('that the failing status results in rejection', () => {
-      get.resolves({body: {state: 'failure'}});
+      octokitCombinedStatus.withArgs({owner: repoOwner, repo: repoName, ref: sha}).resolves({data: {state: 'failure'}});
 
       return assert.isRejected(
-        actions.ensureAcceptability({repo: {full_name: repoName}, ref}, () => undefined),
+        actions.ensureAcceptability({repo, sha}, () => undefined),
         FailedStatusFoundError,
         /A failed status was found for this PR\./
       ).then(assertAuthenticatedForOctokit);
@@ -78,11 +86,11 @@ suite('github actions', () => {
 
     test('that the pending status delegates to poller', () => {
       const result = any.string();
-      get.resolves({body: {state: 'pending'}});
-      poll.default.withArgs({repo: {full_name: repoName}, ref, pollWhenPending: true}, log, MINUTE).resolves(result);
+      octokitCombinedStatus.withArgs({owner: repoOwner, repo: repoName, ref: sha}).resolves({data: {state: 'pending'}});
+      poll.default.withArgs({repo, sha, pollWhenPending: true}, log, MINUTE).resolves(result);
 
       return assert.becomes(
-        actions.ensureAcceptability({repo: {full_name: repoName}, ref, pollWhenPending: true}, log),
+        actions.ensureAcceptability({repo, sha, pollWhenPending: true}, log),
         result
       ).then(assertAuthenticatedForOctokit);
     });
@@ -90,29 +98,31 @@ suite('github actions', () => {
     test('that the timeout is passed along to the poller', () => {
       const timeout = any.integer();
       const result = any.string();
-      get.resolves({body: {state: 'pending'}});
-      poll.default.withArgs({repo: {full_name: repoName}, ref, pollWhenPending: true}, log, timeout).resolves(result);
+      octokitCombinedStatus.withArgs({owner: repoOwner, repo: repoName, ref: sha}).resolves({data: {state: 'pending'}});
+      poll.default.withArgs({repo, sha, pollWhenPending: true}, log, timeout).resolves(result);
 
       return assert.becomes(
-        actions.ensureAcceptability({repo: {full_name: repoName}, ref, pollWhenPending: true}, log, timeout),
+        actions.ensureAcceptability({repo, sha, pollWhenPending: true}, log, timeout),
         result
       ).then(assertAuthenticatedForOctokit);
     });
 
     test('that the polling does not happen without the `pollWhenPending` flag', () => {
-      get.resolves({body: {state: 'pending'}});
+      octokitCombinedStatus.withArgs({owner: repoOwner, repo: repoName, ref: sha}).resolves({data: {state: 'pending'}});
 
       return assert.isRejected(
-        actions.ensureAcceptability({repo: {full_name: repoName}, ref}, log, any.integer()),
+        actions.ensureAcceptability({repo, sha}, log, any.integer()),
         'pending'
       ).then(assertAuthenticatedForOctokit);
     });
 
     test('that an invalid status results in rejection', () => {
-      get.resolves({body: {state: any.string()}});
+      octokitCombinedStatus
+        .withArgs({owner: repoOwner, repo: repoName, ref: sha})
+        .resolves({data: {state: any.string()}});
 
       return assert.isRejected(
-        actions.ensureAcceptability({repo: {full_name: repoName}, ref}, log),
+        actions.ensureAcceptability({repo, sha}, log),
         InvalidStatusFoundError,
         /An invalid status was found for this PR\./
       ).then(assertAuthenticatedForOctokit);
@@ -208,24 +218,16 @@ suite('github actions', () => {
   suite('PRs for a commit', () => {
     test('that PRs with HEAD matching a commit are fetched', () => {
       const pullRequests = any.listOf(any.simpleObject);
-      const ownerLogin = any.word();
       octokitIssueSearch.withArgs({q: `${ref}+type:pr`}).returns({data: {items: pullRequests}});
 
-      return assert.becomes(
-        actions.getPullRequestsForCommit({repo: {full_name: repoName, owner: {login: ownerLogin}}, ref}),
-        pullRequests
-      ).then(assertAuthenticatedForOctokit);
+      return assert.becomes(actions.getPullRequestsForCommit({ref}), pullRequests).then(assertAuthenticatedForOctokit);
     });
   });
 
   test('that the PR gets requested by issue number', () => {
-    const repoOwner = any.word();
     const pullRequest = any.simpleObject();
     octokitGetPr.withArgs({owner: repoOwner, repo: repoName, number: prNumber}).resolves({data: pullRequest});
 
-    return assert.becomes(
-      actions.getPullRequest({owner: {login: repoOwner}, name: repoName}, prNumber),
-      pullRequest
-    );
+    return assert.becomes(actions.getPullRequest(repo, prNumber), pullRequest);
   });
 });

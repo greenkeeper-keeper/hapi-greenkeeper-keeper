@@ -7,7 +7,7 @@ export default function (
 ) {
   const {ensureAcceptability, acceptPR, deleteBranch, postErrorComment} = createActions(github);
 
-  return ensureAcceptability({repo: head.repo, ref: head.ref, url, pollWhenPending}, (...args) => request.log(...args))
+  return ensureAcceptability({repo: head.repo, sha: head.sha, url, pollWhenPending}, (...args) => request.log(...args))
     .then(() => acceptPR(url, head.sha, number, squash, acceptAction, (...args) => request.log(...args)))
     .then(() => deleteBranch(head, deleteBranches))
     .catch(err => {

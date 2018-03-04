@@ -15,19 +15,12 @@ suite('github api', () => {
     client = clientFactory({token: githubToken});
     sandbox = sinon.sandbox.create();
 
-    sandbox.stub(highwire, 'get');
     sandbox.stub(highwire, 'post');
     sandbox.stub(highwire, 'put');
     sandbox.stub(highwire, 'del');
   });
 
   teardown(() => sandbox.restore());
-
-  test('that the get method handles auth', () => {
-    highwire.get.withArgs(url, {headers: {Authorization: `token ${githubToken}`}}).resolves(response);
-
-    return assert.becomes(client.get(url), response);
-  });
 
   test('that the post method handles auth', () => {
     highwire.post.withArgs(url, payload, {headers: {Authorization: `token ${githubToken}`}}).resolves(response);

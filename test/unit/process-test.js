@@ -50,7 +50,7 @@ suite('process', () => {
       const message = any.string();
       const message2 = any.string();
       const tags = any.listOf(any.string);
-      assert.calledWith(ensureAcceptability, {repo, ref, url, pollWhenPending});
+      assert.calledWith(ensureAcceptability, {repo, sha, url, pollWhenPending});
       assert.calledWith(acceptPR, url, sha, number, squash, acceptAction);
       assert.calledWith(deleteBranch, head, deleteBranches);
 
