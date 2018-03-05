@@ -31,7 +31,7 @@
     "tests:integration": "run-s tests:integration:base -- --tags 'not @wip'",
     "tests:integration:base": "cucumber-js test/integration --require-module babel-register --format-options '{\"snippetInterface\": \"async-await\"}'",
     "tests:integration:debug": "DEBUG=test run-s tests:integration",
-    "tests:integration:wip": "run-s -- --tags @wip",
+    "tests:integration:wip": "run-s tests:integration:base -- --tags @wip",
     "test": "run-s lint:* tests:*",
     "commitmsg": "commitlint -e",
     "precommit": "npm test",
