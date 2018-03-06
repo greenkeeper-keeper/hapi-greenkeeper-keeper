@@ -1,5 +1,5 @@
 import {minutes} from 'milliseconds';
-import clientFactory from './request-methods';
+import octokitFactory from './octokit-factory-wrapper';
 import poll from './poller';
 import {
   BranchDeletionFailureError,
@@ -14,18 +14,20 @@ function determineMergeMethodFrom(acceptAction, squash) {
 }
 
 export default function (githubCredentials) {
-  const {get, post, put, del} = clientFactory(githubCredentials);
+  const octokit = octokitFactory();
+  const {token} = githubCredentials;
+  octokit.authenticate({type: 'token', token});
 
-  function ensureAcceptability({repo, ref, url, pollWhenPending}, log, timeout = minutes(1)) {
+  function ensureAcceptability({repo, sha, url, pollWhenPending}, log, timeout = minutes(1)) {
     log(['info', 'PR', 'validating'], url);
 
-    return get(`https://api.github.com/repos/${repo.full_name}/commits/${ref}/status`)
-      .then(response => response.body)
+    return octokit.repos.getCombinedStatusForRef({owner: repo.owner.login, repo: repo.name, ref: sha})
+      .then(response => response.data)
       .then(({state}) => {
         switch (state) {
           case 'pending': {
             if (pollWhenPending) {
-              return poll({repo, ref, pollWhenPending}, log, timeout, ensureAcceptability).then(message => {
+              return poll({repo, sha, pollWhenPending}, log, timeout, ensureAcceptability).then(message => {
                 log(['info', 'PR', 'pending-status'], `retrying statuses for: ${url}`);
                 return message;
               });
@@ -52,34 +54,53 @@ export default function (githubCredentials) {
       });
   }
 
-  function acceptPR(url, sha, prNumber, squash, acceptAction, log) {
-    return put(`${url}/merge`, {
-      sha,
+  function acceptPR(repo, sha, prNumber, squash, acceptAction, log) {
+    return octokit.pullRequests.merge({
+      owner: repo.owner.login,
+      repo: repo.name,
+      number: prNumber,
       commit_title: `greenkeeper-keeper(pr: ${prNumber}): :white_check_mark:`,
       commit_message: `greenkeeper-keeper(pr: ${prNumber}): :white_check_mark:`,
+      sha,
       merge_method: determineMergeMethodFrom(acceptAction, squash)
     }).then(result => {
-      log(['info', 'PR', 'integrated'], url);
-      return result;
+      log(['info', 'PR', 'accepted'], {
+        owner: repo.owner.login,
+        repo: repo.name,
+        number: prNumber
+      });
+      return result.data;
     }).catch(err => Promise.reject(new MergeFailureError(err)));
   }
 
   function deleteBranch({repo, ref}, deleteBranches) {
     if (deleteBranches) {
-      return del(`https://api.github.com/repos/${repo.full_name}/git/refs/heads/${ref}`)
+      return octokit.gitdata.deleteReference({owner: repo.owner.login, repo: repo.name, ref})
         .catch(err => Promise.reject(new BranchDeletionFailureError(err)));
     }
 
     return Promise.resolve();
   }
 
-  function postErrorComment(url, error) {
-    return post(url, {body: `:x: greenkeeper-keeper failed to merge the pull-request \n> ${error.message}`});
+  function postErrorComment(repo, prNumber, error) {
+    return octokit.issues.createComment({
+      owner: repo.owner.login,
+      repo: repo.name,
+      number: prNumber,
+      body: `:x: greenkeeper-keeper failed to merge the pull-request \n> ${error.message}`
+    });
   }
 
-  function getPullRequestsForCommit({repo, ref}) {
-    return get(`https://api.github.com/repos/${repo.full_name}/pulls?head=${repo.owner.login}:${ref}`)
-      .then(response => response.body);
+  async function getPullRequestsForCommit({ref}) {
+    const response = await octokit.search.issues({q: `${ref}+type:pr`});
+
+    return response.data.items;
+  }
+
+  async function getPullRequest(repository, number) {
+    const response = await octokit.pullRequests.get({owner: repository.owner.login, repo: repository.name, number});
+
+    return response.data;
   }
 
   return {
@@ -87,6 +108,7 @@ export default function (githubCredentials) {
     acceptPR,
     deleteBranch,
     postErrorComment,
-    getPullRequestsForCommit
+    getPullRequestsForCommit,
+    getPullRequest
   };
 }

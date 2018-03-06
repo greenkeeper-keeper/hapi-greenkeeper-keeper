@@ -3,8 +3,12 @@ import any from '@travi/any';
 import hapi from 'hapi';
 import {World} from '../support/world';
 
-defineSupportCode(({Given, setWorldConstructor}) => {
+defineSupportCode(({After, Given, setWorldConstructor}) => {
   setWorldConstructor(World);
+
+  After(function () {
+    return this.server.stop();
+  });
 
   Given(/^the server is configured$/, async function () {
     this.server = new hapi.Server();

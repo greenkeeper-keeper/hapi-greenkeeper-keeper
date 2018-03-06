@@ -50,8 +50,8 @@ suite('process', () => {
       const message = any.string();
       const message2 = any.string();
       const tags = any.listOf(any.string);
-      assert.calledWith(ensureAcceptability, {repo, ref, url, pollWhenPending});
-      assert.calledWith(acceptPR, url, sha, number, squash, acceptAction);
+      assert.calledWith(ensureAcceptability, {repo, sha, url, pollWhenPending});
+      assert.calledWith(acceptPR, repo, sha, number, squash, acceptAction);
       assert.calledWith(deleteBranch, head, deleteBranches);
 
       ensureAcceptability.getCall(0).args[1](tags, message2);
@@ -85,12 +85,12 @@ suite('process', () => {
 
     return processPR(
       {log: () => undefined},
-      {comments_url: url, head},
+      {head, number},
       {github: githubCredentials, squash, deleteBranches}
     ).then(() => {
       assert.notCalled(acceptPR);
       assert.notCalled(deleteBranch);
-      assert.calledWith(postErrorComment, url, error);
+      assert.calledWith(postErrorComment, repo, number, error);
     });
   });
 
@@ -116,11 +116,11 @@ suite('process', () => {
 
     return processPR(
       {log: () => undefined},
-      {comments_url: url, head},
+      {head, number},
       {github: githubCredentials, squash, deleteBranches}
     ).then(() => {
       assert.notCalled(deleteBranch);
-      assert.calledWith(postErrorComment, url, error);
+      assert.calledWith(postErrorComment, repo, number, error);
     });
   });
 

@@ -4,6 +4,7 @@ hapi plugin to automatically merge and clean up passing greenkeeper PRs
 
 [![npm](https://img.shields.io/npm/v/hapi-greenkeeper-keeper.svg?maxAge=2592000)](https://www.npmjs.com/package/hapi-greenkeeper-keeper)
 [![license](https://img.shields.io/github/license/greenkeeper-keeper/hapi-greenkeeper-keeper.svg)](LICENSE)
+[![Gitter](https://img.shields.io/gitter/room/greenkeeper-keeper/Lobby.svg)](https://gitter.im/greenkeeper-keeper/Lobby)
 
 [![Build Status](https://img.shields.io/travis/greenkeeper-keeper/hapi-greenkeeper-keeper.svg?style=flat&branch=master)](https://travis-ci.org/greenkeeper-keeper/hapi-greenkeeper-keeper)
 [![Codecov](https://img.shields.io/codecov/c/github/greenkeeper-keeper/hapi-greenkeeper-keeper.svg)](https://codecov.io/github/greenkeeper-keeper/hapi-greenkeeper-keeper)
@@ -11,6 +12,7 @@ hapi plugin to automatically merge and clean up passing greenkeeper PRs
 [![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli/)
 ![greenkeeper badge](https://badges.greenkeeper.io/greenkeeper-keeper/hapi-greenkeeper-keeper.svg)
 [![semantic-release](https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg)](https://github.com/semantic-release/semantic-release)
+[![PRs Welcome][prs-badge]][prs]
 
 ## Installation
 
@@ -48,3 +50,6 @@ the plugin on your server.
 
   _Note_: if you are using the new GitHub integration version of Greenkeeper,
   branches are already deleted automatically
+
+[prs-badge]: https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square
+[prs]: http://makeapullrequest.com

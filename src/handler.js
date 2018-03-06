@@ -13,7 +13,15 @@ function successfulStatusCouldBeForGreenkeeperPR(event, state, branches) {
 }
 
 export default async function (request, responseToolkit, settings) {
-  const {action, sender, state, repository, branches} = request.payload;
+  const {
+    action,
+    sender,
+    state,
+    repository,
+    pull_request,         // eslint-disable-line camelcase
+    branches,
+    sha
+  } = request.payload;
   const event = request.headers['x-github-event'];
 
   if ('ping' === event) {
@@ -27,21 +35,21 @@ export default async function (request, responseToolkit, settings) {
   }
 
   if (isValidGreenkeeperUpdate({event, action, sender})) {
-    process(request, request.payload.pull_request, {...settings, pollWhenPending: true});
+    process(request, pull_request, {...settings, pollWhenPending: true});
 
     return responseToolkit.response('ok').code(ACCEPTED);
   }
 
   if (successfulStatusCouldBeForGreenkeeperPR(event, state, branches)) {
-    const {getPullRequestsForCommit} = createActions(settings.github);
+    const {getPullRequestsForCommit, getPullRequest} = createActions(settings.github);
 
-    return getPullRequestsForCommit({repo: repository, ref: branches[0].name})
-      .then(pullRequests => {
+    return getPullRequestsForCommit({ref: sha})
+      .then(async pullRequests => {
         if (!pullRequests.length) return responseToolkit.response('no PRs for this commit').code(BAD_REQUEST);
         else if (1 < pullRequests.length) {
           return responseToolkit.response(boom.internal('too many PRs exist for this commit'));
         } else if (openedByGreenkeeperBot(pullRequests[0].user.html_url)) {
-          process(request, pullRequests[0], settings);
+          process(request, await getPullRequest(repository, pullRequests[0].number), settings);
           return responseToolkit.response('ok').code(ACCEPTED);
         }
 
