@@ -11,7 +11,8 @@ export default {
     'delay',
     'joi',
     'hoek',
-    'boom'
+    'boom',
+    '@octokit/rest'
   ],
   plugins: [
     nodeResolve({

@@ -17,7 +17,7 @@ Feature: Unsuccessful processing
     But the PR cannot be merged
     When the webhook is received
     Then the webhook response confirms that it will be processed
-    And a comment is made against the PR: An attempt to merge this PR failed. Error: Method Not Allowed
+    And a comment is made against the PR: An attempt to merge this PR failed.
 
   Scenario: delete branch failure
     Given the server is configured
@@ -28,4 +28,4 @@ Feature: Unsuccessful processing
     But the branch cannot be deleted
     When the webhook is received
     Then the webhook response confirms that it will be processed
-    And a comment is made against the PR: An attempt to delete this branch failed. Error: Internal Server Error
+    And a comment is made against the PR: An attempt to delete this branch failed.

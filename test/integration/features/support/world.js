@@ -1,9 +1,13 @@
 import any from '@travi/any';
 
-function buildWebhookPayload(event, {action, prDetails, statusEventDetails, ref, repo}) {
+function buildWebhookPayload(
+  event,
+  {action, prDetails, statusEventDetails, ref, repoFullName, repoName, repoOwner, sha}
+) {
   if ('pull_request' === event) {
     return {
       action,
+      sha,
       sender: {
         html_url: prDetails.sender
       },
@@ -13,10 +17,12 @@ function buildWebhookPayload(event, {action, prDetails, statusEventDetails, ref,
         comments_url: `https://api.github.com${prDetails.comments}`,
         url: 'https://api.github.com/123',
         head: {
-          sha: prDetails.sha,
+          sha,
           ref,
           repo: {
-            full_name: repo
+            full_name: repoFullName,
+            name: repoName,
+            owner: {login: repoOwner}
           }
         }
       }
@@ -26,8 +32,10 @@ function buildWebhookPayload(event, {action, prDetails, statusEventDetails, ref,
   if ('status' === event) {
     return {
       state: statusEventDetails.state,
+      sha,
       repository: {
-        full_name: repo,
+        full_name: repoFullName,
+        name: repoName,
         owner: {
           login: statusEventDetails.repoOwner
         }
@@ -40,12 +48,13 @@ function buildWebhookPayload(event, {action, prDetails, statusEventDetails, ref,
 }
 
 export function World() {
-  this.githubUser = any.word();
   this.githubToken = any.word();
-  this.sha = any.string();
+  this.sha = any.word();
   this.ref = any.word();
   this.prNumber = any.integer();
-  this.repo = 'test-repo';
+  this.repoOwner = any.word();
+  this.repoName = any.word();
+  this.repoFullName = `${this.repoOwner}/${this.repoName}`;
 
   this.receiveWebhook = ({event, action, prDetails, statusEventDetails}) => this.server.inject({
     method: 'POST',
@@ -55,7 +64,16 @@ export function World() {
     },
     payload: buildWebhookPayload(
       event,
-      {action, prDetails, statusEventDetails, ref: this.ref, repo: this.repo}
+      {
+        action,
+        prDetails,
+        statusEventDetails,
+        sha: this.sha,
+        ref: this.ref,
+        repoFullName: this.repoFullName,
+        repoName: this.repoName,
+        repoOwner: this.repoOwner
+      }
     )
   });
 

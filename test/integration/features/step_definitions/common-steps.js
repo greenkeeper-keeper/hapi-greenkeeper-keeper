@@ -13,8 +13,7 @@ defineSupportCode(({When, Then, setWorldConstructor}) => {
       prDetails: {
         sender: this.prSender,
         comments: this.comments,
-        number: this.prNumber,
-        sha: this.sha
+        number: this.prNumber
       },
       statusEventDetails: {
         state: this.statusEventState,
