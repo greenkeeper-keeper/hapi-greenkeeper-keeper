@@ -5,10 +5,9 @@ import validatePayloadAndProcess from './handler';
 function validate(options) {
   const validated = joi.validate(options, joi.object({
     github: joi.object({token: joi.string().required()}).required(),
-    squash: joi.boolean(),
-    acceptAction: joi.string().valid('merge', 'squash', 'rebase'),
+    acceptAction: joi.string().valid('merge', 'squash', 'rebase').required(),
     deleteBranches: joi.boolean()
-  }).xor('squash', 'acceptAction').required());
+  }).required());
 
   hoek.assert(!validated.error, validated.error);
 

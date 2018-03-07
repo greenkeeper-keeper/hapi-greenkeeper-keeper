@@ -132,38 +132,6 @@ suite('github actions', () => {
   });
 
   suite('accept PR', () => {
-    test('that the referenced PR gets merged', () => {
-      const squash = false;
-      octokitMergePr.withArgs({
-        owner: repoOwner,
-        repo: repoName,
-        number: prNumber,
-        sha,
-        commit_title: `greenkeeper-keeper(pr: ${prNumber}): :white_check_mark:`,
-        commit_message: `greenkeeper-keeper(pr: ${prNumber}): :white_check_mark:`,
-        merge_method: 'merge'
-      }).resolves(response);
-
-      return assert.becomes(actions.acceptPR(repo, sha, prNumber, squash, null, log), response.data)
-        .then(assertAuthenticatedForOctokit);
-    });
-
-    test('that the referenced PR gets squashed when configured to do so', () => {
-      const squash = true;
-      octokitMergePr.withArgs({
-        owner: repoOwner,
-        repo: repoName,
-        number: prNumber,
-        sha,
-        commit_title: `greenkeeper-keeper(pr: ${prNumber}): :white_check_mark:`,
-        commit_message: `greenkeeper-keeper(pr: ${prNumber}): :white_check_mark:`,
-        merge_method: 'squash'
-      }).resolves(response);
-
-      return assert.becomes(actions.acceptPR(repo, sha, prNumber, squash, null, log), response.data)
-        .then(assertAuthenticatedForOctokit);
-    });
-
     test('that the referenced PR gets accepted', () => {
       const acceptAction = any.string();
       octokitMergePr.withArgs({
@@ -176,7 +144,7 @@ suite('github actions', () => {
         merge_method: acceptAction
       }).resolves(response);
 
-      return assert.becomes(actions.acceptPR(repo, sha, prNumber, null, acceptAction, log), response.data)
+      return assert.becomes(actions.acceptPR(repo, sha, prNumber, acceptAction, log), response.data)
         .then(assertAuthenticatedForOctokit);
     });
 

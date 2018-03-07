@@ -8,11 +8,6 @@ import {
   MergeFailureError
 } from '../errors';
 
-function determineMergeMethodFrom(acceptAction, squash) {
-  if (acceptAction) return acceptAction;
-  return squash ? 'squash' : 'merge';
-}
-
 export default function (githubCredentials) {
   const octokit = octokitFactory();
   const {token} = githubCredentials;
@@ -54,7 +49,7 @@ export default function (githubCredentials) {
       });
   }
 
-  function acceptPR(repo, sha, prNumber, squash, acceptAction, log) {
+  function acceptPR(repo, sha, prNumber, acceptAction, log) {
     return octokit.pullRequests.merge({
       owner: repo.owner.login,
       repo: repo.name,
@@ -62,7 +57,7 @@ export default function (githubCredentials) {
       commit_title: `greenkeeper-keeper(pr: ${prNumber}): :white_check_mark:`,
       commit_message: `greenkeeper-keeper(pr: ${prNumber}): :white_check_mark:`,
       sha,
-      merge_method: determineMergeMethodFrom(acceptAction, squash)
+      merge_method: acceptAction
     }).then(result => {
       log(['info', 'PR', 'accepted'], {
         owner: repo.owner.login,

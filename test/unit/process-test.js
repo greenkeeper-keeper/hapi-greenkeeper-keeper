@@ -51,13 +51,13 @@ suite('process', () => {
       const message2 = any.string();
       const tags = any.listOf(any.string);
       assert.calledWith(ensureAcceptability, {repo, sha, url, pollWhenPending});
-      assert.calledWith(acceptPR, repo, sha, number, squash, acceptAction);
+      assert.calledWith(acceptPR, repo, sha, number, acceptAction);
       assert.calledWith(deleteBranch, head, deleteBranches);
 
       ensureAcceptability.getCall(0).args[1](tags, message2);
       assert.calledWith(log, tags, message2);
 
-      acceptPR.getCall(0).args[5](tags, message);
+      acceptPR.getCall(0).args[4](tags, message);
       assert.calledWith(log, tags, message);
     });
   });
