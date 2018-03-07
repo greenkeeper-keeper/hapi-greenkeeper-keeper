@@ -13,7 +13,6 @@ suite('process', () => {
   const repo = any.simpleObject();
   const head = {sha, ref, repo};
   const number = any.integer();
-  const squash = any.boolean();
   const deleteBranches = any.boolean();
 
   setup(() => {
@@ -36,21 +35,16 @@ suite('process', () => {
 
   test('that processing a greenkeeper PR confirms that it can be merged, merges, and deletes the branch', () => {
     const log = sinon.stub();
-    const pollWhenPending = any.boolean();
     const acceptAction = any.string();
     ensureAcceptability.resolves();
     acceptPR.resolves();
     deleteBranch.resolves();
 
-    return processPR(
-      {log},
-      {url, head, number},
-      {github: githubCredentials, squash, acceptAction, deleteBranches, pollWhenPending}
-    ).then(() => {
+    return processPR({log}, {url, head, number}, {github: githubCredentials, acceptAction, deleteBranches}).then(() => {
       const message = any.string();
       const message2 = any.string();
       const tags = any.listOf(any.string);
-      assert.calledWith(ensureAcceptability, {repo, sha, url, pollWhenPending});
+      assert.calledWith(ensureAcceptability, {repo, sha, url});
       assert.calledWith(acceptPR, repo, sha, number, acceptAction);
       assert.calledWith(deleteBranch, head, deleteBranches);
 
@@ -67,11 +61,7 @@ suite('process', () => {
     acceptPR.resolves();
     deleteBranch.resolves();
 
-    return processPR(
-      {},
-      {url, head},
-      {github: githubCredentials, squash}
-    ).then(() => {
+    return processPR({}, {url, head}, {github: githubCredentials}).then(() => {
       assert.calledOnce(ensureAcceptability);
       assert.calledOnce(acceptPR);
       assert.calledWith(deleteBranch, head, false);
@@ -83,11 +73,7 @@ suite('process', () => {
     ensureAcceptability.rejects(error);
     postErrorComment.resolves(error);
 
-    return processPR(
-      {log: () => undefined},
-      {head, number},
-      {github: githubCredentials, squash, deleteBranches}
-    ).then(() => {
+    return processPR({log: () => undefined}, {head, number}, {github: githubCredentials, deleteBranches}).then(() => {
       assert.notCalled(acceptPR);
       assert.notCalled(deleteBranch);
       assert.calledWith(postErrorComment, repo, number, error);
@@ -100,7 +86,7 @@ suite('process', () => {
     return processPR(
       {log: () => undefined},
       {comments_url: url, head},
-      {github: githubCredentials, squash, deleteBranches}
+      {github: githubCredentials, deleteBranches}
     ).then(() => {
       assert.notCalled(acceptPR);
       assert.notCalled(deleteBranch);
@@ -114,11 +100,7 @@ suite('process', () => {
     acceptPR.rejects(error);
     postErrorComment.resolves(error);
 
-    return processPR(
-      {log: () => undefined},
-      {head, number},
-      {github: githubCredentials, squash, deleteBranches}
-    ).then(() => {
+    return processPR({log: () => undefined}, {head, number}, {github: githubCredentials, deleteBranches}).then(() => {
       assert.notCalled(deleteBranch);
       assert.calledWith(postErrorComment, repo, number, error);
     });
@@ -129,11 +111,7 @@ suite('process', () => {
     ensureAcceptability.rejects(error);
     postErrorComment.rejects(error);
 
-    return processPR(
-      {log: () => undefined},
-      {url, head},
-      {github: githubCredentials, squash, deleteBranches}
-    ).then(() => {
+    return processPR({log: () => undefined}, {url, head}, {github: githubCredentials, deleteBranches}).then(() => {
       assert.calledOnce(postErrorComment);
     });
   });

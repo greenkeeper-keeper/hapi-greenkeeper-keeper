@@ -4,24 +4,12 @@ import openedByGreenkeeperBot from './greenkeeper';
 import createActions from './github/actions';
 import process from './process';
 
-function isValidGreenkeeperUpdate({event, action, sender}) {
-  return 'pull_request' === event && 'opened' === action && openedByGreenkeeperBot(sender.html_url);
-}
-
 function successfulStatusCouldBeForGreenkeeperPR(event, state, branches) {
   return 'status' === event && 'success' === state && 1 === branches.length && 'master' !== branches[0].name;
 }
 
 export default async function (request, responseToolkit, settings) {
-  const {
-    action,
-    sender,
-    state,
-    repository,
-    pull_request,         // eslint-disable-line camelcase
-    branches,
-    sha
-  } = request.payload;
+  const {state, repository, branches, sha} = request.payload;
   const event = request.headers['x-github-event'];
 
   if ('ping' === event) {
@@ -32,12 +20,6 @@ export default async function (request, responseToolkit, settings) {
     }
 
     return responseToolkit.response('successfully configured the webhook for greenkeeper-keeper').code(NO_CONTENT);
-  }
-
-  if (isValidGreenkeeperUpdate({event, action, sender})) {
-    process(request, pull_request, {...settings, pollWhenPending: true});
-
-    return responseToolkit.response('ok').code(ACCEPTED);
   }
 
   if (successfulStatusCouldBeForGreenkeeperPR(event, state, branches)) {

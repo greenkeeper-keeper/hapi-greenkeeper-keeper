@@ -1,7 +1,6 @@
 import {assert} from 'chai';
 import sinon from 'sinon';
 import any from '@travi/any';
-import * as poll from '../../../src/github/poller';
 import * as octokitFactory from '../../../src/github/octokit-factory-wrapper';
 import actionsFactory from '../../../src/github/actions';
 import {
@@ -22,7 +21,6 @@ suite('github actions', () => {
     octokitCombinedStatus,
     octokitDeleteRef,
     octokitCreateIssueComment;
-  const MINUTE = 1000 * 60;
   const token = any.simpleObject();
   const githubCredentials = {...any.simpleObject(), token};
   const sha = any.string();
@@ -46,7 +44,6 @@ suite('github actions', () => {
     octokitCreateIssueComment = sinon.stub();
 
     sandbox.stub(octokitFactory, 'default');
-    sandbox.stub(poll, 'default');
 
     octokitFactory.default.returns({
       authenticate: octokitAuthenticate,
@@ -86,30 +83,7 @@ suite('github actions', () => {
       ).then(assertAuthenticatedForOctokit);
     });
 
-    test('that the pending status delegates to poller', () => {
-      const result = any.string();
-      octokitCombinedStatus.withArgs({owner: repoOwner, repo: repoName, ref: sha}).resolves({data: {state: 'pending'}});
-      poll.default.withArgs({repo, sha, pollWhenPending: true}, log, MINUTE).resolves(result);
-
-      return assert.becomes(
-        actions.ensureAcceptability({repo, sha, pollWhenPending: true}, log),
-        result
-      ).then(assertAuthenticatedForOctokit);
-    });
-
-    test('that the timeout is passed along to the poller', () => {
-      const timeout = any.integer();
-      const result = any.string();
-      octokitCombinedStatus.withArgs({owner: repoOwner, repo: repoName, ref: sha}).resolves({data: {state: 'pending'}});
-      poll.default.withArgs({repo, sha, pollWhenPending: true}, log, timeout).resolves(result);
-
-      return assert.becomes(
-        actions.ensureAcceptability({repo, sha, pollWhenPending: true}, log, timeout),
-        result
-      ).then(assertAuthenticatedForOctokit);
-    });
-
-    test('that the polling does not happen without the `pollWhenPending` flag', () => {
+    test('that the pending status results in rejection', () => {
       octokitCombinedStatus.withArgs({owner: repoOwner, repo: repoName, ref: sha}).resolves({data: {state: 'pending'}});
 
       return assert.isRejected(

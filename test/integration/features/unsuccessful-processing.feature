@@ -2,8 +2,10 @@ Feature: Unsuccessful processing
 
   Scenario: commit status failure
     Given the server is configured
-    And the webhook is for a pull_request event and a opened action
+    And the webhook is for a status event and a success state
+    And the commit is only on one, non-master branch
     And the PR was submitted by the greenkeeper integration
+    And an open PR exists for the commit
     But the commit statuses resolve to failure
     When the webhook is received
     Then the webhook response confirms that it will be processed
@@ -11,9 +13,11 @@ Feature: Unsuccessful processing
 
   Scenario: merge failure
     Given the server is configured
-    And the webhook is for a pull_request event and a opened action
+    And the webhook is for a status event and a success state
+    And the commit is only on one, non-master branch
     And the PR was submitted by the greenkeeper integration
     And statuses exist for the PR
+    And an open PR exists for the commit
     But the PR cannot be merged
     When the webhook is received
     Then the webhook response confirms that it will be processed
@@ -21,9 +25,11 @@ Feature: Unsuccessful processing
 
   Scenario: delete branch failure
     Given the server is configured
-    And the webhook is for a pull_request event and a opened action
+    And the webhook is for a status event and a success state
+    And the commit is only on one, non-master branch
     And the PR was submitted by the greenkeeper integration
     And statuses exist for the PR
+    And an open PR exists for the commit
     And the PR can be accepted
     But the branch cannot be deleted
     When the webhook is received

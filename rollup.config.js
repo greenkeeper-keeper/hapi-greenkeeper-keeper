@@ -6,7 +6,6 @@ export default {
   input: 'src/plugin.js',
   external: [
     'http-status-codes',
-    'milliseconds',
     'highwire',
     'delay',
     'joi',

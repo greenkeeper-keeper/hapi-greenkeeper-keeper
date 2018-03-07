@@ -1,6 +1,4 @@
-import {minutes} from 'milliseconds';
 import octokitFactory from './octokit-factory-wrapper';
-import poll from './poller';
 import {
   BranchDeletionFailureError,
   FailedStatusFoundError,
@@ -13,7 +11,7 @@ export default function (githubCredentials) {
   const {token} = githubCredentials;
   octokit.authenticate({type: 'token', token});
 
-  function ensureAcceptability({repo, sha, url, pollWhenPending}, log, timeout = minutes(1)) {
+  function ensureAcceptability({repo, sha, url}, log) {
     log(['info', 'PR', 'validating'], url);
 
     return octokit.repos.getCombinedStatusForRef({owner: repo.owner.login, repo: repo.name, ref: sha})
@@ -21,14 +19,7 @@ export default function (githubCredentials) {
       .then(({state}) => {
         switch (state) {
           case 'pending': {
-            if (pollWhenPending) {
-              return poll({repo, sha, pollWhenPending}, log, timeout, ensureAcceptability).then(message => {
-                log(['info', 'PR', 'pending-status'], `retrying statuses for: ${url}`);
-                return message;
-              });
-            }
-
-            log(['info', 'PR', 'pending-status'], `not configured to poll: ${url}`);
+            log(['info', 'PR', 'pending-status'], `commit status checks have not completed yet: ${url}`);
             return Promise.reject(new Error('pending'));
           }
           case 'success':

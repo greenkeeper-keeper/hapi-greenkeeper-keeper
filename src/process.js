@@ -3,11 +3,11 @@ import createActions from './github/actions';
 export default function (
   request,
   {head, url, number},
-  {github, deleteBranches = false, pollWhenPending, acceptAction}
+  {github, deleteBranches = false, acceptAction}
 ) {
   const {ensureAcceptability, acceptPR, deleteBranch, postErrorComment} = createActions(github);
 
-  return ensureAcceptability({repo: head.repo, sha: head.sha, url, pollWhenPending}, (...args) => request.log(...args))
+  return ensureAcceptability({repo: head.repo, sha: head.sha, url}, (...args) => request.log(...args))
     .then(() => acceptPR(head.repo, head.sha, number, acceptAction, (...args) => request.log(...args)))
     .then(() => deleteBranch(head, deleteBranches))
     .catch(err => {
