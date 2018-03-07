@@ -2,7 +2,7 @@ import {defineSupportCode} from 'cucumber';
 import {assert} from 'chai';
 import nock from 'nock';
 import any from '@travi/any';
-import {OK, METHOD_NOT_ALLOWED, INTERNAL_SERVER_ERROR} from 'http-status-codes';
+import {METHOD_NOT_ALLOWED, OK} from 'http-status-codes';
 import {World} from '../support/world';
 import {GREENKEEPER_INTEGRATION_GITHUB_URL} from '../../../../src/greenkeeper';
 
@@ -152,27 +152,6 @@ defineSupportCode(({Before, After, Given, setWorldConstructor}) => {
         message: 'Pull Request is not mergeable',
         documentation_url: 'https://developer.github.com/v3/pulls/#merge-a-pull-request-merge-button'
       });
-    stubTheCommentsEndpoint.call(this, githubScope, authorizationHeader);
-
-    callback();
-  });
-
-  Given('the branch can be deleted', function (callback) {
-    this.prProcessed = new Promise(resolve => {
-      githubScope
-        .matchHeader('Authorization', authorizationHeader)
-        .delete(`/repos/${this.repoFullName}/git/refs/${this.ref}`)
-        .reply(OK, resolve);
-    });
-
-    callback();
-  });
-
-  Given('the branch cannot be deleted', function (callback) {
-    githubScope
-      .matchHeader('Authorization', authorizationHeader)
-      .delete(`/repos/${this.repoFullName}/git/refs/${this.ref}`)
-      .reply(INTERNAL_SERVER_ERROR, {});
     stubTheCommentsEndpoint.call(this, githubScope, authorizationHeader);
 
     callback();

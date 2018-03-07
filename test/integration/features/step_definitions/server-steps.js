@@ -19,7 +19,6 @@ defineSupportCode(({After, Given, setWorldConstructor}) => {
         plugin: require('../../../../src/plugin'),
         options: {
           acceptAction: this.acceptType,
-          deleteBranches: true,
           github: {
             token: this.githubToken
           }

@@ -36,28 +36,7 @@ suite('handler', () => {
   });
 
   suite('`pull_request` event', () => {
-    test('that response is accepted when pr was opened by greenkeeper and is then processed', () => {
-      const pullRequest = any.simpleObject();
-      const request = {
-        payload: {
-          action: 'opened',
-          sender: {
-            html_url: greenkeeperSender
-          },
-          pull_request: pullRequest
-        },
-        headers: {'x-github-event': 'pull_request'},
-        log: () => undefined
-      };
-      response.withArgs('ok').returns({code});
-
-      return handler(request, {response}, settings).then(() => {
-        assert.calledWith(code, ACCEPTED);
-        assert.calledWith(process.default, request, pullRequest, {...settings, pollWhenPending: true});
-      });
-    });
-
-    test('that response is bad-request when the webhook action is not `opened`', () => {
+    test('that response is bad-request when the webhook action is a `pull_request`', () => {
       const request = {
         payload: {
           action: any.word(),

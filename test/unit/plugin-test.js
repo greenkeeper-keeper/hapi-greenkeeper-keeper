@@ -5,9 +5,10 @@ import {plugin} from '../../src/plugin';
 import * as validatePayloadAndProcess from '../../src/handler';
 
 suite('plugin', () => {
+  const possibleAcceptActions = ['merge', 'squash', 'rebase'];
   const options = {
     github: {token: any.string()},
-    squash: any.boolean()
+    acceptAction: any.fromList(possibleAcceptActions)
   };
   let sandbox;
 
@@ -73,37 +74,16 @@ suite('plugin', () => {
     ));
 
     test(
-      'that an error is thrown if neither the `squash` nor the `acceptAction` setting is provided',
+      'that an error is thrown if the `acceptAction` setting is not provided',
       () => assert.isRejected(
         plugin.register({}, {github: {token: any.string()}}, next),
-        '"value" must contain at least one of [squash, acceptAction]'
+        'child "acceptAction" fails because ["acceptAction" is required]'
       )
     );
 
     test('that an error is thrown if the accept-action is not provided as an appropriate type', () => assert.isRejected(
       plugin.register({}, {github: {token: any.string()}, acceptAction: any.integer()}, next),
       'child "acceptAction" fails because ["acceptAction" must be a string]'
-    ));
-
-    test(
-      'that an error is thrown if the `squash` setting is not provided as an appropriate type',
-      () => assert.isRejected(
-        plugin.register({}, {github: {token: any.string()}, squash: any.string()}, next),
-        '"squash" must be a boolean'
-      )
-    );
-
-    test('that an error is thrown if both accept-action and squash flag are provided', () => assert.isRejected(
-      plugin.register(
-        {},
-        {
-          github: {token: any.string()},
-          acceptAction: any.fromList(['merge', 'rebase', 'squash']),
-          squash: any.boolean()
-        },
-        next
-      ),
-      '"value" contains a conflict between exclusive peers [squash, acceptAction]'
     ));
 
     test('that an error is thrown if an invalid accept-action is not provided', () => assert.isRejected(
@@ -114,30 +94,12 @@ suite('plugin', () => {
     test('that no error is thrown if a valid accept-type is provided', () => Promise.all([
       plugin.register({route}, {github: {token: any.string()}, acceptAction: 'merge'}, next),
       plugin.register({route}, {github: {token: any.string()}, acceptAction: 'squash'}, next),
-      plugin.register({route}, {github: {token: any.string()}, acceptAction: 'rebase'}, next),
-      plugin.register({route}, {github: {token: any.string()}, squash: true}, next),
-      plugin.register({route}, {github: {token: any.string()}, squash: false}, next)
+      plugin.register({route}, {github: {token: any.string()}, acceptAction: 'rebase'}, next)
     ]));
-
-    test(
-      'that an error is thrown if the flag to delete branches is not a boolean when provided',
-      () => assert.isRejected(
-        plugin.register({}, {
-          github: {token: any.string()},
-          squash: any.boolean(),
-          deleteBranches: any.string()
-        }, () => undefined),
-        '"deleteBranches" must be a boolean'
-      )
-    );
 
     test('that no error occurs for valid config', () => assert.isFulfilled(plugin.register(
       {route},
-      {
-        github: {token: any.string()},
-        squash: any.boolean(),
-        deleteBranches: any.boolean()
-      },
+      {github: {token: any.string()}, acceptAction: any.fromList(possibleAcceptActions)},
       () => undefined
     )));
   });
