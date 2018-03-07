@@ -97,25 +97,9 @@ suite('plugin', () => {
       plugin.register({route}, {github: {token: any.string()}, acceptAction: 'rebase'}, next)
     ]));
 
-    test(
-      'that an error is thrown if the flag to delete branches is not a boolean when provided',
-      () => assert.isRejected(
-        plugin.register({}, {
-          github: {token: any.string()},
-          acceptAction: any.fromList(possibleAcceptActions),
-          deleteBranches: any.string()
-        }, () => undefined),
-        '"deleteBranches" must be a boolean'
-      )
-    );
-
     test('that no error occurs for valid config', () => assert.isFulfilled(plugin.register(
       {route},
-      {
-        github: {token: any.string()},
-        acceptAction: any.fromList(possibleAcceptActions),
-        deleteBranches: any.boolean()
-      },
+      {github: {token: any.string()}, acceptAction: any.fromList(possibleAcceptActions)},
       () => undefined
     )));
   });

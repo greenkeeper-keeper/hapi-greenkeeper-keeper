@@ -22,16 +22,3 @@ Feature: Unsuccessful processing
     When the webhook is received
     Then the webhook response confirms that it will be processed
     And a comment is made against the PR: An attempt to merge this PR failed.
-
-  Scenario: delete branch failure
-    Given the server is configured
-    And the webhook is for a status event and a success state
-    And the commit is only on one, non-master branch
-    And the PR was submitted by the greenkeeper integration
-    And statuses exist for the PR
-    And an open PR exists for the commit
-    And the PR can be accepted
-    But the branch cannot be deleted
-    When the webhook is received
-    Then the webhook response confirms that it will be processed
-    And a comment is made against the PR: An attempt to delete this branch failed.

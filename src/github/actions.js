@@ -1,10 +1,5 @@
 import octokitFactory from './octokit-factory-wrapper';
-import {
-  BranchDeletionFailureError,
-  FailedStatusFoundError,
-  InvalidStatusFoundError,
-  MergeFailureError
-} from '../errors';
+import {FailedStatusFoundError, InvalidStatusFoundError, MergeFailureError} from '../errors';
 
 export default function (githubCredentials) {
   const octokit = octokitFactory();
@@ -59,15 +54,6 @@ export default function (githubCredentials) {
     }).catch(err => Promise.reject(new MergeFailureError(err)));
   }
 
-  function deleteBranch({repo, ref}, deleteBranches) {
-    if (deleteBranches) {
-      return octokit.gitdata.deleteReference({owner: repo.owner.login, repo: repo.name, ref})
-        .catch(err => Promise.reject(new BranchDeletionFailureError(err)));
-    }
-
-    return Promise.resolve();
-  }
-
   function postErrorComment(repo, prNumber, error) {
     return octokit.issues.createComment({
       owner: repo.owner.login,
@@ -92,7 +78,6 @@ export default function (githubCredentials) {
   return {
     ensureAcceptability,
     acceptPR,
-    deleteBranch,
     postErrorComment,
     getPullRequestsForCommit,
     getPullRequest

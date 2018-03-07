@@ -3,12 +3,7 @@ import sinon from 'sinon';
 import any from '@travi/any';
 import * as octokitFactory from '../../../src/github/octokit-factory-wrapper';
 import actionsFactory from '../../../src/github/actions';
-import {
-  BranchDeletionFailureError,
-  FailedStatusFoundError,
-  InvalidStatusFoundError,
-  MergeFailureError
-} from '../../../src/errors';
+import {FailedStatusFoundError, InvalidStatusFoundError, MergeFailureError} from '../../../src/errors';
 
 suite('github actions', () => {
   let
@@ -129,29 +124,6 @@ suite('github actions', () => {
         actions.acceptPR(repo),
         MergeFailureError,
         /An attempt to merge this PR failed. Error: error from PUT request in test$/
-      ).then(assertAuthenticatedForOctokit);
-    });
-  });
-
-  suite('delete branch', () => {
-    test('that the branch gets deleted if config is to delete', () => {
-      octokitDeleteRef.withArgs({owner: repoOwner, repo: repoName, ref}).resolves(response);
-
-      return assert.becomes(actions.deleteBranch({repo, ref}, true), response)
-        .then(assertAuthenticatedForOctokit);
-    });
-
-    test('that the branch is not deleted if the config is not to delete', () => {
-      actions.deleteBranch({}, false).then(() => assert.notCalled(octokitDeleteRef));
-    });
-
-    test('that a failure to delete the branch is reported appropriately', () => {
-      octokitDeleteRef.rejects(new Error('error from DELETE request in test'));
-
-      return assert.isRejected(
-        actions.deleteBranch({repo, ref}, true),
-        BranchDeletionFailureError,
-        /An attempt to delete this branch failed. Error: error from DELETE request in test$/
       ).then(assertAuthenticatedForOctokit);
     });
   });
