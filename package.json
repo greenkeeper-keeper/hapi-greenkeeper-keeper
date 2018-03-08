@@ -7,10 +7,7 @@
   "engines": {
     "node": ">= 8"
   },
-  "author": "Kurtis Kemple <kurtiskemple@gmail.com>",
-  "maintainers": [
-    "Matt Travi <npm@travi.org> (https://matt.travi.org/)"
-  ],
+  "author": "Matt Travi <npm@travi.org> (https://matt.travi.org/)",
   "description": "hapi plugin to automatically merge and clean up passing greenkeeper PRs",
   "repository": "greenkeeper-keeper/hapi-greenkeeper-keeper",
   "bugs": "https://github.com/greenkeeper-keeper/hapi-greenkeeper-keeper/issues",
