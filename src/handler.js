@@ -4,42 +4,22 @@ import openedByGreenkeeperBot from './greenkeeper';
 import createActions from './github/actions';
 import process from './process';
 
-function isValidGreenkeeperUpdate({event, action, sender}) {
-  return 'pull_request' === event && 'opened' === action && openedByGreenkeeperBot(sender.html_url);
-}
-
 function successfulStatusCouldBeForGreenkeeperPR(event, state, branches) {
   return 'status' === event && 'success' === state && 1 === branches.length && 'master' !== branches[0].name;
 }
 
-export default async function (request, reply, settings) {
-  const {
-    action,
-    sender,
-    state,
-    repository,
-    pull_request,         // eslint-disable-line camelcase
-    branches,
-    sha
-  } = request.payload;
+export default async function (request, responseToolkit, settings) {
+  const {state, repository, branches, sha} = request.payload;
   const event = request.headers['x-github-event'];
 
   if ('ping' === event) {
     if ('json' !== request.payload.hook.config.content_type) {
-      reply('please update your webhook configuration to send application/json').code(UNSUPPORTED_MEDIA_TYPE);
-
-      return Promise.resolve();
+      return responseToolkit
+        .response('please update your webhook configuration to send application/json')
+        .code(UNSUPPORTED_MEDIA_TYPE);
     }
 
-    reply('successfully configured the webhook for greenkeeper-keeper').code(NO_CONTENT);
-
-    return Promise.resolve();
-  }
-
-  if (isValidGreenkeeperUpdate({event, action, sender})) {
-    reply('ok').code(ACCEPTED);
-
-    return process(request, pull_request, {...settings, pollWhenPending: true});
+    return responseToolkit.response('successfully configured the webhook for greenkeeper-keeper').code(NO_CONTENT);
   }
 
   if (successfulStatusCouldBeForGreenkeeperPR(event, state, branches)) {
@@ -47,18 +27,20 @@ export default async function (request, reply, settings) {
 
     return getPullRequestsForCommit({ref: sha})
       .then(async pullRequests => {
-        if (!pullRequests.length) reply('no PRs for this commit').code(BAD_REQUEST);
-        else if (1 < pullRequests.length) reply(boom.internal('too many PRs exist for this commit'));
-        else if (openedByGreenkeeperBot(pullRequests[0].user.html_url)) {
-          reply('ok').code(ACCEPTED);
+        if (!pullRequests.length) return responseToolkit.response('no PRs for this commit').code(BAD_REQUEST);
+        else if (1 < pullRequests.length) {
+          return responseToolkit.response(boom.internal('too many PRs exist for this commit'));
+        } else if (openedByGreenkeeperBot(pullRequests[0].user.html_url)) {
           process(request, await getPullRequest(repository, pullRequests[0].number), settings);
-        } else reply('PR is not from greenkeeper').code(BAD_REQUEST);
+          return responseToolkit.response('ok').code(ACCEPTED);
+        }
+
+        return responseToolkit.response('PR is not from greenkeeper').code(BAD_REQUEST);
       })
-      .catch(e => reply(boom.internal('failed to fetch PRs', e)));
+      .catch(e => boom.internal('failed to fetch PRs', e));
   }
 
-  reply('skipping').code(BAD_REQUEST);
   request.log(['PR', 'skipping']);
 
-  return Promise.resolve();
+  return responseToolkit.response('skipping').code(BAD_REQUEST);
 }

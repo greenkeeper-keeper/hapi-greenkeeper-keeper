@@ -9,19 +9,19 @@ import * as process from '../../src/process';
 import handler from '../../src/handler';
 
 suite('handler', () => {
-  let sandbox, reply, code;
+  let sandbox, response, code;
   const greenkeeperSender = any.url();
   const githubCredentials = {token: any.string()};
   const settings = {...any.simpleObject(), github: githubCredentials};
   const log = sinon.spy();
 
   setup(() => {
-    reply = sinon.stub();
+    response = sinon.stub();
     code = sinon.spy();
 
     sandbox = sinon.sandbox.create();
 
-    reply.withArgs('skipping').returns({code});
+    response.withArgs('skipping').returns({code});
 
     sandbox.stub(boom, 'internal');
     sandbox.stub(greenkeeper, 'default')
@@ -36,28 +36,7 @@ suite('handler', () => {
   });
 
   suite('`pull_request` event', () => {
-    test('that response is accepted when pr was opened by greenkeeper and is then processed', () => {
-      const pullRequest = any.simpleObject();
-      const request = {
-        payload: {
-          action: 'opened',
-          sender: {
-            html_url: greenkeeperSender
-          },
-          pull_request: pullRequest
-        },
-        headers: {'x-github-event': 'pull_request'},
-        log: () => undefined
-      };
-      reply.withArgs('ok').returns({code});
-
-      return handler(request, reply, settings).then(() => {
-        assert.calledWith(code, ACCEPTED);
-        assert.calledWith(process.default, request, pullRequest, {...settings, pollWhenPending: true});
-      });
-    });
-
-    test('that response is bad-request when the webhook action is not `opened`', () => {
+    test('that response is bad-request when the webhook action is a `pull_request`', () => {
       const request = {
         payload: {
           action: any.word(),
@@ -69,7 +48,7 @@ suite('handler', () => {
         log
       };
 
-      return handler(request, reply, settings).then(() => {
+      return handler(request, {response}, settings).then(() => {
         assert.calledWith(code, BAD_REQUEST);
         assert.calledWith(log, ['PR', 'skipping']);
       });
@@ -87,7 +66,7 @@ suite('handler', () => {
         log
       };
 
-      return handler(request, reply, settings).then(() => {
+      return handler(request, {response}, settings).then(() => {
         assert.calledWith(code, BAD_REQUEST);
         assert.calledWith(log, ['PR', 'skipping']);
       });
@@ -125,11 +104,11 @@ suite('handler', () => {
         headers: {'x-github-event': 'status'},
         log: () => undefined
       };
-      reply.withArgs('ok').returns({code});
+      response.withArgs('ok').returns({code});
       getPullRequestsForCommit.withArgs({ref: sha}).resolves([partialPullRequest]);
       getPullRequest.withArgs(repository, prNumber).resolves(fullPullRequest);
 
-      return handler(request, reply, settings).then(() => {
+      return handler(request, {response}, settings).then(() => {
         assert.calledWith(code, ACCEPTED);
         assert.calledWith(process.default, request, fullPullRequest, settings);
       });
@@ -142,7 +121,7 @@ suite('handler', () => {
         log
       };
 
-      return handler(request, reply, settings).then(() => {
+      return handler(request, {response}, settings).then(() => {
         assert.calledWith(code, BAD_REQUEST);
         assert.calledWith(log, ['PR', 'skipping']);
       });
@@ -155,7 +134,7 @@ suite('handler', () => {
         log
       };
 
-      return handler(request, reply, settings).then(() => {
+      return handler(request, {response}, settings).then(() => {
         assert.calledWith(code, BAD_REQUEST);
         assert.calledWith(log, ['PR', 'skipping']);
       });
@@ -168,7 +147,7 @@ suite('handler', () => {
         log
       };
 
-      return handler(request, reply, settings).then(() => {
+      return handler(request, {response}, settings).then(() => {
         assert.calledWith(code, BAD_REQUEST);
         assert.calledWith(log, ['PR', 'skipping']);
       });
@@ -181,9 +160,9 @@ suite('handler', () => {
         log: () => undefined
       };
       getPullRequestsForCommit.resolves([]);
-      reply.withArgs('no PRs for this commit').returns({code});
+      response.withArgs('no PRs for this commit').returns({code});
 
-      return handler(request, reply, settings).then(() => assert.calledWith(code, BAD_REQUEST));
+      return handler(request, {response}, settings).then(() => assert.calledWith(code, BAD_REQUEST));
     });
 
     test('that a server-error is returned if the list of PRs for the commit is greater than one', () => {
@@ -195,7 +174,7 @@ suite('handler', () => {
       getPullRequestsForCommit.resolves([{}, {}]);
       boom.internal.withArgs('too many PRs exist for this commit').returns(error);
 
-      return handler(request, reply, settings).then(() => assert.calledWith(reply, error));
+      return handler(request, {response}, settings).then(() => assert.calledWith(response, error));
     });
 
     test('that the response is bad-request if the PR is not from greenkeeper', () => {
@@ -205,9 +184,9 @@ suite('handler', () => {
         log: () => undefined
       };
       getPullRequestsForCommit.resolves([{user: {html_url: any.url()}}]);
-      reply.withArgs('PR is not from greenkeeper').returns({code});
+      response.withArgs('PR is not from greenkeeper').returns({code});
 
-      return handler(request, reply, settings).then(() => assert.calledWith(code, BAD_REQUEST));
+      return handler(request, {response}, settings).then(() => assert.calledWith(code, BAD_REQUEST));
     });
 
     test('that a server-error is reported if the fetching of related PRs fails', () => {
@@ -223,7 +202,7 @@ suite('handler', () => {
       getPullRequestsForCommit.rejects(error);
       boom.internal.withArgs('failed to fetch PRs', error).returns(wrappedError);
 
-      return handler(request, reply, settings).then(() => assert.calledWith(reply, wrappedError));
+      return handler(request, {response}, settings).then(err => assert.equal(err, wrappedError));
     });
   });
 
@@ -240,9 +219,9 @@ suite('handler', () => {
         headers: {'x-github-event': 'ping'},
         log: () => undefined
       };
-      reply.withArgs('successfully configured the webhook for greenkeeper-keeper').returns({code});
+      response.withArgs('successfully configured the webhook for greenkeeper-keeper').returns({code});
 
-      return handler(request, reply, settings).then(() => assert.calledWith(code, NO_CONTENT));
+      return handler(request, {response}, settings).then(() => assert.calledWith(code, NO_CONTENT));
     });
 
     test('that a 415 response is sent when the ping shows that the hook is not configured to send json', () => {
@@ -257,9 +236,9 @@ suite('handler', () => {
         headers: {'x-github-event': 'ping'},
         log: () => undefined
       };
-      reply.withArgs('please update your webhook configuration to send application/json').returns({code});
+      response.withArgs('please update your webhook configuration to send application/json').returns({code});
 
-      return handler(request, reply, settings).then(() => assert.calledWith(code, UNSUPPORTED_MEDIA_TYPE));
+      return handler(request, {response}, settings).then(() => assert.calledWith(code, UNSUPPORTED_MEDIA_TYPE));
     });
   });
 
@@ -271,7 +250,7 @@ suite('handler', () => {
         log
       };
 
-      return handler(request, reply, settings).then(() => {
+      return handler(request, {response}, settings).then(() => {
         assert.calledWith(code, BAD_REQUEST);
         assert.calledWith(log, ['PR', 'skipping']);
       });

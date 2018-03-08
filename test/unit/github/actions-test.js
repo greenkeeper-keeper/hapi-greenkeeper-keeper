@@ -1,15 +1,9 @@
 import {assert} from 'chai';
 import sinon from 'sinon';
 import any from '@travi/any';
-import * as poll from '../../../src/github/poller';
 import * as octokitFactory from '../../../src/github/octokit-factory-wrapper';
 import actionsFactory from '../../../src/github/actions';
-import {
-  BranchDeletionFailureError,
-  FailedStatusFoundError,
-  InvalidStatusFoundError,
-  MergeFailureError
-} from '../../../src/errors';
+import {FailedStatusFoundError, InvalidStatusFoundError, MergeFailureError} from '../../../src/errors';
 
 suite('github actions', () => {
   let
@@ -22,7 +16,6 @@ suite('github actions', () => {
     octokitCombinedStatus,
     octokitDeleteRef,
     octokitCreateIssueComment;
-  const MINUTE = 1000 * 60;
   const token = any.simpleObject();
   const githubCredentials = {...any.simpleObject(), token};
   const sha = any.string();
@@ -46,7 +39,6 @@ suite('github actions', () => {
     octokitCreateIssueComment = sinon.stub();
 
     sandbox.stub(octokitFactory, 'default');
-    sandbox.stub(poll, 'default');
 
     octokitFactory.default.returns({
       authenticate: octokitAuthenticate,
@@ -86,30 +78,7 @@ suite('github actions', () => {
       ).then(assertAuthenticatedForOctokit);
     });
 
-    test('that the pending status delegates to poller', () => {
-      const result = any.string();
-      octokitCombinedStatus.withArgs({owner: repoOwner, repo: repoName, ref: sha}).resolves({data: {state: 'pending'}});
-      poll.default.withArgs({repo, sha, pollWhenPending: true}, log, MINUTE).resolves(result);
-
-      return assert.becomes(
-        actions.ensureAcceptability({repo, sha, pollWhenPending: true}, log),
-        result
-      ).then(assertAuthenticatedForOctokit);
-    });
-
-    test('that the timeout is passed along to the poller', () => {
-      const timeout = any.integer();
-      const result = any.string();
-      octokitCombinedStatus.withArgs({owner: repoOwner, repo: repoName, ref: sha}).resolves({data: {state: 'pending'}});
-      poll.default.withArgs({repo, sha, pollWhenPending: true}, log, timeout).resolves(result);
-
-      return assert.becomes(
-        actions.ensureAcceptability({repo, sha, pollWhenPending: true}, log, timeout),
-        result
-      ).then(assertAuthenticatedForOctokit);
-    });
-
-    test('that the polling does not happen without the `pollWhenPending` flag', () => {
+    test('that the pending status results in rejection', () => {
       octokitCombinedStatus.withArgs({owner: repoOwner, repo: repoName, ref: sha}).resolves({data: {state: 'pending'}});
 
       return assert.isRejected(
@@ -132,38 +101,6 @@ suite('github actions', () => {
   });
 
   suite('accept PR', () => {
-    test('that the referenced PR gets merged', () => {
-      const squash = false;
-      octokitMergePr.withArgs({
-        owner: repoOwner,
-        repo: repoName,
-        number: prNumber,
-        sha,
-        commit_title: `greenkeeper-keeper(pr: ${prNumber}): :white_check_mark:`,
-        commit_message: `greenkeeper-keeper(pr: ${prNumber}): :white_check_mark:`,
-        merge_method: 'merge'
-      }).resolves(response);
-
-      return assert.becomes(actions.acceptPR(repo, sha, prNumber, squash, null, log), response.data)
-        .then(assertAuthenticatedForOctokit);
-    });
-
-    test('that the referenced PR gets squashed when configured to do so', () => {
-      const squash = true;
-      octokitMergePr.withArgs({
-        owner: repoOwner,
-        repo: repoName,
-        number: prNumber,
-        sha,
-        commit_title: `greenkeeper-keeper(pr: ${prNumber}): :white_check_mark:`,
-        commit_message: `greenkeeper-keeper(pr: ${prNumber}): :white_check_mark:`,
-        merge_method: 'squash'
-      }).resolves(response);
-
-      return assert.becomes(actions.acceptPR(repo, sha, prNumber, squash, null, log), response.data)
-        .then(assertAuthenticatedForOctokit);
-    });
-
     test('that the referenced PR gets accepted', () => {
       const acceptAction = any.string();
       octokitMergePr.withArgs({
@@ -176,7 +113,7 @@ suite('github actions', () => {
         merge_method: acceptAction
       }).resolves(response);
 
-      return assert.becomes(actions.acceptPR(repo, sha, prNumber, null, acceptAction, log), response.data)
+      return assert.becomes(actions.acceptPR(repo, sha, prNumber, acceptAction, log), response.data)
         .then(assertAuthenticatedForOctokit);
     });
 
@@ -187,29 +124,6 @@ suite('github actions', () => {
         actions.acceptPR(repo),
         MergeFailureError,
         /An attempt to merge this PR failed. Error: error from PUT request in test$/
-      ).then(assertAuthenticatedForOctokit);
-    });
-  });
-
-  suite('delete branch', () => {
-    test('that the branch gets deleted if config is to delete', () => {
-      octokitDeleteRef.withArgs({owner: repoOwner, repo: repoName, ref}).resolves(response);
-
-      return assert.becomes(actions.deleteBranch({repo, ref}, true), response)
-        .then(assertAuthenticatedForOctokit);
-    });
-
-    test('that the branch is not deleted if the config is not to delete', () => {
-      actions.deleteBranch({}, false).then(() => assert.notCalled(octokitDeleteRef));
-    });
-
-    test('that a failure to delete the branch is reported appropriately', () => {
-      octokitDeleteRef.rejects(new Error('error from DELETE request in test'));
-
-      return assert.isRejected(
-        actions.deleteBranch({repo, ref}, true),
-        BranchDeletionFailureError,
-        /An attempt to delete this branch failed. Error: error from DELETE request in test$/
       ).then(assertAuthenticatedForOctokit);
     });
   });

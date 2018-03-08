@@ -6,7 +6,6 @@ export default {
   input: 'src/plugin.js',
   external: [
     'http-status-codes',
-    'milliseconds',
     'highwire',
     'delay',
     'joi',
@@ -22,7 +21,7 @@ export default {
     babel({
       babelrc: false,
       exclude: ['./node_modules/**'],
-      presets: [['env', {targets: {node: 'current'}, modules: false}]],
+      presets: [['env', {modules: false, targets: {node: 8}}]],
       plugins: [['transform-object-rest-spread', {useBuiltIns: true}]]
     })
   ],

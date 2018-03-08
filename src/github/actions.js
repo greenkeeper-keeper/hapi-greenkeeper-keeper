@@ -1,24 +1,12 @@
-import {minutes} from 'milliseconds';
 import octokitFactory from './octokit-factory-wrapper';
-import poll from './poller';
-import {
-  BranchDeletionFailureError,
-  FailedStatusFoundError,
-  InvalidStatusFoundError,
-  MergeFailureError
-} from '../errors';
-
-function determineMergeMethodFrom(acceptAction, squash) {
-  if (acceptAction) return acceptAction;
-  return squash ? 'squash' : 'merge';
-}
+import {FailedStatusFoundError, InvalidStatusFoundError, MergeFailureError} from '../errors';
 
 export default function (githubCredentials) {
   const octokit = octokitFactory();
   const {token} = githubCredentials;
   octokit.authenticate({type: 'token', token});
 
-  function ensureAcceptability({repo, sha, url, pollWhenPending}, log, timeout = minutes(1)) {
+  function ensureAcceptability({repo, sha, url}, log) {
     log(['info', 'PR', 'validating'], url);
 
     return octokit.repos.getCombinedStatusForRef({owner: repo.owner.login, repo: repo.name, ref: sha})
@@ -26,14 +14,7 @@ export default function (githubCredentials) {
       .then(({state}) => {
         switch (state) {
           case 'pending': {
-            if (pollWhenPending) {
-              return poll({repo, sha, pollWhenPending}, log, timeout, ensureAcceptability).then(message => {
-                log(['info', 'PR', 'pending-status'], `retrying statuses for: ${url}`);
-                return message;
-              });
-            }
-
-            log(['info', 'PR', 'pending-status'], `not configured to poll: ${url}`);
+            log(['info', 'PR', 'pending-status'], `commit status checks have not completed yet: ${url}`);
             return Promise.reject(new Error('pending'));
           }
           case 'success':
@@ -54,7 +35,7 @@ export default function (githubCredentials) {
       });
   }
 
-  function acceptPR(repo, sha, prNumber, squash, acceptAction, log) {
+  function acceptPR(repo, sha, prNumber, acceptAction, log) {
     return octokit.pullRequests.merge({
       owner: repo.owner.login,
       repo: repo.name,
@@ -62,7 +43,7 @@ export default function (githubCredentials) {
       commit_title: `greenkeeper-keeper(pr: ${prNumber}): :white_check_mark:`,
       commit_message: `greenkeeper-keeper(pr: ${prNumber}): :white_check_mark:`,
       sha,
-      merge_method: determineMergeMethodFrom(acceptAction, squash)
+      merge_method: acceptAction
     }).then(result => {
       log(['info', 'PR', 'accepted'], {
         owner: repo.owner.login,
@@ -71,15 +52,6 @@ export default function (githubCredentials) {
       });
       return result.data;
     }).catch(err => Promise.reject(new MergeFailureError(err)));
-  }
-
-  function deleteBranch({repo, ref}, deleteBranches) {
-    if (deleteBranches) {
-      return octokit.gitdata.deleteReference({owner: repo.owner.login, repo: repo.name, ref})
-        .catch(err => Promise.reject(new BranchDeletionFailureError(err)));
-    }
-
-    return Promise.resolve();
   }
 
   function postErrorComment(repo, prNumber, error) {
@@ -106,7 +78,6 @@ export default function (githubCredentials) {
   return {
     ensureAcceptability,
     acceptPR,
-    deleteBranch,
     postErrorComment,
     getPullRequestsForCommit,
     getPullRequest

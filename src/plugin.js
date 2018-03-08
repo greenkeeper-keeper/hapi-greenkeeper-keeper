@@ -5,30 +5,26 @@ import validatePayloadAndProcess from './handler';
 function validate(options) {
   const validated = joi.validate(options, joi.object({
     github: joi.object({token: joi.string().required()}).required(),
-    squash: joi.boolean(),
-    acceptAction: joi.string().valid('merge', 'squash', 'rebase'),
-    deleteBranches: joi.boolean()
-  }).xor('squash', 'acceptAction').required());
+    acceptAction: joi.string().valid('merge', 'squash', 'rebase').required()
+  }).required());
 
   hoek.assert(!validated.error, validated.error);
 
   return validated.value;
 }
 
-export function register(server, options, next) {
-  const settings = validate(options);
 
-  server.route({
-    method: 'POST',
-    path: '/payload',
-    handler(request, reply) {
-      validatePayloadAndProcess(request, reply, settings);
-    }
-  });
+export const plugin = {
+  async register(server, options) {
+    const settings = validate(options);
 
-  next();
-}
-
-register.attributes = {
+    server.route({
+      method: 'POST',
+      path: '/payload',
+      handler(request, responseToolkit) {
+        return validatePayloadAndProcess(request, responseToolkit, settings);
+      }
+    });
+  },
   pkg: require('../package.json')
 };
