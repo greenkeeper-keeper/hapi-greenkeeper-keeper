@@ -2,17 +2,22 @@
 
 hapi plugin to automatically merge and clean up passing greenkeeper PRs
 
-[![npm](https://img.shields.io/npm/v/hapi-greenkeeper-keeper.svg?maxAge=2592000)](https://www.npmjs.com/package/hapi-greenkeeper-keeper)
-[![license](https://img.shields.io/github/license/greenkeeper-keeper/hapi-greenkeeper-keeper.svg)](LICENSE)
-[![Gitter](https://img.shields.io/gitter/room/greenkeeper-keeper/Lobby.svg)](https://gitter.im/greenkeeper-keeper/Lobby)
+<!-- consumer badges -->
+[![npm](https://img.shields.io/npm/v/hapi-greenkeeper-keeper.svg?style=flat)](https://www.npmjs.com/package/hapi-greenkeeper-keeper)
+[![monthly downloads](https://img.shields.io/npm/dm/hapi-greenkeeper-keeper.svg?style=flat)](https://www.npmjs.com/package/hapi-greenkeeper-keeper)
+[![license](https://img.shields.io/github/license/greenkeeper-keeper/hapi-greenkeeper-keeper.svg?style=flat)](LICENSE)
+[![Gitter](https://img.shields.io/gitter/room/greenkeeper-keeper/Lobby.svg?style=flat)](https://gitter.im/greenkeeper-keeper/Lobby)
 
+<!-- status badges -->
 [![Build Status](https://img.shields.io/travis/greenkeeper-keeper/hapi-greenkeeper-keeper.svg?style=flat&branch=master)](https://travis-ci.org/greenkeeper-keeper/hapi-greenkeeper-keeper)
-[![Codecov](https://img.shields.io/codecov/c/github/greenkeeper-keeper/hapi-greenkeeper-keeper.svg)](https://codecov.io/github/greenkeeper-keeper/hapi-greenkeeper-keeper)
+[![Codecov](https://img.shields.io/codecov/c/github/greenkeeper-keeper/hapi-greenkeeper-keeper.svg?style=flat)](https://codecov.io/github/greenkeeper-keeper/hapi-greenkeeper-keeper)
 
-[![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli/)
-![greenkeeper badge](https://badges.greenkeeper.io/greenkeeper-keeper/hapi-greenkeeper-keeper.svg)
-[![semantic-release](https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg)](https://github.com/semantic-release/semantic-release)
+<!-- contribution badges -->
 [![PRs Welcome][prs-badge]][prs]
+[![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg?style=flat)](https://conventionalcommits.org)
+[![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg?style=flat)](http://commitizen.github.io/cz-cli/)
+![greenkeeper badge](https://badges.greenkeeper.io/greenkeeper-keeper/hapi-greenkeeper-keeper.svg)
+[![semantic-release](https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg?style=flat)](https://github.com/semantic-release/semantic-release)
 
 ## Installation
 
