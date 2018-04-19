@@ -71,7 +71,7 @@
     "mocha": "5.1.1",
     "nock": "9.2.5",
     "npm-run-all": "4.1.2",
-    "nyc": "11.6.0",
+    "nyc": "11.7.1",
     "proxyquire": "2.0.1",
     "rollup": "0.58.1",
     "rollup-plugin-babel": "3.0.3",
