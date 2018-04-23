@@ -74,7 +74,7 @@
     "nyc": "11.7.1",
     "proxyquire": "2.0.1",
     "rollup": "0.58.1",
-    "rollup-plugin-babel": "3.0.3",
+    "rollup-plugin-babel": "3.0.4",
     "rollup-plugin-node-resolve": "3.3.0",
     "semantic-release": "15.1.7",
     "sinon": "4.5.0"
