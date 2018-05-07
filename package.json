@@ -77,7 +77,7 @@
     "rollup-plugin-babel": "3.0.4",
     "rollup-plugin-node-resolve": "3.3.0",
     "semantic-release": "15.1.8",
-    "sinon": "5.0.1"
+    "sinon": "5.0.6"
   },
   "dependencies": {
     "@octokit/rest": "15.2.7",
