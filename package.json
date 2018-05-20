@@ -67,7 +67,7 @@
     "greenkeeper-lockfile": "1.15.1",
     "hapi": "17.4.0",
     "husky": "1.0.0-rc.1",
-    "markdownlint-cli": "0.8.1",
+    "markdownlint-cli": "0.8.2",
     "mocha": "5.1.1",
     "nock": "9.2.5",
     "npm-run-all": "4.1.3",
