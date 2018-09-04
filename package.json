@@ -75,7 +75,7 @@
     "proxyquire": "2.0.1",
     "rollup": "0.58.2",
     "rollup-plugin-babel": "3.0.4",
-    "rollup-plugin-node-resolve": "3.3.0",
+    "rollup-plugin-node-resolve": "3.4.0",
     "semantic-release": "15.1.8",
     "sinon": "5.0.6"
   },
