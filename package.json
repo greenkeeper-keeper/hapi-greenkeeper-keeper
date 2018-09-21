@@ -50,9 +50,9 @@
   "devDependencies": {
     "@travi/any": "1.7.5",
     "@travi/eslint-config-travi": "1.6.13",
-    "babel-core": "6.26.0",
+    "babel-core": "^6.26.3",
     "babel-plugin-transform-object-rest-spread": "6.26.0",
-    "babel-preset-env": "1.6.1",
+    "babel-preset-env": "^1.7.0",
     "chai": "4.1.2",
     "chai-as-promised": "7.1.1",
     "codecov": "3.0.1",
