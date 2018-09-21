@@ -4,8 +4,28 @@ import openedByGreenkeeperBot from './greenkeeper';
 import createActions from './github/actions';
 import process from './process';
 
-function successfulStatusCouldBeForGreenkeeperPR(event, state, branches) {
-  return 'status' === event && 'success' === state && 1 === branches.length && 'master' !== branches[0].name;
+function successfulStatusCouldBeForGreenkeeperPR(event, state, branches, log) {
+  if ('status' !== event) {
+    log(['PR', 'event was not `status`']);
+    return false;
+  }
+
+  if ('success' !== state) {
+    log(['PR', 'state was not `success`']);
+    return false;
+  }
+
+  if (1 !== branches.length) {
+    log(['PR', `expected 1 branch, but found ${branches.length}`]);
+    return false;
+  }
+
+  if ('master' === branches[0].name) {
+    log(['PR', 'branch name should not be `master`']);
+    return false;
+  }
+
+  return true;
 }
 
 export default async function (request, responseToolkit, settings) {
@@ -22,7 +42,7 @@ export default async function (request, responseToolkit, settings) {
     return responseToolkit.response('successfully configured the webhook for greenkeeper-keeper').code(NO_CONTENT);
   }
 
-  if (successfulStatusCouldBeForGreenkeeperPR(event, state, branches)) {
+  if (successfulStatusCouldBeForGreenkeeperPR(event, state, branches, (...args) => request.log(...args))) {
     const {getPullRequestsForCommit, getPullRequest} = createActions(settings.github);
 
     return getPullRequestsForCommit({ref: sha})
