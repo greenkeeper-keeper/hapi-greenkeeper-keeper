@@ -28,7 +28,7 @@ suite('github actions', () => {
   const log = () => undefined;
 
   setup(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.createSandbox();
 
     octokitAuthenticate = sinon.spy();
     octokitIssueSearch = sinon.stub();

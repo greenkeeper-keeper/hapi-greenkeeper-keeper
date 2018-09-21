@@ -19,7 +19,7 @@ suite('handler', () => {
     response = sinon.stub();
     code = sinon.spy();
 
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.createSandbox();
 
     response.withArgs('skipping').returns({code});
 

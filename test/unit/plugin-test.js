@@ -13,7 +13,7 @@ suite('plugin', () => {
   let sandbox;
 
   setup(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.createSandbox();
 
     sandbox.stub(validatePayloadAndProcess, 'default');
   });

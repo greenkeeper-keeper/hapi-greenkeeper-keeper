@@ -15,7 +15,7 @@ suite('process', () => {
   const number = any.integer();
 
   setup(() => {
-    sandbox = sinon.sandbox.create();
+    sandbox = sinon.createSandbox();
 
     ensureAcceptability = sinon.stub();
     acceptPR = sinon.stub();
