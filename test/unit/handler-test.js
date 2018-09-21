@@ -50,7 +50,7 @@ suite('handler', () => {
 
       return handler(request, {response}, settings).then(() => {
         assert.calledWith(code, BAD_REQUEST);
-        assert.calledWith(log, ['PR', 'skipping']);
+        assert.calledWith(log, ['PR'], 'skipping');
       });
     });
 
@@ -68,7 +68,7 @@ suite('handler', () => {
 
       return handler(request, {response}, settings).then(() => {
         assert.calledWith(code, BAD_REQUEST);
-        assert.calledWith(log, ['PR', 'skipping']);
+        assert.calledWith(log, ['PR'], 'skipping');
       });
     });
   });
@@ -123,7 +123,7 @@ suite('handler', () => {
 
       return handler(request, {response}, settings).then(() => {
         assert.calledWith(code, BAD_REQUEST);
-        assert.calledWith(log, ['PR', 'skipping']);
+        assert.calledWith(log, ['PR'], 'skipping');
       });
     });
 
@@ -136,7 +136,7 @@ suite('handler', () => {
 
       return handler(request, {response}, settings).then(() => {
         assert.calledWith(code, BAD_REQUEST);
-        assert.calledWith(log, ['PR', 'skipping']);
+        assert.calledWith(log, ['PR'], 'skipping');
       });
     });
 
@@ -149,7 +149,7 @@ suite('handler', () => {
 
       return handler(request, {response}, settings).then(() => {
         assert.calledWith(code, BAD_REQUEST);
-        assert.calledWith(log, ['PR', 'skipping']);
+        assert.calledWith(log, ['PR'], 'skipping');
       });
     });
 
@@ -252,7 +252,7 @@ suite('handler', () => {
 
       return handler(request, {response}, settings).then(() => {
         assert.calledWith(code, BAD_REQUEST);
-        assert.calledWith(log, ['PR', 'skipping']);
+        assert.calledWith(log, ['PR'], 'skipping');
       });
     });
   });

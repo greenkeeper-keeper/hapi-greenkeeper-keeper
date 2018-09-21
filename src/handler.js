@@ -6,22 +6,23 @@ import process from './process';
 
 function successfulStatusCouldBeForGreenkeeperPR(event, state, branches, log) {
   if ('status' !== event) {
-    log(['PR', 'event was not `status`']);
+    log(['PR'], `event was \`${event}\` instead of \`status\``);
     return false;
   }
 
   if ('success' !== state) {
-    log(['PR', 'state was not `success`']);
+    log(['PR'], `state was \`${state}\` instead of \`success\``);
     return false;
   }
 
   if (1 !== branches.length) {
-    log(['PR', `expected 1 branch, but found ${branches.length}`]);
+    log(['PR'], `expected 1 branch, but found ${branches.length}`);
     return false;
   }
 
-  if ('master' === branches[0].name) {
-    log(['PR', 'branch name should not be `master`']);
+  const branchName = branches[0].name;
+  if ('master' === branchName) {
+    log(['PR'], `branch name \`${branchName}\` should not be \`master\``);
     return false;
   }
 
@@ -63,7 +64,7 @@ export default async function (request, responseToolkit, settings) {
       .catch(e => boom.internal('failed to fetch PRs', e));
   }
 
-  request.log(['PR', 'skipping']);
+  request.log(['PR'], 'skipping');
 
   return responseToolkit.response('skipping').code(BAD_REQUEST);
 }
