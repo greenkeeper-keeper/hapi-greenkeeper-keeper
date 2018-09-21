@@ -28,9 +28,12 @@ export default async function (request, responseToolkit, settings) {
     return getPullRequestsForCommit({ref: sha})
       .then(async pullRequests => {
         if (!pullRequests.length) return responseToolkit.response('no PRs for this commit').code(BAD_REQUEST);
-        else if (1 < pullRequests.length) {
+
+        if (1 < pullRequests.length) {
           return responseToolkit.response(boom.internal('too many PRs exist for this commit'));
-        } else if (openedByGreenkeeperBot(pullRequests[0].user.html_url)) {
+        }
+
+        if (openedByGreenkeeperBot(pullRequests[0].user.html_url)) {
           process(request, await getPullRequest(repository, pullRequests[0].number), settings);
           return responseToolkit.response('ok').code(ACCEPTED);
         }
