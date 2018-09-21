@@ -1,6 +1,7 @@
 language: node_js
 notifications:
   email: false
+install: case $TRAVIS_BRANCH in greenkeeper*) npm i;; *) npm ci;; esac;
 before_script:
 - npm run greenkeeper:update-lockfile
 - npm ls --production >/dev/null
