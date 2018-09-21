@@ -34,7 +34,7 @@
     "precommit": "npm test",
     "build": "rollup -c",
     "preversion": "npm test",
-    "prepublish": "run-s build",
+    "prepack": "run-s build",
     "semantic-release": "semantic-release",
     "greenkeeper:update-lockfile": "greenkeeper-lockfile-update",
     "greenkeeper:upload-lockfile": "greenkeeper-lockfile-upload"
@@ -74,7 +74,7 @@
     "nyc": "^13.0.1",
     "proxyquire": "^2.1.0",
     "rollup": "^0.66.2",
-    "rollup-plugin-babel": "^4.0.3",
+    "rollup-plugin-babel": "^3.0.7",
     "rollup-plugin-node-resolve": "^3.4.0",
     "semantic-release": "^15.9.16",
     "sinon": "^6.3.4"
