@@ -1,4 +1,4 @@
-export const GREENKEEPER_BOT_GITHUB_URL = 'https://github.com/greenkeeperio-bot';
+export const GREENKEEPER_BOT_GITHUB_URL = 'https://github.com/marketplace/greenkeeper';
 export const GREENKEEPER_INTEGRATION_GITHUB_URL = 'https://github.com/apps/greenkeeper';
 
 export default function (sender) {

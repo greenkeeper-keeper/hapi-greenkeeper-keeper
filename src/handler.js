@@ -54,12 +54,13 @@ export default async function (request, responseToolkit, settings) {
           return responseToolkit.response(boom.internal('too many PRs exist for this commit'));
         }
 
-        if (openedByGreenkeeperBot(pullRequests[0].user.html_url)) {
+        const senderUrl = pullRequests[0].user.html_url;
+        if (openedByGreenkeeperBot(senderUrl)) {
           process(request, await getPullRequest(repository, pullRequests[0].number), settings);
           return responseToolkit.response('ok').code(ACCEPTED);
         }
 
-        return responseToolkit.response('PR is not from greenkeeper').code(BAD_REQUEST);
+        return responseToolkit.response(`PR is not from greenkeeper, but from ${senderUrl}`).code(BAD_REQUEST);
       })
       .catch(e => boom.internal('failed to fetch PRs', e));
   }

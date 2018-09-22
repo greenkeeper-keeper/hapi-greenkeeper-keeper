@@ -178,13 +178,14 @@ suite('handler', () => {
     });
 
     test('that the response is bad-request if the PR is not from greenkeeper', () => {
+      const senderUrl = any.url();
       const request = {
         payload: {state: 'success', branches: [{name: any.string()}]},
         headers: {'x-github-event': 'status'},
         log: () => undefined
       };
-      getPullRequestsForCommit.resolves([{user: {html_url: any.url()}}]);
-      response.withArgs('PR is not from greenkeeper').returns({code});
+      getPullRequestsForCommit.resolves([{user: {html_url: senderUrl}}]);
+      response.withArgs(`PR is not from greenkeeper, but from ${senderUrl}`).returns({code});
 
       return handler(request, {response}, settings).then(() => assert.calledWith(code, BAD_REQUEST));
     });
