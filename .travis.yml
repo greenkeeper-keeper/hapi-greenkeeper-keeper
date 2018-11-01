@@ -10,3 +10,7 @@ deploy:
 branches:
   except:
   - "/^v\\d+\\.\\d+\\.\\d+$/"
+env:
+  global:
+  - FORCE_COLOR=1
+  - NPM_CONFIG_COLOR=always
