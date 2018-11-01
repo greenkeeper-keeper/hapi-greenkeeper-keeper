@@ -28,7 +28,7 @@ export function World() {
   this.repoName = any.word();
   this.repoFullName = `${this.repoOwner}/${this.repoName}`;
 
-  this.receiveWebhook = ({event, action, prDetails, statusEventDetails}) => this.server.inject({
+  this.receiveWebhook = ({event, statusEventDetails}) => this.server.inject({
     method: 'POST',
     url: '/payload',
     headers: {
@@ -37,14 +37,10 @@ export function World() {
     payload: buildWebhookPayload(
       event,
       {
-        action,
-        prDetails,
         statusEventDetails,
         sha: this.sha,
-        ref: this.ref,
         repoFullName: this.repoFullName,
-        repoName: this.repoName,
-        repoOwner: this.repoOwner
+        repoName: this.repoName
       }
     )
   });

@@ -9,12 +9,6 @@ defineSupportCode(({When, Then, setWorldConstructor}) => {
   When(/^the webhook is received$/, function () {
     return this.receiveWebhook({
       event: this.webhookEventName,
-      action: this.webhookAction,
-      prDetails: {
-        sender: this.prSender,
-        comments: this.comments,
-        number: this.prNumber
-      },
       statusEventDetails: {
         state: this.statusEventState,
         repoOwner: this.repoOwner,
