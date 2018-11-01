@@ -1,34 +1,6 @@
 import any from '@travi/any';
 
-function buildWebhookPayload(
-  event,
-  {action, prDetails, statusEventDetails, ref, repoFullName, repoName, repoOwner, sha}
-) {
-  if ('pull_request' === event) {
-    return {
-      action,
-      sha,
-      sender: {
-        html_url: prDetails.sender
-      },
-      number: prDetails.number,
-      pull_request: {
-        number: prDetails.number,
-        comments_url: `https://api.github.com${prDetails.comments}`,
-        url: 'https://api.github.com/123',
-        head: {
-          sha,
-          ref,
-          repo: {
-            full_name: repoFullName,
-            name: repoName,
-            owner: {login: repoOwner}
-          }
-        }
-      }
-    };
-  }
-
+function buildWebhookPayload(event, {statusEventDetails, repoFullName, repoName, sha}) {
   if ('status' === event) {
     return {
       state: statusEventDetails.state,
