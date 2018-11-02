@@ -13,7 +13,7 @@ defineSupportCode(({Given, Then, setWorldConstructor}) => {
     callback();
   });
 
-  Given('the PR was submitted by a non-greenkeeper user', function (callback) {
+  Given(/^the PR was submitted by a non-greenkeeper user$/, function (callback) {
     this.prSender = any.url();
 
     callback();

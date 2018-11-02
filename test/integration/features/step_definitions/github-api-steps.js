@@ -40,13 +40,15 @@ defineSupportCode(({Before, After, Given, setWorldConstructor}) => {
     nock.cleanAll();
   });
 
-  Given('an open PR exists for the commit', function (callback) {
+  Given(/^an open PR exists for the commit$/, function (callback) {
+    this.prLink = 'https://api.github.com/123';
+
     if (GREENKEEPER_INTEGRATION_GITHUB_URL === this.prSender) {
       githubScope
         .matchHeader('Authorization', authorizationHeader)
         .get(`/repos/${this.repoFullName}/pulls/${this.prNumber}`)
         .reply(OK, {
-          url: 'https://api.github.com/123',
+          url: this.prLink,
           user: {html_url: this.prSender || any.url()},
           number: this.prNumber,
           head: {
@@ -60,21 +62,24 @@ defineSupportCode(({Before, After, Given, setWorldConstructor}) => {
           }
         });
     }
-    githubScope
-      .matchHeader('Authorization', authorizationHeader)
-      .get(`/search/issues?q=${this.sha}+type%3Apr`)
-      .reply(OK, {
-        items: [{
-          url: 'https://api.github.com/123',
-          user: {html_url: this.prSender || any.url()},
-          number: this.prNumber
-        }]
-      });
+
+    if ('status' === this.webhookEventName) {
+      githubScope
+        .matchHeader('Authorization', authorizationHeader)
+        .get(`/search/issues?q=${this.sha}+type%3Apr`)
+        .reply(OK, {
+          items: [{
+            url: this.prLink,
+            user: {html_url: this.prSender || any.url()},
+            number: this.prNumber
+          }]
+        });
+    }
 
     callback();
   });
 
-  Given('no open PRs exist for the commit', function (callback) {
+  Given(/^no open PRs exist for the commit$/, function (callback) {
     githubScope
       .matchHeader('Authorization', authorizationHeader)
       .get(`/search/issues?q=${encodeURIComponent(this.sha)}+type%3Apr`)
