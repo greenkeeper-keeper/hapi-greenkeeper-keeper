@@ -97,10 +97,6 @@ defineSupportCode(({Before, After, Given, setWorldConstructor}) => {
     callback();
   });
 
-  Given(/^statuses exist for the PR$/, function () {
-    stubTheStatusesEndpoint.call(this, githubScope, authorizationHeader, 'success');
-  });
-
   Given(/^the commit statuses resolve to (.*)$/, function (status) {
     stubTheStatusesEndpoint.call(this, githubScope, authorizationHeader, status);
 

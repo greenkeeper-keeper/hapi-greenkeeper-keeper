@@ -1,38 +1,45 @@
 import octokitFactory from './octokit-factory-wrapper';
 import {FailedStatusFoundError, InvalidStatusFoundError, MergeFailureError} from '../errors';
 
+function determineIfAllStatusesAreSuccessful(state, url, log) {
+  switch (state) {
+    case 'pending': {
+      log(['info', 'PR', 'pending-status'], `commit status checks have not completed yet: ${url}`);
+      return Promise.reject(new Error('pending'));
+    }
+    case 'success':
+      return Promise.resolve('All commit statuses passed')
+        .then(message => {
+          log(['info', 'PR', 'passing-status'], 'statuses verified, continuing...');
+          return message;
+        });
+    case 'failure':
+      return Promise.reject(new FailedStatusFoundError())
+        .catch(err => {
+          log(['error', 'PR', 'failure status'], 'found failed, rejecting...');
+          return Promise.reject(err);
+        });
+    default:
+      return Promise.reject(new InvalidStatusFoundError());
+  }
+}
+
 export default function (githubCredentials) {
   const octokit = octokitFactory();
   const {token} = githubCredentials;
   octokit.authenticate({type: 'token', token});
 
-  function ensureAcceptability({repo, sha, url}, log) {
+  async function ensureAcceptability({repo, sha, url}, log) {
     log(['info', 'PR', 'validating'], url);
+    const {name: repoName, owner: {login: repoOwner}} = repo;
 
-    return octokit.repos.getCombinedStatusForRef({owner: repo.owner.login, repo: repo.name, ref: sha})
-      .then(response => response.data)
-      .then(({state}) => {
-        switch (state) {
-          case 'pending': {
-            log(['info', 'PR', 'pending-status'], `commit status checks have not completed yet: ${url}`);
-            return Promise.reject(new Error('pending'));
-          }
-          case 'success':
-            return Promise.resolve('All commit statuses passed')
-              .then(message => {
-                log(['info', 'PR', 'passing-status'], 'statuses verified, continuing...');
-                return message;
-              });
-          case 'failure':
-            return Promise.reject(new FailedStatusFoundError())
-              .catch(err => {
-                log(['error', 'PR', 'failure status'], 'found failed, rejecting...');
-                return Promise.reject(err);
-              });
-          default:
-            return Promise.reject(new InvalidStatusFoundError());
-        }
-      });
+    const [statusesResponse] = await Promise.all([
+      octokit.repos.getCombinedStatusForRef({owner: repoOwner, repo: repoName, ref: sha}),
+      octokit.checks.listForRef({owner: repoOwner, repo: repoName, ref: sha})
+    ]);
+    const {state} = statusesResponse.data;
+
+    return determineIfAllStatusesAreSuccessful(state, url, log);
   }
 
   function acceptPR(repo, sha, prNumber, acceptAction, log) {

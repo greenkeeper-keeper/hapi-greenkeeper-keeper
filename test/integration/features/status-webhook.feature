@@ -6,7 +6,7 @@ Feature: Commit status event webhook
     And the commit is only on one, non-master branch
     And the PR was submitted by the greenkeeper integration
     And an open PR exists for the commit
-    #    And the check_run results resolve to success
+    And the check_run results resolve to success
     But the commit statuses resolve to success
     And the PR can be accepted
     When the webhook is received

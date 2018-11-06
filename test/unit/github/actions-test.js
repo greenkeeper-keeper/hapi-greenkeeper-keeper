@@ -15,7 +15,8 @@ suite('github actions', () => {
     octokitMergePr,
     octokitCombinedStatus,
     octokitDeleteRef,
-    octokitCreateIssueComment;
+    octokitCreateIssueComment,
+    octokitListChecksForRef;
   const token = any.simpleObject();
   const githubCredentials = {...any.simpleObject(), token};
   const sha = any.string();
@@ -37,6 +38,7 @@ suite('github actions', () => {
     octokitMergePr = sinon.stub();
     octokitDeleteRef = sinon.stub();
     octokitCreateIssueComment = sinon.stub();
+    octokitListChecksForRef = sinon.stub();
 
     sandbox.stub(octokitFactory, 'default');
 
@@ -49,7 +51,8 @@ suite('github actions', () => {
       },
       issues: {createComment: octokitCreateIssueComment},
       repos: {getCombinedStatusForRef: octokitCombinedStatus},
-      gitdata: {deleteReference: octokitDeleteRef}
+      gitdata: {deleteReference: octokitDeleteRef},
+      checks: {listForRef: octokitListChecksForRef}
     });
     actions = actionsFactory(githubCredentials);
   });
