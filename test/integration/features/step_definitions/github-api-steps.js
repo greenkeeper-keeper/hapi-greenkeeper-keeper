@@ -99,7 +99,15 @@ defineSupportCode(({Before, After, Given, setWorldConstructor}) => {
     callback();
   });
 
-  Given(/^the check_run results resolve to (.*)$/, () => 'pending');
+  Given(/^the check_run results resolve to (.*)$/, function (status) {
+    githubScope
+      .matchHeader('Authorization', authorizationHeader)
+      // .matchHeader('Accept', 'application/vnd.github.antiope-preview+json')
+      .get(`/repos/${this.repoFullName}/commits/${this.sha}/check-runs`)
+      .reply(OK, {
+        state: status
+      });
+  });
 
   Given(/^the PR can be merged$/, function (callback) {
     this.prProcessed = new Promise(resolve => {
