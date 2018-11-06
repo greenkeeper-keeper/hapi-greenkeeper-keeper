@@ -20,6 +20,15 @@ function stubTheCommentsEndpoint(githubScope, authorizationHeader) {
   });
 }
 
+function stubTheStatusesEndpoint(githubScope, authorizationHeader, status) {
+  githubScope
+    .matchHeader('Authorization', authorizationHeader)
+    .get(`/repos/${this.repoFullName}/commits/${this.sha}/status`)
+    .reply(OK, {
+      state: status
+    });
+}
+
 defineSupportCode(({Before, After, Given, setWorldConstructor}) => {
   setWorldConstructor(World);
 
@@ -88,15 +97,16 @@ defineSupportCode(({Before, After, Given, setWorldConstructor}) => {
     callback();
   });
 
-  Given(/^statuses exist for the PR$/, function (callback) {
-    githubScope
-      .matchHeader('Authorization', authorizationHeader)
-      .get(`/repos/${this.repoFullName}/commits/${this.sha}/status`)
-      .reply(OK, {
-        state: 'success'
-      });
+  Given(/^statuses exist for the PR$/, function () {
+    stubTheStatusesEndpoint.call(this, githubScope, authorizationHeader, 'success');
+  });
 
-    callback();
+  Given(/^the commit statuses resolve to (.*)$/, function (status) {
+    stubTheStatusesEndpoint.call(this, githubScope, authorizationHeader, status);
+
+    if ('failure' === status) {
+      stubTheCommentsEndpoint.call(this, githubScope, authorizationHeader);
+    }
   });
 
   Given(/^the check_run results resolve to (.*)$/, function (status) {
@@ -143,18 +153,6 @@ defineSupportCode(({Before, After, Given, setWorldConstructor}) => {
           resolve();
         });
     });
-
-    callback();
-  });
-
-  Given(/^the commit statuses resolve to (.*)$/, function (status, callback) {
-    githubScope
-      .matchHeader('Authorization', authorizationHeader)
-      .get(`/repos/${this.repoFullName}/commits/${this.sha}/status`)
-      .reply(OK, {
-        state: status
-      });
-    stubTheCommentsEndpoint.call(this, githubScope, authorizationHeader);
 
     callback();
   });
