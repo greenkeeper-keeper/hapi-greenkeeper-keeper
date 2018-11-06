@@ -1,1 +1,4 @@
 extends: '@travi/travi/rules/tests/cucumber'
+
+rules:
+  cucumber/async-then: off

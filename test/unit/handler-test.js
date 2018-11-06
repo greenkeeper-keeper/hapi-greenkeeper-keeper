@@ -35,44 +35,6 @@ suite('handler', () => {
     log.resetHistory();
   });
 
-  suite('`pull_request` event', () => {
-    test('that response is bad-request when the webhook action is a `pull_request`', () => {
-      const request = {
-        payload: {
-          action: any.word(),
-          sender: {
-            html_url: greenkeeperSender
-          }
-        },
-        headers: {'x-github-event': 'pull_request'},
-        log
-      };
-
-      return handler(request, {response}, settings).then(() => {
-        assert.calledWith(code, BAD_REQUEST);
-        assert.calledWith(log, ['PR'], 'skipping');
-      });
-    });
-
-    test('that response is bad-request when pr not opened by greenkeeper', () => {
-      const request = {
-        payload: {
-          action: 'opened',
-          sender: {
-            html_url: any.url()
-          }
-        },
-        headers: {'x-github-event': 'pull_request'},
-        log
-      };
-
-      return handler(request, {response}, settings).then(() => {
-        assert.calledWith(code, BAD_REQUEST);
-        assert.calledWith(log, ['PR'], 'skipping');
-      });
-    });
-  });
-
   suite('`status` event', () => {
     let getPullRequestsForCommit, getPullRequest;
     const error = new Error(any.sentence());
@@ -443,17 +405,18 @@ suite('handler', () => {
   });
 
   suite('other statuses', () => {
-    test('that response is bad-request when the webhook event is not `pull_request` or `status', () => {
+    test('that response is bad-request when the webhook event is not `pull_request` or `status', async () => {
+      const event = any.word();
       const request = {
         payload: {},
-        headers: {'x-github-event': any.word()},
+        headers: {'x-github-event': event},
         log
       };
+      response.withArgs(`event was \`${event}\` instead of \`status\` or \`check_run\``).returns({code});
 
-      return handler(request, {response}, settings).then(() => {
-        assert.calledWith(code, BAD_REQUEST);
-        assert.calledWith(log, ['PR'], 'skipping');
-      });
+      await handler(request, {response}, settings);
+
+      assert.calledWith(code, BAD_REQUEST);
     });
   });
 });

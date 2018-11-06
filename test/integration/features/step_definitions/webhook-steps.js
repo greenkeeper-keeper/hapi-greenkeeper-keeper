@@ -7,8 +7,7 @@ import {World} from '../support/world';
 defineSupportCode(({Given, Then, setWorldConstructor}) => {
   setWorldConstructor(World);
 
-  Given(/^the webhook is for a (.*) event and a (.*) action$/, function (event, action, callback) {
-    this.webhookAction = action;
+  Given(/^the webhook is for a (.*) event$/, function (event, callback) {
     this.webhookEventName = event;
 
     callback();
@@ -61,5 +60,13 @@ defineSupportCode(({Given, Then, setWorldConstructor}) => {
     assert.equal(this.getResponseStatus(), BAD_REQUEST);
 
     callback();
+  });
+
+  Then(/^the webhook response indicates that the webhook action is incorrect$/, async function () {
+    assert.equal(
+      this.serverResponse.payload,
+      `event was \`${this.webhookEventName}\` instead of \`status\` or \`check_run\``
+    );
+    assert.equal(this.getResponseStatus(), BAD_REQUEST);
   });
 });
