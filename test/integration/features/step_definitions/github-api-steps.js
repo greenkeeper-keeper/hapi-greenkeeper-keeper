@@ -99,6 +99,8 @@ defineSupportCode(({Before, After, Given, setWorldConstructor}) => {
     callback();
   });
 
+  Given(/^the check_run results resolve to (.*)$/, () => 'pending');
+
   Given(/^the PR can be merged$/, function (callback) {
     this.prProcessed = new Promise(resolve => {
       githubScope
@@ -149,7 +151,7 @@ defineSupportCode(({Before, After, Given, setWorldConstructor}) => {
     callback();
   });
 
-  Given('the PR cannot be merged', function (callback) {
+  Given(/^the PR cannot be merged$/, function (callback) {
     githubScope
       .matchHeader('Authorization', authorizationHeader)
       .put(`/repos/${this.repoFullName}/pulls/${this.prNumber}/merge`)
