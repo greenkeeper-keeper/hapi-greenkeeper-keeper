@@ -44,10 +44,11 @@ defineSupportCode(({Before, After, Given, setWorldConstructor}) => {
     githubScope = nock('https://api.github.com').log(debug);
   });
 
-  After(() => {
+  After(function () {
     assert.isTrue(githubScope.isDone(), `pending mocks: ${githubScope.pendingMocks()}`);
     nock.enableNetConnect();
     nock.cleanAll();
+    this.prProcessed = null;
   });
 
   Given(/^an open PR exists for the commit$/, function (callback) {
@@ -117,9 +118,26 @@ defineSupportCode(({Before, After, Given, setWorldConstructor}) => {
   });
 
   Given(/^the check_run results resolve to (.*)$/, function (status) {
+    if ('failure' === status) {
+      stubTheCommentsEndpoint.call(this, githubScope, authorizationHeader);
+    }
+
     const checkRuns = [
-      ...any.listOf(() => ({...any.simpleObject(), status: 'completed'})),
-      ...'pending' === status ? [{...any.simpleObject(), status: any.fromList(['in_progress', 'queued'])}] : []
+      ...any.listOf(() => ({
+        ...any.simpleObject(),
+        status: 'completed',
+        conclusion: any.fromList(['success', 'neutral'])
+      })),
+      ...'pending' === status ? [{...any.simpleObject(), status: any.fromList(['in_progress', 'queued'])}] : [],
+      ...'failure' === status
+        ? [
+          {
+            ...any.simpleObject(),
+            status: 'completed',
+            conclusion: any.fromList(['failure', 'cancelled', 'timed_out', 'action_required'])
+          }
+        ]
+        : []
     ];
 
     githubScope

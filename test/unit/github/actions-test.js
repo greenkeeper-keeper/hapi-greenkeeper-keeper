@@ -3,7 +3,12 @@ import sinon from 'sinon';
 import any from '@travi/any';
 import * as octokitFactory from '../../../src/github/octokit-factory-wrapper';
 import actionsFactory from '../../../src/github/actions';
-import {FailedStatusFoundError, InvalidStatusFoundError, MergeFailureError} from '../../../src/errors';
+import {
+  FailedCheckRunFoundError,
+  FailedStatusFoundError,
+  InvalidStatusFoundError,
+  MergeFailureError
+} from '../../../src/errors';
 
 suite('github actions', () => {
   let
@@ -62,7 +67,11 @@ suite('github actions', () => {
   const assertAuthenticatedForOctokit = () => assert.calledWith(octokitAuthenticate, {type: 'token', token});
 
   suite('ensure PR can be accepted', () => {
-    const successfulCheckRuns = any.listOf(() => ({...any.simpleObject(), status: 'completed'}));
+    const successfulCheckRuns = any.listOf(() => ({
+      ...any.simpleObject(),
+      status: 'completed',
+      conclusion: any.fromList(['success', 'neutral'])
+    }));
 
     test('that the passing status is acceptable', async () => {
       octokitCombinedStatus.withArgs({owner: repoOwner, repo: repoName, ref: sha}).resolves({data: {state: 'success'}});
@@ -138,6 +147,57 @@ suite('github actions', () => {
 
       return assert.isRejected(actions.ensureAcceptability({repo, sha}, log, any.integer()), 'pending')
         .then(assertAuthenticatedForOctokit);
+    });
+
+    test('that a check_run with a `failure` conclusion results in rejection', () => {
+      const checkRuns = [...successfulCheckRuns, {...any.simpleObject(), status: 'completed', conclusion: 'failure'}];
+      octokitCombinedStatus.withArgs({owner: repoOwner, repo: repoName, ref: sha}).resolves({data: {state: 'success'}});
+      octokitListChecksForRef.resolves({data: {total_count: checkRuns.length, check_runs: checkRuns}});
+
+      return assert.isRejected(
+        actions.ensureAcceptability({repo, sha}, log, any.integer()),
+        FailedCheckRunFoundError,
+        /A failed check_run was found for this PR\./
+      ).then(assertAuthenticatedForOctokit);
+    });
+
+    test('that a check_run with a `cancelled` conclusion results in rejection', () => {
+      const checkRuns = [...successfulCheckRuns, {...any.simpleObject(), status: 'completed', conclusion: 'cancelled'}];
+      octokitCombinedStatus.withArgs({owner: repoOwner, repo: repoName, ref: sha}).resolves({data: {state: 'success'}});
+      octokitListChecksForRef.resolves({data: {total_count: checkRuns.length, check_runs: checkRuns}});
+
+      return assert.isRejected(
+        actions.ensureAcceptability({repo, sha}, log, any.integer()),
+        FailedCheckRunFoundError,
+        /A failed check_run was found for this PR\./
+      ).then(assertAuthenticatedForOctokit);
+    });
+
+    test('that a check_run with a `timed_out` conclusion results in rejection', () => {
+      const checkRuns = [...successfulCheckRuns, {...any.simpleObject(), status: 'completed', conclusion: 'timed_out'}];
+      octokitCombinedStatus.withArgs({owner: repoOwner, repo: repoName, ref: sha}).resolves({data: {state: 'success'}});
+      octokitListChecksForRef.resolves({data: {total_count: checkRuns.length, check_runs: checkRuns}});
+
+      return assert.isRejected(
+        actions.ensureAcceptability({repo, sha}, log, any.integer()),
+        FailedCheckRunFoundError,
+        /A failed check_run was found for this PR\./
+      ).then(assertAuthenticatedForOctokit);
+    });
+
+    test('that a check_run with an `action_required` conclusion results in rejection', () => {
+      const checkRuns = [
+        ...successfulCheckRuns,
+        {...any.simpleObject(), status: 'completed', conclusion: 'action_required'}
+      ];
+      octokitCombinedStatus.withArgs({owner: repoOwner, repo: repoName, ref: sha}).resolves({data: {state: 'success'}});
+      octokitListChecksForRef.resolves({data: {total_count: checkRuns.length, check_runs: checkRuns}});
+
+      return assert.isRejected(
+        actions.ensureAcceptability({repo, sha}, log, any.integer()),
+        FailedCheckRunFoundError,
+        /A failed check_run was found for this PR\./
+      ).then(assertAuthenticatedForOctokit);
     });
   });
 

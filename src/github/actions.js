@@ -1,5 +1,5 @@
 import octokitFactory from './octokit-factory-wrapper';
-import {FailedStatusFoundError, InvalidStatusFoundError, MergeFailureError} from '../errors';
+import {FailedCheckRunFoundError, FailedStatusFoundError, InvalidStatusFoundError, MergeFailureError} from '../errors';
 
 function allStatusesAreSuccessful(statusesResponse, url, log) {
   const {state, statuses} = statusesResponse.data;
@@ -35,10 +35,15 @@ function allCheckRunsAreSuccessful(checkRunsResponse, url, log) {
     return true;
   }
 
-  checkRuns.forEach(checkRun => {
-    if ('completed' !== checkRun.status) {
+  checkRuns.forEach(({status, conclusion}) => {
+    if ('completed' !== status) {
       log(['info', 'PR', 'pending-check_runs'], `check_runs have not completed yet: ${url}`);
       throw new Error('pending');
+    }
+
+    if (['failure', 'cancelled', 'timed_out', 'action_required'].includes(conclusion)) {
+      log(['error', 'PR', 'failure check_run'], 'found failed check_run, rejecting...');
+      throw new FailedCheckRunFoundError();
     }
   });
 
