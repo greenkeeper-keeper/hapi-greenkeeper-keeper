@@ -1,7 +1,9 @@
 import octokitFactory from './octokit-factory-wrapper';
 import {FailedStatusFoundError, InvalidStatusFoundError, MergeFailureError} from '../errors';
 
-function determineIfAllStatusesAreSuccessful(state, url, log) {
+function allStatusesAreSuccessful(statusesResponse, url, log) {
+  const {state} = statusesResponse.data;
+
   switch (state) {
     case 'pending': {
       log(['info', 'PR', 'pending-status'], `commit status checks have not completed yet: ${url}`);
@@ -9,15 +11,23 @@ function determineIfAllStatusesAreSuccessful(state, url, log) {
     }
     case 'success': {
       log(['info', 'PR', 'passing-status'], 'statuses verified, continuing...');
-      return 'All commit statuses passed';
+      return true;
     }
     case 'failure': {
-      log(['error', 'PR', 'failure status'], 'found failed, rejecting...');
+      log(['error', 'PR', 'failure status'], 'found failed status, rejecting...');
       throw new FailedStatusFoundError();
     }
     default:
       throw new InvalidStatusFoundError();
   }
+}
+
+function allCheckRunsAreSuccessful(checkRunsResponse) {
+  const {total_count: totalCount} = checkRunsResponse;
+
+  if (!totalCount) return true;
+
+  throw new Error();
 }
 
 export default function (githubCredentials) {
@@ -29,13 +39,12 @@ export default function (githubCredentials) {
     log(['info', 'PR', 'validating'], url);
     const {name: repoName, owner: {login: repoOwner}} = repo;
 
-    const [statusesResponse] = await Promise.all([
+    const [statusesResponse, checkRunsResponse] = await Promise.all([
       octokit.repos.getCombinedStatusForRef({owner: repoOwner, repo: repoName, ref: sha}),
       octokit.checks.listForRef({owner: repoOwner, repo: repoName, ref: sha})
     ]);
-    const {state} = statusesResponse.data;
 
-    return determineIfAllStatusesAreSuccessful(state, url, log);
+    return allStatusesAreSuccessful(statusesResponse, url, log) && allCheckRunsAreSuccessful(checkRunsResponse);
   }
 
   function acceptPR(repo, sha, prNumber, acceptAction, log) {

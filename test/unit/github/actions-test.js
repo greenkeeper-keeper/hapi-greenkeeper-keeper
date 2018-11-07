@@ -62,13 +62,14 @@ suite('github actions', () => {
   const assertAuthenticatedForOctokit = () => assert.calledWith(octokitAuthenticate, {type: 'token', token});
 
   suite('ensure PR can be merged', () => {
-    test('that the passing status is acceptable', () => {
+    test('that the passing status is acceptable', async () => {
       octokitCombinedStatus.withArgs({owner: repoOwner, repo: repoName, ref: sha}).resolves({data: {state: 'success'}});
+      octokitListChecksForRef.resolves({total_count: 0});
 
-      return assert.becomes(
-        actions.ensureAcceptability({repo, sha}, () => undefined),
-        'All commit statuses passed'
-      ).then(assertAuthenticatedForOctokit);
+      const result = await actions.ensureAcceptability({repo, sha}, () => undefined);
+
+      assert.isTrue(result);
+      assertAuthenticatedForOctokit();
     });
 
     test('that the failing status results in rejection', () => {
@@ -100,6 +101,14 @@ suite('github actions', () => {
         InvalidStatusFoundError,
         /An invalid status was found for this PR\./
       ).then(assertAuthenticatedForOctokit);
+    });
+
+    test('that the existence of check_runs results in a failure (for now)', () => {
+      octokitCombinedStatus.withArgs({owner: repoOwner, repo: repoName, ref: sha}).resolves({data: {state: 'success'}});
+      octokitListChecksForRef.resolves({total_count: 1});
+
+      return assert.isRejected(actions.ensureAcceptability({repo, sha}, () => undefined))
+        .then(assertAuthenticatedForOctokit);
     });
   });
 

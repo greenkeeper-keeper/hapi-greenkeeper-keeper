@@ -105,13 +105,28 @@ defineSupportCode(({Before, After, Given, setWorldConstructor}) => {
     }
   });
 
+  // Given(/^there are no statuses$/, async function () {
+  //   Write code here that turns the phrase above into concrete actions
+  // return 'pending';
+  // });
+
   Given(/^the check_run results resolve to (.*)$/, function (status) {
     githubScope
       .matchHeader('Authorization', authorizationHeader)
-      // .matchHeader('Accept', 'application/vnd.github.antiope-preview+json')
       .get(`/repos/${this.repoFullName}/commits/${this.sha}/check-runs`)
       .reply(OK, {
-        state: status
+        total_count: 'failure' === status ? 1 : 0,
+        check_runs: []
+      });
+  });
+
+  Given(/^there are no check_runs$/, async function () {
+    githubScope
+      .matchHeader('Authorization', authorizationHeader)
+      .get(`/repos/${this.repoFullName}/commits/${this.sha}/check-runs`)
+      .reply(OK, {
+        total_count: 0,
+        check_runs: []
       });
   });
 
