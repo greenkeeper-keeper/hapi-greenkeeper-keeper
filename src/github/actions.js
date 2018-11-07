@@ -5,22 +5,18 @@ function determineIfAllStatusesAreSuccessful(state, url, log) {
   switch (state) {
     case 'pending': {
       log(['info', 'PR', 'pending-status'], `commit status checks have not completed yet: ${url}`);
-      return Promise.reject(new Error('pending'));
+      throw new Error('pending');
     }
-    case 'success':
-      return Promise.resolve('All commit statuses passed')
-        .then(message => {
-          log(['info', 'PR', 'passing-status'], 'statuses verified, continuing...');
-          return message;
-        });
-    case 'failure':
-      return Promise.reject(new FailedStatusFoundError())
-        .catch(err => {
-          log(['error', 'PR', 'failure status'], 'found failed, rejecting...');
-          return Promise.reject(err);
-        });
+    case 'success': {
+      log(['info', 'PR', 'passing-status'], 'statuses verified, continuing...');
+      return 'All commit statuses passed';
+    }
+    case 'failure': {
+      log(['error', 'PR', 'failure status'], 'found failed, rejecting...');
+      throw new FailedStatusFoundError();
+    }
     default:
-      return Promise.reject(new InvalidStatusFoundError());
+      throw new InvalidStatusFoundError();
   }
 }
 
