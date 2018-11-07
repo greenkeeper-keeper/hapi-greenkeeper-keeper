@@ -61,10 +61,12 @@ suite('github actions', () => {
 
   const assertAuthenticatedForOctokit = () => assert.calledWith(octokitAuthenticate, {type: 'token', token});
 
-  suite('ensure PR can be merged', () => {
+  suite('ensure PR can be accepted', () => {
+    const successfulCheckRuns = any.listOf(() => ({...any.simpleObject(), status: 'completed'}));
+
     test('that the passing status is acceptable', async () => {
       octokitCombinedStatus.withArgs({owner: repoOwner, repo: repoName, ref: sha}).resolves({data: {state: 'success'}});
-      octokitListChecksForRef.resolves({total_count: 0});
+      octokitListChecksForRef.resolves({data: {total_count: 0}});
 
       const result = await actions.ensureAcceptability({repo, sha}, () => undefined);
 
@@ -97,7 +99,7 @@ suite('github actions', () => {
       octokitCombinedStatus
         .withArgs({owner: repoOwner, repo: repoName, ref: sha})
         .resolves({data: {state: 'pending', statuses: []}});
-      octokitListChecksForRef.resolves({total_count: 0});
+      octokitListChecksForRef.resolves({data: {total_count: 0}});
 
       const result = await actions.ensureAcceptability({repo, sha}, log, any.integer());
 
@@ -117,11 +119,23 @@ suite('github actions', () => {
       ).then(assertAuthenticatedForOctokit);
     });
 
-    test('that the existence of check_runs results in a failure (for now)', () => {
+    test('that completed check_runs are acceptable', async () => {
       octokitCombinedStatus.withArgs({owner: repoOwner, repo: repoName, ref: sha}).resolves({data: {state: 'success'}});
-      octokitListChecksForRef.resolves({total_count: 1});
+      octokitListChecksForRef
+        .resolves({data: {total_count: successfulCheckRuns.length, check_runs: successfulCheckRuns}});
 
-      return assert.isRejected(actions.ensureAcceptability({repo, sha}, () => undefined))
+      const result = await actions.ensureAcceptability({repo, sha}, () => undefined);
+
+      assert.isTrue(result);
+      assertAuthenticatedForOctokit();
+    });
+
+    test('that pending check_runs result in rejection', () => {
+      const checkRuns = [...successfulCheckRuns, {...any.simpleObject(), status: 'in_progress'}];
+      octokitCombinedStatus.withArgs({owner: repoOwner, repo: repoName, ref: sha}).resolves({data: {state: 'success'}});
+      octokitListChecksForRef.resolves({data: {total_count: checkRuns.length, check_runs: checkRuns}});
+
+      return assert.isRejected(actions.ensureAcceptability({repo, sha}, log, any.integer()), 'pending')
         .then(assertAuthenticatedForOctokit);
     });
   });

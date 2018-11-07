@@ -24,4 +24,8 @@ defineSupportCode(({Given, Then, setWorldConstructor}) => {
 
     callback();
   });
+
+  Then(/^the PR is not merged$/, async function () {
+    // passes because there are no pending required requests, like posting a comment due to an error
+  });
 });

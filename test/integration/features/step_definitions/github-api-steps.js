@@ -117,12 +117,17 @@ defineSupportCode(({Before, After, Given, setWorldConstructor}) => {
   });
 
   Given(/^the check_run results resolve to (.*)$/, function (status) {
+    const checkRuns = [
+      ...any.listOf(() => ({...any.simpleObject(), status: 'completed'})),
+      ...'pending' === status ? [{...any.simpleObject(), status: any.fromList(['in_progress', 'queued'])}] : []
+    ];
+
     githubScope
       .matchHeader('Authorization', authorizationHeader)
       .get(`/repos/${this.repoFullName}/commits/${this.sha}/check-runs`)
       .reply(OK, {
-        total_count: 'failure' === status ? 1 : 0,
-        check_runs: []
+        total_count: checkRuns.length,
+        check_runs: checkRuns
       });
   });
 

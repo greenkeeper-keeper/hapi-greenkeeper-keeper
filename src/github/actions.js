@@ -7,7 +7,7 @@ function allStatusesAreSuccessful(statusesResponse, url, log) {
   switch (state) {
     case 'pending': {
       if (!statuses.length) {
-        log(['info', 'PR', 'no check-runs'], 'no check_runs listed, continuing...');
+        log(['info', 'PR', 'no commit statuses'], 'no commit statuses listed, continuing...');
         return true;
       }
 
@@ -27,15 +27,22 @@ function allStatusesAreSuccessful(statusesResponse, url, log) {
   }
 }
 
-function allCheckRunsAreSuccessful(checkRunsResponse, log) {
-  const {total_count: totalCount} = checkRunsResponse;
+function allCheckRunsAreSuccessful(checkRunsResponse, url, log) {
+  const {total_count: totalCount, check_runs: checkRuns} = checkRunsResponse.data;
 
   if (!totalCount) {
     log(['info', 'PR', 'no check-runs'], 'no check_runs listed, continuing...');
     return true;
   }
 
-  throw new Error();
+  checkRuns.forEach(checkRun => {
+    if ('completed' !== checkRun.status) {
+      log(['info', 'PR', 'pending-check_runs'], `check_runs have not completed yet: ${url}`);
+      throw new Error('pending');
+    }
+  });
+
+  return true;
 }
 
 export default function (githubCredentials) {
@@ -52,7 +59,8 @@ export default function (githubCredentials) {
       octokit.checks.listForRef({owner: repoOwner, repo: repoName, ref: sha})
     ]);
 
-    return allStatusesAreSuccessful(statusesResponse, url, log) && allCheckRunsAreSuccessful(checkRunsResponse, log);
+    return allStatusesAreSuccessful(statusesResponse, url, log) &&
+      allCheckRunsAreSuccessful(checkRunsResponse, url, log);
   }
 
   function acceptPR(repo, sha, prNumber, acceptAction, log) {
