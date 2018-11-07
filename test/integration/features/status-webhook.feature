@@ -13,7 +13,6 @@ Feature: Commit status event webhook
     Then the webhook response confirms that it will be processed
     And the PR is merged
 
-  @wip
   Scenario: Success status-event for head commit of greenkeeper PR for project with check_runs but no statuses
     Given the server is configured
     And the webhook is for a status event and a success state

@@ -83,12 +83,26 @@ suite('github actions', () => {
     });
 
     test('that the pending status results in rejection', () => {
-      octokitCombinedStatus.withArgs({owner: repoOwner, repo: repoName, ref: sha}).resolves({data: {state: 'pending'}});
+      octokitCombinedStatus
+        .withArgs({owner: repoOwner, repo: repoName, ref: sha})
+        .resolves({data: {state: 'pending', statuses: any.listOf(any.simpleObject)}});
 
       return assert.isRejected(
         actions.ensureAcceptability({repo, sha}, log, any.integer()),
         'pending'
       ).then(assertAuthenticatedForOctokit);
+    });
+
+    test('that the pending status does not result in rejection if no statuses are listed', async () => {
+      octokitCombinedStatus
+        .withArgs({owner: repoOwner, repo: repoName, ref: sha})
+        .resolves({data: {state: 'pending', statuses: []}});
+      octokitListChecksForRef.resolves({total_count: 0});
+
+      const result = await actions.ensureAcceptability({repo, sha}, log, any.integer());
+
+      assert.isTrue(result);
+      assertAuthenticatedForOctokit();
     });
 
     test('that an invalid status results in rejection', () => {

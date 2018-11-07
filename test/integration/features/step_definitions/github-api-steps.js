@@ -25,7 +25,8 @@ function stubTheStatusesEndpoint(githubScope, authorizationHeader, status) {
     .matchHeader('Authorization', authorizationHeader)
     .get(`/repos/${this.repoFullName}/commits/${this.sha}/status`)
     .reply(OK, {
-      state: status
+      state: status,
+      statuses: any.listOf(any.simpleObject)
     });
 }
 
@@ -105,10 +106,15 @@ defineSupportCode(({Before, After, Given, setWorldConstructor}) => {
     }
   });
 
-  // Given(/^there are no statuses$/, async function () {
-  //   Write code here that turns the phrase above into concrete actions
-  // return 'pending';
-  // });
+  Given(/^there are no statuses$/, async function () {
+    githubScope
+      .matchHeader('Authorization', authorizationHeader)
+      .get(`/repos/${this.repoFullName}/commits/${this.sha}/status`)
+      .reply(OK, {
+        state: 'pending',
+        statuses: []
+      });
+  });
 
   Given(/^the check_run results resolve to (.*)$/, function (status) {
     githubScope
