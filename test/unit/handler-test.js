@@ -72,7 +72,7 @@ suite('handler', () => {
 
       return handler(request, {response}, settings).then(() => {
         assert.calledWith(code, ACCEPTED);
-        assert.calledWith(process.default, request, fullPullRequest, settings);
+        assert.calledWith(process.default, fullPullRequest, settings);
       });
     });
 
@@ -212,7 +212,7 @@ suite('handler', () => {
 
       return handler(request, {response}, settings).then(() => {
         assert.calledWith(code, ACCEPTED);
-        assert.calledWith(process.default, request, fullPullRequest, settings);
+        assert.calledWith(process.default, fullPullRequest, settings);
       });
     });
 

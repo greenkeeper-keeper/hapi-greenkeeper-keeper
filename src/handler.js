@@ -70,7 +70,7 @@ async function processStatusEvent(payload, settings, request, responseToolkit, l
 
         const senderUrl = pullRequests[0].user.html_url;
         if (openedByGreenkeeperBot(senderUrl)) {
-          process(request, await getPullRequest(repository, pullRequests[0].number), settings);
+          process(await getPullRequest(repository, pullRequests[0].number), settings, log);
           return responseToolkit.response('status event will be processed').code(ACCEPTED);
         }
 
@@ -79,7 +79,7 @@ async function processStatusEvent(payload, settings, request, responseToolkit, l
       .catch(e => boom.internal('failed to fetch PRs', e));
   }
 
-  request.log(['PR'], 'skipping');
+  log(['PR'], 'skipping');
 
   return responseToolkit.response('skipping').code(BAD_REQUEST);
 }
@@ -106,11 +106,11 @@ async function processCheckRunEvent(request, responseToolkit, settings, log) {
       throw boom.internal('failed to fetch PRs', err);
     }
 
-    process(request, pullRequest, settings);
+    process(pullRequest, settings, log);
     return responseToolkit.response('check_run event will be processed').code(ACCEPTED);
   }
 
-  request.log(['PR'], 'skipping');
+  log(['PR'], 'skipping');
 
   return responseToolkit.response('skipping').code(BAD_REQUEST);
 }
