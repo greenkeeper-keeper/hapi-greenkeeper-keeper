@@ -122,6 +122,7 @@ suite('github actions', () => {
     test('that completed check_runs are acceptable', async () => {
       octokitCombinedStatus.withArgs({owner: repoOwner, repo: repoName, ref: sha}).resolves({data: {state: 'success'}});
       octokitListChecksForRef
+        .withArgs({owner: repoOwner, repo: repoName, ref: sha})
         .resolves({data: {total_count: successfulCheckRuns.length, check_runs: successfulCheckRuns}});
 
       const result = await actions.ensureAcceptability({repo, sha}, () => undefined);
