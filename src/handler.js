@@ -85,7 +85,7 @@ async function processStatusEvent(payload, settings, request, responseToolkit, l
 }
 
 async function processCheckRunEvent(request, responseToolkit, settings, log) {
-  const {repository, check_run: checkRun, sender} = request.payload;
+  const {repository, check_run: checkRun} = request.payload;
 
   if (checkRunEventIsSuccessfulAndCouldBeForGreenkeeperPR(checkRun, log)) {
     const {check_suite: {pull_requests: pullRequests}} = checkRun;
@@ -94,16 +94,16 @@ async function processCheckRunEvent(request, responseToolkit, settings, log) {
     if (!pullRequests.length) return responseToolkit.response('no PRs for this commit').code(BAD_REQUEST);
     if (1 < pullRequests.length) return responseToolkit.response(boom.internal('too many PRs exist for this commit'));
 
-    const senderUrl = sender.html_url;
-    if (!openedByGreenkeeperBot(senderUrl)) {
-      return responseToolkit.response(`PR is not from greenkeeper, but from ${senderUrl}`).code(BAD_REQUEST);
-    }
-
     let pullRequest;
     try {
       pullRequest = await getPullRequest(repository, pullRequests[0].number);
     } catch (err) {
       throw boom.internal('failed to fetch PRs', err);
+    }
+
+    const senderUrl = pullRequest.user.html_url;
+    if (!openedByGreenkeeperBot(senderUrl)) {
+      return responseToolkit.response(`PR is not from greenkeeper, but from ${senderUrl}`).code(BAD_REQUEST);
     }
 
     process(pullRequest, settings, log);

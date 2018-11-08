@@ -36,8 +36,7 @@ function buildWebhookPayload(event, {statusEventDetails, checkRunEventDetails, r
         owner: {
           login: checkRunEventDetails.repoOwner
         }
-      },
-      sender: {html_url: checkRunEventDetails.sender}
+      }
     };
   }
 

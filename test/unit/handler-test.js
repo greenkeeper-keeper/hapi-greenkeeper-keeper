@@ -188,7 +188,7 @@ suite('handler', () => {
       const prNumber = any.integer();
       const sha = any.string();
       const partialPullRequest = {user: {html_url: greenkeeperSender}, number: prNumber};
-      const fullPullRequest = any.simpleObject();
+      const fullPullRequest = {...any.simpleObject(), user: {html_url: greenkeeperSender}};
       const request = {
         payload: {
           action: 'completed',
@@ -201,8 +201,7 @@ suite('handler', () => {
               pull_requests: [partialPullRequest]
             }
           },
-          repository,
-          sender: {html_url: greenkeeperSender}
+          repository
         },
         headers: {'x-github-event': 'check_run'},
         log: () => undefined
@@ -323,6 +322,10 @@ suite('handler', () => {
 
     test('that the response is bad-request if the PR is not from greenkeeper', () => {
       const senderUrl = any.url();
+      const prNumber = any.integer();
+      const repository = any.simpleObject();
+      const partialPullRequest = {user: {html_url: greenkeeperSender}, number: prNumber};
+      const fullPullRequest = {...any.simpleObject(), user: {html_url: senderUrl}};
       const request = {
         payload: {
           action: 'completed',
@@ -331,15 +334,16 @@ suite('handler', () => {
             conclusion: 'success',
             check_suite: {
               head_branch: any.word(),
-              pull_requests: [any.simpleObject()]
+              pull_requests: [partialPullRequest]
             }
           },
-          sender: {html_url: senderUrl}
+          repository
         },
         headers: {'x-github-event': 'check_run'},
         log: () => undefined
       };
       response.withArgs(`PR is not from greenkeeper, but from ${senderUrl}`).returns({code});
+      getPullRequest.withArgs(repository, prNumber).resolves(fullPullRequest);
 
       return handler(request, {response}, settings).then(() => assert.calledWith(code, BAD_REQUEST));
     });

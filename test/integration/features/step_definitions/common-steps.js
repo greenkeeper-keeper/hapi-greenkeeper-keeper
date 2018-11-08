@@ -18,7 +18,6 @@ When(/^the webhook is received$/, function () {
       status: this.checkRunEventStatus,
       conclusion: this.checkRunEventConclusion,
       repoOwner: this.repoOwner,
-      sender: this.prSender,
       prLink: this.prLink,
       prNumber: this.prNumber,
       ...this.commitBranches && {branch: this.commitBranches[0]}
