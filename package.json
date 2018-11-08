@@ -36,9 +36,7 @@
     "precommit": "npm test",
     "build": "rollup -c",
     "preversion": "npm test",
-    "prepack": "run-s build",
-    "greenkeeper:update-lockfile": "greenkeeper-lockfile-update",
-    "greenkeeper:upload-lockfile": "greenkeeper-lockfile-upload"
+    "prepack": "run-s build"
   },
   "config": {
     "commitizen": {
