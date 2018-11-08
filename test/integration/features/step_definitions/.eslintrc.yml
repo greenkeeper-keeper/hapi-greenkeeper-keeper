@@ -1,1 +1,5 @@
 extends: '@travi/travi/rules/tests/cucumber'
+
+rules:
+  cucumber/async-then: off
+  prefer-arrow-callback: off

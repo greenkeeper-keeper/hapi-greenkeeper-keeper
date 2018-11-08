@@ -36,7 +36,7 @@ suite('process', () => {
     ensureAcceptability.resolves();
     acceptPR.resolves();
 
-    return processPR({log}, {url, head, number}, {github: githubCredentials, acceptAction}).then(() => {
+    return processPR({url, head, number}, {github: githubCredentials, acceptAction}, log).then(() => {
       const message = any.string();
       const message2 = any.string();
       const tags = any.listOf(any.string);
@@ -56,7 +56,7 @@ suite('process', () => {
     ensureAcceptability.rejects(error);
     postErrorComment.resolves(error);
 
-    return processPR({log: () => undefined}, {head, number}, {github: githubCredentials}).then(() => {
+    return processPR({head, number}, {github: githubCredentials}, () => undefined).then(() => {
       assert.notCalled(acceptPR);
       assert.calledWith(postErrorComment, repo, number, error);
     });
@@ -65,11 +65,7 @@ suite('process', () => {
   test('that pending statuses when polling is disabled does not result in a comment', () => {
     ensureAcceptability.rejects(new Error('pending'));
 
-    return processPR(
-      {log: () => undefined},
-      {comments_url: url, head},
-      {github: githubCredentials}
-    ).then(() => {
+    return processPR({comments_url: url, head}, {github: githubCredentials}, () => undefined).then(() => {
       assert.notCalled(acceptPR);
       assert.notCalled(postErrorComment);
     });
@@ -81,7 +77,7 @@ suite('process', () => {
     acceptPR.rejects(error);
     postErrorComment.resolves(error);
 
-    return processPR({log: () => undefined}, {head, number}, {github: githubCredentials}).then(() => {
+    return processPR({head, number}, {github: githubCredentials}, () => undefined).then(() => {
       assert.calledWith(postErrorComment, repo, number, error);
     });
   });
@@ -91,7 +87,7 @@ suite('process', () => {
     ensureAcceptability.rejects(error);
     postErrorComment.rejects(error);
 
-    return processPR({log: () => undefined}, {url, head}, {github: githubCredentials}).then(() => {
+    return processPR({url, head}, {github: githubCredentials}, () => undefined).then(() => {
       assert.calledOnce(postErrorComment);
     });
   });

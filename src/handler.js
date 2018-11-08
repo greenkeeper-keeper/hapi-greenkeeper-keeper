@@ -1,15 +1,29 @@
-import {ACCEPTED, NO_CONTENT, BAD_REQUEST, UNSUPPORTED_MEDIA_TYPE} from 'http-status-codes';
+import {ACCEPTED, BAD_REQUEST, NO_CONTENT, UNSUPPORTED_MEDIA_TYPE} from 'http-status-codes';
 import boom from 'boom';
 import openedByGreenkeeperBot from './greenkeeper';
 import createActions from './github/actions';
 import process from './process';
 
-function successfulStatusCouldBeForGreenkeeperPR(event, state, branches, log) {
-  if ('status' !== event) {
-    log(['PR'], `event was \`${event}\` instead of \`status\``);
+function determineIfWebhookConfigIsCorrect(hook, responseToolkit) {
+  if ('json' !== hook.config.content_type) {
+    return responseToolkit
+      .response('please update your webhook configuration to send application/json')
+      .code(UNSUPPORTED_MEDIA_TYPE);
+  }
+
+  return responseToolkit.response('successfully configured the webhook for greenkeeper-keeper').code(NO_CONTENT);
+}
+
+function branchIsNotMaster(branchName, log) {
+  if ('master' === branchName) {
+    log(['PR'], `branch name \`${branchName}\` should not be \`master\``);
     return false;
   }
 
+  return true;
+}
+
+function statusEventIsSuccessfulAndCouldBeForGreenkeeperPR(state, branches, log) {
   if ('success' !== state) {
     log(['PR'], `state was \`${state}\` instead of \`success\``);
     return false;
@@ -20,30 +34,30 @@ function successfulStatusCouldBeForGreenkeeperPR(event, state, branches, log) {
     return false;
   }
 
-  const branchName = branches[0].name;
-  if ('master' === branchName) {
-    log(['PR'], `branch name \`${branchName}\` should not be \`master\``);
+  return branchIsNotMaster(branches[0].name, log);
+}
+
+function checkRunEventIsSuccessfulAndCouldBeForGreenkeeperPR(checkRun, log) {
+  const {status, conclusion, check_suite: checkSuite} = checkRun;
+  const {head_branch: headBranch} = checkSuite;
+
+  if ('completed' !== status) {
+    log(['PR'], `check_run status was \`${status}\` instead of \`completed\``);
     return false;
   }
 
-  return true;
-}
-
-export default async function (request, responseToolkit, settings) {
-  const {state, repository, branches, sha} = request.payload;
-  const event = request.headers['x-github-event'];
-
-  if ('ping' === event) {
-    if ('json' !== request.payload.hook.config.content_type) {
-      return responseToolkit
-        .response('please update your webhook configuration to send application/json')
-        .code(UNSUPPORTED_MEDIA_TYPE);
-    }
-
-    return responseToolkit.response('successfully configured the webhook for greenkeeper-keeper').code(NO_CONTENT);
+  if ('success' !== conclusion) {
+    log(['PR'], `check_run conclusion was \`${conclusion}\` instead of \`success\``);
+    return false;
   }
 
-  if (successfulStatusCouldBeForGreenkeeperPR(event, state, branches, (...args) => request.log(...args))) {
+  return branchIsNotMaster(headBranch, log);
+}
+
+async function processStatusEvent(payload, settings, request, responseToolkit, log) {
+  const {state, repository, branches, sha} = request.payload;
+
+  if (statusEventIsSuccessfulAndCouldBeForGreenkeeperPR(state, branches, log)) {
     const {getPullRequestsForCommit, getPullRequest} = createActions(settings.github);
 
     return getPullRequestsForCommit({ref: sha})
@@ -51,13 +65,13 @@ export default async function (request, responseToolkit, settings) {
         if (!pullRequests.length) return responseToolkit.response('no PRs for this commit').code(BAD_REQUEST);
 
         if (1 < pullRequests.length) {
-          return responseToolkit.response(boom.internal('too many PRs exist for this commit'));
+          throw boom.internal('too many PRs exist for this commit');
         }
 
         const senderUrl = pullRequests[0].user.html_url;
         if (openedByGreenkeeperBot(senderUrl)) {
-          process(request, await getPullRequest(repository, pullRequests[0].number), settings);
-          return responseToolkit.response('ok').code(ACCEPTED);
+          process(await getPullRequest(repository, pullRequests[0].number), settings, log);
+          return responseToolkit.response('status event will be processed').code(ACCEPTED);
         }
 
         return responseToolkit.response(`PR is not from greenkeeper, but from ${senderUrl}`).code(BAD_REQUEST);
@@ -65,7 +79,60 @@ export default async function (request, responseToolkit, settings) {
       .catch(e => boom.internal('failed to fetch PRs', e));
   }
 
-  request.log(['PR'], 'skipping');
+  log(['PR'], 'skipping');
 
   return responseToolkit.response('skipping').code(BAD_REQUEST);
+}
+
+async function processCheckRunEvent(request, responseToolkit, settings, log) {
+  const {repository, check_run: checkRun, sender} = request.payload;
+
+  if (checkRunEventIsSuccessfulAndCouldBeForGreenkeeperPR(checkRun, log)) {
+    const {check_suite: {pull_requests: pullRequests}} = checkRun;
+    const {getPullRequest} = createActions(settings.github);
+
+    if (!pullRequests.length) return responseToolkit.response('no PRs for this commit').code(BAD_REQUEST);
+    if (1 < pullRequests.length) return responseToolkit.response(boom.internal('too many PRs exist for this commit'));
+
+    const senderUrl = sender.html_url;
+    if (!openedByGreenkeeperBot(senderUrl)) {
+      return responseToolkit.response(`PR is not from greenkeeper, but from ${senderUrl}`).code(BAD_REQUEST);
+    }
+
+    let pullRequest;
+    try {
+      pullRequest = await getPullRequest(repository, pullRequests[0].number);
+    } catch (err) {
+      throw boom.internal('failed to fetch PRs', err);
+    }
+
+    process(pullRequest, settings, log);
+    return responseToolkit.response('check_run event will be processed').code(ACCEPTED);
+  }
+
+  log(['PR'], 'skipping');
+
+  return responseToolkit.response('skipping').code(BAD_REQUEST);
+}
+
+export default async function (request, responseToolkit, settings) {
+  const {hook} = request.payload;
+  const event = request.headers['x-github-event'];
+
+  function logger(...args) {
+    request.log(...args);
+  }
+
+  switch (event) {
+    case 'ping':
+      return determineIfWebhookConfigIsCorrect(hook, responseToolkit);
+    case 'status':
+      return processStatusEvent(request.payload, settings, request, responseToolkit, logger);
+    case 'check_run':
+      return processCheckRunEvent(request, responseToolkit, settings, logger);
+    default:
+      return responseToolkit
+        .response(`event was \`${event}\` instead of \`status\` or \`check_run\``)
+        .code(BAD_REQUEST);
+  }
 }

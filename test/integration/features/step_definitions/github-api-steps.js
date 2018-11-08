@@ -20,6 +20,16 @@ function stubTheCommentsEndpoint(githubScope, authorizationHeader) {
   });
 }
 
+function stubTheStatusesEndpoint(githubScope, authorizationHeader, status) {
+  githubScope
+    .matchHeader('Authorization', authorizationHeader)
+    .get(`/repos/${this.repoFullName}/commits/${this.sha}/status`)
+    .reply(OK, {
+      state: status,
+      statuses: any.listOf(any.simpleObject)
+    });
+}
+
 defineSupportCode(({Before, After, Given, setWorldConstructor}) => {
   setWorldConstructor(World);
 
@@ -34,19 +44,22 @@ defineSupportCode(({Before, After, Given, setWorldConstructor}) => {
     githubScope = nock('https://api.github.com').log(debug);
   });
 
-  After(() => {
+  After(function () {
     assert.isTrue(githubScope.isDone(), `pending mocks: ${githubScope.pendingMocks()}`);
     nock.enableNetConnect();
     nock.cleanAll();
+    this.prProcessed = null;
   });
 
-  Given('an open PR exists for the commit', function (callback) {
+  Given(/^an open PR exists for the commit$/, function (callback) {
+    this.prLink = 'https://api.github.com/123';
+
     if (GREENKEEPER_INTEGRATION_GITHUB_URL === this.prSender) {
       githubScope
         .matchHeader('Authorization', authorizationHeader)
         .get(`/repos/${this.repoFullName}/pulls/${this.prNumber}`)
         .reply(OK, {
-          url: 'https://api.github.com/123',
+          url: this.prLink,
           user: {html_url: this.prSender || any.url()},
           number: this.prNumber,
           head: {
@@ -60,21 +73,24 @@ defineSupportCode(({Before, After, Given, setWorldConstructor}) => {
           }
         });
     }
-    githubScope
-      .matchHeader('Authorization', authorizationHeader)
-      .get(`/search/issues?q=${this.sha}+type%3Apr`)
-      .reply(OK, {
-        items: [{
-          url: 'https://api.github.com/123',
-          user: {html_url: this.prSender || any.url()},
-          number: this.prNumber
-        }]
-      });
+
+    if ('status' === this.webhookEventName) {
+      githubScope
+        .matchHeader('Authorization', authorizationHeader)
+        .get(`/search/issues?q=${this.sha}+type%3Apr`)
+        .reply(OK, {
+          items: [{
+            url: this.prLink,
+            user: {html_url: this.prSender || any.url()},
+            number: this.prNumber
+          }]
+        });
+    }
 
     callback();
   });
 
-  Given('no open PRs exist for the commit', function (callback) {
+  Given(/^no open PRs exist for the commit$/, function (callback) {
     githubScope
       .matchHeader('Authorization', authorizationHeader)
       .get(`/search/issues?q=${encodeURIComponent(this.sha)}+type%3Apr`)
@@ -83,15 +99,64 @@ defineSupportCode(({Before, After, Given, setWorldConstructor}) => {
     callback();
   });
 
-  Given(/^statuses exist for the PR$/, function (callback) {
+  Given(/^the commit statuses resolve to (.*)$/, function (status) {
+    stubTheStatusesEndpoint.call(this, githubScope, authorizationHeader, status);
+
+    if ('failure' === status) {
+      stubTheCommentsEndpoint.call(this, githubScope, authorizationHeader);
+    }
+  });
+
+  Given(/^there are no statuses$/, async function () {
     githubScope
       .matchHeader('Authorization', authorizationHeader)
       .get(`/repos/${this.repoFullName}/commits/${this.sha}/status`)
       .reply(OK, {
-        state: 'success'
+        state: 'pending',
+        statuses: []
       });
+  });
 
-    callback();
+  Given(/^the check_run results resolve to (.*)$/, function (status) {
+    if ('failure' === status) {
+      stubTheCommentsEndpoint.call(this, githubScope, authorizationHeader);
+    }
+
+    const checkRuns = [
+      ...any.listOf(() => ({
+        ...any.simpleObject(),
+        status: 'completed',
+        conclusion: any.fromList(['success', 'neutral'])
+      })),
+      ...'pending' === status ? [{...any.simpleObject(), status: any.fromList(['in_progress', 'queued'])}] : [],
+      ...'failure' === status
+        ? [
+          {
+            ...any.simpleObject(),
+            status: 'completed',
+            conclusion: any.fromList(['failure', 'cancelled', 'timed_out', 'action_required'])
+          }
+        ]
+        : []
+    ];
+
+    githubScope
+      .matchHeader('Authorization', authorizationHeader)
+      .get(`/repos/${this.repoFullName}/commits/${this.sha}/check-runs`)
+      .reply(OK, {
+        total_count: checkRuns.length,
+        check_runs: checkRuns
+      });
+  });
+
+  Given(/^there are no check_runs$/, async function () {
+    githubScope
+      .matchHeader('Authorization', authorizationHeader)
+      .get(`/repos/${this.repoFullName}/commits/${this.sha}/check-runs`)
+      .reply(OK, {
+        total_count: 0,
+        check_runs: []
+      });
   });
 
   Given(/^the PR can be merged$/, function (callback) {
@@ -132,19 +197,7 @@ defineSupportCode(({Before, After, Given, setWorldConstructor}) => {
     callback();
   });
 
-  Given(/^the commit statuses resolve to (.*)$/, function (status, callback) {
-    githubScope
-      .matchHeader('Authorization', authorizationHeader)
-      .get(`/repos/${this.repoFullName}/commits/${this.sha}/status`)
-      .reply(OK, {
-        state: status
-      });
-    stubTheCommentsEndpoint.call(this, githubScope, authorizationHeader);
-
-    callback();
-  });
-
-  Given('the PR cannot be merged', function (callback) {
+  Given(/^the PR cannot be merged$/, function (callback) {
     githubScope
       .matchHeader('Authorization', authorizationHeader)
       .put(`/repos/${this.repoFullName}/pulls/${this.prNumber}/merge`)

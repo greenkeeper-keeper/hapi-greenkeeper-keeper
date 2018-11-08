@@ -9,10 +9,20 @@ defineSupportCode(({When, Then, setWorldConstructor}) => {
   When(/^the webhook is received$/, function () {
     return this.receiveWebhook({
       event: this.webhookEventName,
+      action: this.webhookAction,
       statusEventDetails: {
         state: this.statusEventState,
         repoOwner: this.repoOwner,
         branches: this.commitBranches
+      },
+      checkRunEventDetails: {
+        status: this.checkRunEventStatus,
+        conclusion: this.checkRunEventConclusion,
+        repoOwner: this.repoOwner,
+        sender: this.prSender,
+        prLink: this.prLink,
+        prNumber: this.prNumber,
+        ...this.commitBranches && {branch: this.commitBranches[0]}
       }
     }).then(response => {
       this.serverResponse = response;

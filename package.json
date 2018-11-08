@@ -26,11 +26,11 @@
     "coverage": "nyc run-s tests:unit:no-coverage",
     "coverage:report": "nyc report --reporter=text-lcov > coverage.lcov && codecov",
     "test:unit": "run-s coverage",
-    "test:integration": "run-s test:integration:base -- --tags 'not @wip'",
+    "test:integration": "run-s 'test:integration:base -- --tags \"not @wip\"'",
     "test:integration:base": "cucumber-js test/integration --require-module babel-register --format-options '{\"snippetInterface\": \"async-await\"}'",
     "test:integration:debug": "DEBUG=test run-s test:integration",
-    "test:integration:wip": "run-s test:integration:base -- --tags @wip",
-    "test:integration:focus": "run-s test:integration:base -- --tags @focus",
+    "test:integration:wip": "run-s 'test:integration:base -- --tags @wip'",
+    "test:integration:focus": "run-s 'test:integration:base -- --tags @focus'",
     "test": "npm-run-all --print-label --parallel lint:* --parallel test:*",
     "commitmsg": "commitlint -e",
     "precommit": "npm test",
@@ -48,6 +48,7 @@
   "publishConfig": {
     "access": "public"
   },
+  "files": ["lib/"],
   "devDependencies": {
     "@travi/any": "^1.8.2",
     "@travi/eslint-config-travi": "^1.6.18",

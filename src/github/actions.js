@@ -1,38 +1,71 @@
 import octokitFactory from './octokit-factory-wrapper';
-import {FailedStatusFoundError, InvalidStatusFoundError, MergeFailureError} from '../errors';
+import {FailedCheckRunFoundError, FailedStatusFoundError, InvalidStatusFoundError, MergeFailureError} from '../errors';
+
+function allStatusesAreSuccessful(statusesResponse, url, log) {
+  const {state, statuses} = statusesResponse.data;
+
+  switch (state) {
+    case 'pending': {
+      if (!statuses.length) {
+        log(['info', 'PR', 'no commit statuses'], 'no commit statuses listed, continuing...');
+        return true;
+      }
+
+      log(['info', 'PR', 'pending-status'], `commit status checks have not completed yet: ${url}`);
+      throw new Error('pending');
+    }
+    case 'success': {
+      log(['info', 'PR', 'passing-status'], 'statuses verified, continuing...');
+      return true;
+    }
+    case 'failure': {
+      log(['error', 'PR', 'failure status'], 'found failed status, rejecting...');
+      throw new FailedStatusFoundError();
+    }
+    default:
+      throw new InvalidStatusFoundError();
+  }
+}
+
+function allCheckRunsAreSuccessful(checkRunsResponse, url, log) {
+  const {total_count: totalCount, check_runs: checkRuns} = checkRunsResponse.data;
+
+  if (!totalCount) {
+    log(['info', 'PR', 'no check-runs'], 'no check_runs listed, continuing...');
+    return true;
+  }
+
+  checkRuns.forEach(({status, conclusion}) => {
+    if ('completed' !== status) {
+      log(['info', 'PR', 'pending-check_runs'], `check_runs have not completed yet: ${url}`);
+      throw new Error('pending');
+    }
+
+    if (['failure', 'cancelled', 'timed_out', 'action_required'].includes(conclusion)) {
+      log(['error', 'PR', 'failure check_run'], 'found failed check_run, rejecting...');
+      throw new FailedCheckRunFoundError();
+    }
+  });
+
+  return true;
+}
 
 export default function (githubCredentials) {
   const octokit = octokitFactory();
   const {token} = githubCredentials;
   octokit.authenticate({type: 'token', token});
 
-  function ensureAcceptability({repo, sha, url}, log) {
+  async function ensureAcceptability({repo, sha, url}, log) {
     log(['info', 'PR', 'validating'], url);
+    const {name: repoName, owner: {login: repoOwner}} = repo;
 
-    return octokit.repos.getCombinedStatusForRef({owner: repo.owner.login, repo: repo.name, ref: sha})
-      .then(response => response.data)
-      .then(({state}) => {
-        switch (state) {
-          case 'pending': {
-            log(['info', 'PR', 'pending-status'], `commit status checks have not completed yet: ${url}`);
-            return Promise.reject(new Error('pending'));
-          }
-          case 'success':
-            return Promise.resolve('All commit statuses passed')
-              .then(message => {
-                log(['info', 'PR', 'passing-status'], 'statuses verified, continuing...');
-                return message;
-              });
-          case 'failure':
-            return Promise.reject(new FailedStatusFoundError())
-              .catch(err => {
-                log(['error', 'PR', 'failure status'], 'found failed, rejecting...');
-                return Promise.reject(err);
-              });
-          default:
-            return Promise.reject(new InvalidStatusFoundError());
-        }
-      });
+    const [statusesResponse, checkRunsResponse] = await Promise.all([
+      octokit.repos.getCombinedStatusForRef({owner: repoOwner, repo: repoName, ref: sha}),
+      octokit.checks.listForRef({owner: repoOwner, repo: repoName, ref: sha})
+    ]);
+
+    return allStatusesAreSuccessful(statusesResponse, url, log) &&
+      allCheckRunsAreSuccessful(checkRunsResponse, url, log);
   }
 
   function acceptPR(repo, sha, prNumber, acceptAction, log) {

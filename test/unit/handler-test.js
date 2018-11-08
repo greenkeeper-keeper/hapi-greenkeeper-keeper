@@ -35,47 +35,9 @@ suite('handler', () => {
     log.resetHistory();
   });
 
-  suite('`pull_request` event', () => {
-    test('that response is bad-request when the webhook action is a `pull_request`', () => {
-      const request = {
-        payload: {
-          action: any.word(),
-          sender: {
-            html_url: greenkeeperSender
-          }
-        },
-        headers: {'x-github-event': 'pull_request'},
-        log
-      };
-
-      return handler(request, {response}, settings).then(() => {
-        assert.calledWith(code, BAD_REQUEST);
-        assert.calledWith(log, ['PR'], 'skipping');
-      });
-    });
-
-    test('that response is bad-request when pr not opened by greenkeeper', () => {
-      const request = {
-        payload: {
-          action: 'opened',
-          sender: {
-            html_url: any.url()
-          }
-        },
-        headers: {'x-github-event': 'pull_request'},
-        log
-      };
-
-      return handler(request, {response}, settings).then(() => {
-        assert.calledWith(code, BAD_REQUEST);
-        assert.calledWith(log, ['PR'], 'skipping');
-      });
-    });
-  });
-
   suite('`status` event', () => {
     let getPullRequestsForCommit, getPullRequest;
-    const error = new Error(any.simpleObject());
+    const error = new Error(any.sentence());
     const wrappedError = any.simpleObject();
 
     setup(() => {
@@ -104,13 +66,13 @@ suite('handler', () => {
         headers: {'x-github-event': 'status'},
         log: () => undefined
       };
-      response.withArgs('ok').returns({code});
+      response.withArgs('status event will be processed').returns({code});
       getPullRequestsForCommit.withArgs({ref: sha}).resolves([partialPullRequest]);
       getPullRequest.withArgs(repository, prNumber).resolves(fullPullRequest);
 
       return handler(request, {response}, settings).then(() => {
         assert.calledWith(code, ACCEPTED);
-        assert.calledWith(process.default, request, fullPullRequest, settings);
+        assert.calledWith(process.default, fullPullRequest, settings);
       });
     });
 
@@ -174,7 +136,7 @@ suite('handler', () => {
       getPullRequestsForCommit.resolves([{}, {}]);
       boom.internal.withArgs('too many PRs exist for this commit').returns(error);
 
-      return handler(request, {response}, settings).then(() => assert.calledWith(response, error));
+      return handler(request, {response}, settings).catch(err => assert.equal(err, wrappedError));
     });
 
     test('that the response is bad-request if the PR is not from greenkeeper', () => {
@@ -204,6 +166,205 @@ suite('handler', () => {
       boom.internal.withArgs('failed to fetch PRs', error).returns(wrappedError);
 
       return handler(request, {response}, settings).then(err => assert.equal(err, wrappedError));
+    });
+  });
+
+  suite('`check_run` event', () => {
+    let getPullRequest;
+    const error = new Error(any.sentence());
+    const wrappedError = new Error(any.sentence());
+
+    setup(() => {
+      getPullRequest = sinon.stub();
+
+      sandbox.stub(actionsFactory, 'default')
+        .withArgs(githubCredentials)
+        .returns({getPullRequest});
+    });
+
+    test('that the webhook is accepted and processed for a successful check_run and a matching greenkeeper PR', () => {
+      const repository = any.simpleObject();
+      const branch = any.string();
+      const prNumber = any.integer();
+      const sha = any.string();
+      const partialPullRequest = {user: {html_url: greenkeeperSender}, number: prNumber};
+      const fullPullRequest = any.simpleObject();
+      const request = {
+        payload: {
+          action: 'completed',
+          check_run: {
+            status: 'completed',
+            conclusion: 'success',
+            head_sha: sha,
+            check_suite: {
+              head_branch: branch,
+              pull_requests: [partialPullRequest]
+            }
+          },
+          repository,
+          sender: {html_url: greenkeeperSender}
+        },
+        headers: {'x-github-event': 'check_run'},
+        log: () => undefined
+      };
+      response.withArgs('check_run event will be processed').returns({code});
+      getPullRequest.withArgs(repository, prNumber).resolves(fullPullRequest);
+
+      return handler(request, {response}, settings).then(() => {
+        assert.calledWith(code, ACCEPTED);
+        assert.calledWith(process.default, fullPullRequest, settings);
+      });
+    });
+
+    test('that the response is bad-request when the status is not `completed`', () => {
+      const status = any.string();
+      const request = {
+        payload: {
+          action: status,
+          check_run: {
+            status,
+            check_suite: {}
+          }
+        },
+        headers: {'x-github-event': 'check_run'},
+        log
+      };
+
+      return handler(request, {response}, settings).then(() => {
+        assert.calledWith(code, BAD_REQUEST);
+        assert.calledWith(log, ['PR'], 'skipping');
+      });
+    });
+
+    test('that the response is bad-request when the conclusion is not `success`', () => {
+      const request = {
+        payload: {
+          action: 'completed',
+          check_run: {
+            status: 'completed',
+            conclusion: any.word(),
+            check_suite: {}
+          }
+        },
+        headers: {'x-github-event': 'check_run'},
+        log
+      };
+
+      return handler(request, {response}, settings).then(() => {
+        assert.calledWith(code, BAD_REQUEST);
+        assert.calledWith(log, ['PR'], 'skipping');
+      });
+    });
+
+    test('that the response is bad-request when commit is on master', () => {
+      const request = {
+        payload: {
+          action: 'completed',
+          check_run: {
+            status: 'completed',
+            conclusion: 'success',
+            check_suite: {head_branch: 'master'}
+          }
+        },
+        headers: {'x-github-event': 'check_run'},
+        log
+      };
+
+      return handler(request, {response}, settings).then(() => {
+        assert.calledWith(code, BAD_REQUEST);
+        assert.calledWith(log, ['PR'], 'skipping');
+      });
+    });
+
+    test('that the response is bad-request if there are no PRs for the commit', () => {
+      const request = {
+        payload: {
+          action: 'completed',
+          check_run: {
+            status: 'completed',
+            conclusion: 'success',
+            check_suite: {
+              head_branch: any.word(),
+              pull_requests: []
+            }
+          }
+        },
+        headers: {'x-github-event': 'check_run'},
+        log: () => undefined
+      };
+      response.withArgs('no PRs for this commit').returns({code});
+
+      return handler(request, {response}, settings).then(() => assert.calledWith(code, BAD_REQUEST));
+    });
+
+    test('that a server-error is returned if the list of PRs for the commit is greater than one', () => {
+      const request = {
+        payload: {
+          action: 'completed',
+          check_run: {
+            status: 'completed',
+            conclusion: 'success',
+            check_suite: {
+              head_branch: any.word(),
+              pull_requests: [
+                any.simpleObject(),
+                any.simpleObject()
+              ]
+            }
+          }
+        },
+        headers: {'x-github-event': 'check_run'},
+        log: () => undefined
+      };
+      boom.internal.withArgs('too many PRs exist for this commit').returns(error);
+
+      return handler(request, {response}, settings).then(() => assert.calledWith(response, error));
+    });
+
+    test('that the response is bad-request if the PR is not from greenkeeper', () => {
+      const senderUrl = any.url();
+      const request = {
+        payload: {
+          action: 'completed',
+          check_run: {
+            status: 'completed',
+            conclusion: 'success',
+            check_suite: {
+              head_branch: any.word(),
+              pull_requests: [any.simpleObject()]
+            }
+          },
+          sender: {html_url: senderUrl}
+        },
+        headers: {'x-github-event': 'check_run'},
+        log: () => undefined
+      };
+      response.withArgs(`PR is not from greenkeeper, but from ${senderUrl}`).returns({code});
+
+      return handler(request, {response}, settings).then(() => assert.calledWith(code, BAD_REQUEST));
+    });
+
+    test('that a server-error is reported if the fetching of related PR fails', () => {
+      const request = {
+        payload: {
+          action: 'completed',
+          check_run: {
+            status: 'completed',
+            conclusion: 'success',
+            check_suite: {
+              head_branch: any.word(),
+              pull_requests: [any.simpleObject()]
+            }
+          },
+          sender: {html_url: greenkeeperSender}
+        },
+        headers: {'x-github-event': 'check_run'},
+        log: () => undefined
+      };
+      getPullRequest.rejects(error);
+      boom.internal.withArgs('failed to fetch PRs', error).returns(wrappedError);
+
+      return handler(request, {response}, settings).catch(err => assert.equal(err, wrappedError));
     });
   });
 
@@ -244,17 +405,18 @@ suite('handler', () => {
   });
 
   suite('other statuses', () => {
-    test('that response is bad-request when the webhook event is not `pull_request` or `status', () => {
+    test('that response is bad-request when the webhook event is not `pull_request` or `status', async () => {
+      const event = any.word();
       const request = {
         payload: {},
-        headers: {'x-github-event': any.word()},
+        headers: {'x-github-event': event},
         log
       };
+      response.withArgs(`event was \`${event}\` instead of \`status\` or \`check_run\``).returns({code});
 
-      return handler(request, {response}, settings).then(() => {
-        assert.calledWith(code, BAD_REQUEST);
-        assert.calledWith(log, ['PR'], 'skipping');
-      });
+      await handler(request, {response}, settings);
+
+      assert.calledWith(code, BAD_REQUEST);
     });
   });
 });
