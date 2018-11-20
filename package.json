@@ -79,7 +79,7 @@
     "sinon": "^7.1.1"
   },
   "dependencies": {
-    "@octokit/rest": "^15.15.1",
+    "@octokit/rest": "^16.0.1",
     "boom": "^7.2.1",
     "btoa": "1.2.1",
     "delay": "^4.1.0",
