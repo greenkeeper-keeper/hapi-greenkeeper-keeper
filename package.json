@@ -46,7 +46,9 @@
   "publishConfig": {
     "access": "public"
   },
-  "files": ["lib/"],
+  "files": [
+    "lib/"
+  ],
   "devDependencies": {
     "@travi/any": "^2.0.0",
     "@travi/eslint-config-travi": "^1.6.18",
