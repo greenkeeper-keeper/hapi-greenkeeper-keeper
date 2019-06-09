@@ -51,7 +51,7 @@
   ],
   "devDependencies": {
     "@travi/any": "^2.0.0",
-    "@travi/eslint-config-travi": "^1.6.18",
+    "@travi/eslint-config-travi": "^1.8.0",
     "babel-core": "^6.26.3",
     "babel-plugin-transform-object-rest-spread": "6.26.0",
     "babel-preset-env": "^1.7.0",
@@ -62,7 +62,7 @@
     "cucumber": "^5.0.2",
     "cz-conventional-changelog": "2.1.0",
     "debug": "^4.1.0",
-    "gherkin-lint": "^3.0.0",
+    "gherkin-lint": "^3.3.2",
     "globstar": "1.0.0",
     "good": "8.1.2",
     "good-console": "8.0.0",
