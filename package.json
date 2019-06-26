@@ -35,7 +35,6 @@
     "commitmsg": "commitlint -e",
     "precommit": "npm test",
     "build": "rollup -c",
-    "preversion": "npm test",
     "prepack": "run-s build"
   },
   "config": {
