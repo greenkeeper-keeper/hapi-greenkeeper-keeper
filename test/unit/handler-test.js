@@ -215,6 +215,39 @@ suite('handler', () => {
       });
     });
 
+    test('that the webhook is accepted and processed for a neutral check_run and a matching greenkeeper PR', () => {
+      const repository = any.simpleObject();
+      const branch = any.string();
+      const prNumber = any.integer();
+      const sha = any.string();
+      const partialPullRequest = {user: {html_url: greenkeeperSender}, number: prNumber};
+      const fullPullRequest = {...any.simpleObject(), user: {html_url: greenkeeperSender}};
+      const request = {
+        payload: {
+          action: 'completed',
+          check_run: {
+            status: 'completed',
+            conclusion: 'neutral',
+            head_sha: sha,
+            check_suite: {
+              head_branch: branch,
+              pull_requests: [partialPullRequest]
+            }
+          },
+          repository
+        },
+        headers: {'x-github-event': 'check_run'},
+        log: () => undefined
+      };
+      response.withArgs('check_run event will be processed').returns({code});
+      getPullRequest.withArgs(repository, prNumber).resolves(fullPullRequest);
+
+      return handler(request, {response}, settings).then(() => {
+        assert.calledWith(code, ACCEPTED);
+        assert.calledWith(process.default, fullPullRequest, settings);
+      });
+    });
+
     test('that the response is bad-request when the status is not `completed`', () => {
       const status = any.string();
       const request = {

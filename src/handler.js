@@ -46,7 +46,7 @@ function checkRunEventIsSuccessfulAndCouldBeForGreenkeeperPR(checkRun, log) {
     return false;
   }
 
-  if ('success' !== conclusion) {
+  if ('success' !== conclusion && 'neutral' !== conclusion) {
     log(['PR'], `check_run conclusion was \`${conclusion}\` instead of \`success\``);
     return false;
   }
