@@ -76,7 +76,7 @@
     "proxyquire": "^2.1.0",
     "rollup": "^1.16.3",
     "rollup-plugin-babel": "^3.0.7",
-    "rollup-plugin-node-resolve": "^4.0.0",
+    "rollup-plugin-node-resolve": "^5.2.0",
     "sinon": "^7.1.1"
   },
   "dependencies": {
