@@ -1,18 +1,12 @@
 /* eslint import/no-extraneous-dependencies: ["error", {"devDependencies": true}] */
 import babel from 'rollup-plugin-babel';
 import nodeResolve from 'rollup-plugin-node-resolve';
+import autoExternal from 'rollup-plugin-auto-external';
 
 export default {
   input: 'src/plugin.js',
-  external: [
-    'http-status-codes',
-    'delay',
-    'joi',
-    'hoek',
-    'boom',
-    '@octokit/rest'
-  ],
   plugins: [
+    autoExternal(),
     nodeResolve({
       module: true,
       jsnext: true

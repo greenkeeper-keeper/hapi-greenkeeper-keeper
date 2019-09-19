@@ -60,35 +60,30 @@ suite('plugin', () => {
 
     test('that an error is thrown if the github config is not an object', () => assert.isRejected(
       plugin.register({}, {github: ''}, next),
-      '"github" must be an object'
+      '"github" must be of type object'
     ));
 
     test('that an error is thrown if the github token is not provided', () => assert.isRejected(
       plugin.register({}, {github: {}}, next),
-      '"token" is required'
+      '"github.token" is required'
     ));
 
     test('that an error is thrown if the github token is an inappropriate type', () => assert.isRejected(
       plugin.register({}, {github: {token: any.integer()}}, next),
-      '"token" must be a string'
+      '"github.token" must be a string'
     ));
 
     test(
       'that an error is thrown if the `acceptAction` setting is not provided',
       () => assert.isRejected(
         plugin.register({}, {github: {token: any.string()}}, next),
-        'child "acceptAction" fails because ["acceptAction" is required]'
+        '"acceptAction" is required'
       )
     );
 
-    test('that an error is thrown if the accept-action is not provided as an appropriate type', () => assert.isRejected(
-      plugin.register({}, {github: {token: any.string()}, acceptAction: any.integer()}, next),
-      'child "acceptAction" fails because ["acceptAction" must be a string]'
-    ));
-
     test('that an error is thrown if an invalid accept-action is not provided', () => assert.isRejected(
       plugin.register({}, {github: {token: any.string()}, acceptAction: any.string()}, next),
-      'child "acceptAction" fails because ["acceptAction" must be one of [merge, squash, rebase]]'
+      '"acceptAction" must be one of [merge, squash, rebase]'
     ));
 
     test('that no error is thrown if a valid accept-type is provided', () => Promise.all([

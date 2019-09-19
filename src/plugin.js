@@ -1,12 +1,13 @@
-import * as joi from 'joi';
+import * as joi from '@hapi/joi';
 import hoek from 'hoek';
 import validatePayloadAndProcess from './handler';
 
 function validate(options) {
-  const validated = joi.validate(options, joi.object({
+  const schema = joi.object({
     github: joi.object({token: joi.string().required()}).required(),
     acceptAction: joi.string().valid('merge', 'squash', 'rebase').required()
-  }).required());
+  }).required();
+  const validated = schema.validate(options);
 
   hoek.assert(!validated.error, validated.error);
 
