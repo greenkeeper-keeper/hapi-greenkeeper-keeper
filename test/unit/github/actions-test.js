@@ -14,7 +14,6 @@ suite('github actions', () => {
   let
     sandbox,
     actions,
-    octokitAuthenticate,
     octokitIssueSearch,
     octokitGetPr,
     octokitMergePr,
@@ -36,7 +35,6 @@ suite('github actions', () => {
   setup(() => {
     sandbox = sinon.createSandbox();
 
-    octokitAuthenticate = sinon.spy();
     octokitIssueSearch = sinon.stub();
     octokitGetPr = sinon.stub();
     octokitCombinedStatus = sinon.stub();
@@ -47,9 +45,8 @@ suite('github actions', () => {
 
     sandbox.stub(octokitFactory, 'default');
 
-    octokitFactory.default.returns({
-      authenticate: octokitAuthenticate,
-      search: {issues: octokitIssueSearch},
+    octokitFactory.default.withArgs({auth: `token ${token}`}).returns({
+      search: {issuesAndPullRequests: octokitIssueSearch},
       pullRequests: {
         get: octokitGetPr,
         merge: octokitMergePr
@@ -63,8 +60,6 @@ suite('github actions', () => {
   });
 
   teardown(() => sandbox.restore());
-
-  const assertAuthenticatedForOctokit = () => assert.calledWith(octokitAuthenticate, {type: 'token', token});
 
   suite('ensure PR can be accepted', () => {
     const successfulCheckRuns = any.listOf(() => ({
@@ -80,7 +75,7 @@ suite('github actions', () => {
       const result = await actions.ensureAcceptability({repo, sha}, () => undefined);
 
       assert.isTrue(result);
-      assertAuthenticatedForOctokit();
+      assert.calledWithNew(octokitFactory.default);
     });
 
     test('that the failing status results in rejection', () => {
@@ -90,7 +85,7 @@ suite('github actions', () => {
         actions.ensureAcceptability({repo, sha}, () => undefined),
         FailedStatusFoundError,
         /A failed status was found for this PR\./
-      ).then(assertAuthenticatedForOctokit);
+      );
     });
 
     test('that the pending status results in rejection', () => {
@@ -101,7 +96,7 @@ suite('github actions', () => {
       return assert.isRejected(
         actions.ensureAcceptability({repo, sha}, log, any.integer()),
         'pending'
-      ).then(assertAuthenticatedForOctokit);
+      );
     });
 
     test('that the pending status does not result in rejection if no statuses are listed', async () => {
@@ -113,7 +108,7 @@ suite('github actions', () => {
       const result = await actions.ensureAcceptability({repo, sha}, log, any.integer());
 
       assert.isTrue(result);
-      assertAuthenticatedForOctokit();
+      assert.calledWithNew(octokitFactory.default);
     });
 
     test('that an invalid status results in rejection', () => {
@@ -125,7 +120,7 @@ suite('github actions', () => {
         actions.ensureAcceptability({repo, sha}, log),
         InvalidStatusFoundError,
         /An invalid status was found for this PR\./
-      ).then(assertAuthenticatedForOctokit);
+      );
     });
 
     test('that completed check_runs are acceptable', async () => {
@@ -137,7 +132,7 @@ suite('github actions', () => {
       const result = await actions.ensureAcceptability({repo, sha}, () => undefined);
 
       assert.isTrue(result);
-      assertAuthenticatedForOctokit();
+      assert.calledWithNew(octokitFactory.default);
     });
 
     test('that pending check_runs result in rejection', () => {
@@ -145,8 +140,7 @@ suite('github actions', () => {
       octokitCombinedStatus.withArgs({owner: repoOwner, repo: repoName, ref: sha}).resolves({data: {state: 'success'}});
       octokitListChecksForRef.resolves({data: {total_count: checkRuns.length, check_runs: checkRuns}});
 
-      return assert.isRejected(actions.ensureAcceptability({repo, sha}, log, any.integer()), 'pending')
-        .then(assertAuthenticatedForOctokit);
+      return assert.isRejected(actions.ensureAcceptability({repo, sha}, log, any.integer()), 'pending');
     });
 
     test('that a check_run with a `failure` conclusion results in rejection', () => {
@@ -158,7 +152,7 @@ suite('github actions', () => {
         actions.ensureAcceptability({repo, sha}, log, any.integer()),
         FailedCheckRunFoundError,
         /A failed check_run was found for this PR\./
-      ).then(assertAuthenticatedForOctokit);
+      );
     });
 
     test('that a check_run with a `cancelled` conclusion results in rejection', () => {
@@ -170,7 +164,7 @@ suite('github actions', () => {
         actions.ensureAcceptability({repo, sha}, log, any.integer()),
         FailedCheckRunFoundError,
         /A failed check_run was found for this PR\./
-      ).then(assertAuthenticatedForOctokit);
+      );
     });
 
     test('that a check_run with a `timed_out` conclusion results in rejection', () => {
@@ -182,7 +176,7 @@ suite('github actions', () => {
         actions.ensureAcceptability({repo, sha}, log, any.integer()),
         FailedCheckRunFoundError,
         /A failed check_run was found for this PR\./
-      ).then(assertAuthenticatedForOctokit);
+      );
     });
 
     test('that a check_run with an `action_required` conclusion results in rejection', () => {
@@ -197,25 +191,25 @@ suite('github actions', () => {
         actions.ensureAcceptability({repo, sha}, log, any.integer()),
         FailedCheckRunFoundError,
         /A failed check_run was found for this PR\./
-      ).then(assertAuthenticatedForOctokit);
+      );
     });
   });
 
   suite('accept PR', () => {
-    test('that the referenced PR gets accepted', () => {
+    test('that the referenced PR gets accepted', async () => {
       const acceptAction = any.string();
       octokitMergePr.withArgs({
         owner: repoOwner,
         repo: repoName,
-        number: prNumber,
+        pull_number: prNumber,
         sha,
         commit_title: `greenkeeper-keeper(pr: ${prNumber}): :white_check_mark:`,
         commit_message: `greenkeeper-keeper(pr: ${prNumber}): :white_check_mark:`,
         merge_method: acceptAction
       }).resolves(response);
 
-      return assert.becomes(actions.acceptPR(repo, sha, prNumber, acceptAction, log), response.data)
-        .then(assertAuthenticatedForOctokit);
+      assert.equal(await actions.acceptPR(repo, sha, prNumber, acceptAction, log), response.data);
+      assert.calledWithNew(octokitFactory.default);
     });
 
     test('that a merge failure is reported appropriately', () => {
@@ -225,38 +219,39 @@ suite('github actions', () => {
         actions.acceptPR(repo),
         MergeFailureError,
         /An attempt to merge this PR failed. Error: error from PUT request in test$/
-      ).then(assertAuthenticatedForOctokit);
+      );
     });
   });
 
   suite('comments', () => {
-    test('that an error comment is posted', () => {
+    test('that an error comment is posted', async () => {
       const message = any.string();
       const error = new Error(message);
       octokitCreateIssueComment.withArgs({
         owner: repoOwner,
         repo: repoName,
-        number: prNumber,
+        issue_number: prNumber,
         body: `:x: greenkeeper-keeper failed to merge the pull-request \n> ${message}`
       }).resolves(response);
 
-      return assert.becomes(actions.postErrorComment(repo, prNumber, error), response)
-        .then(assertAuthenticatedForOctokit);
+      assert.equal(await actions.postErrorComment(repo, prNumber, error), response);
+      assert.calledWithNew(octokitFactory.default);
     });
   });
 
   suite('PRs for a commit', () => {
-    test('that PRs with HEAD matching a commit are fetched', () => {
+    test('that PRs with HEAD matching a commit are fetched', async () => {
       const pullRequests = any.listOf(any.simpleObject);
       octokitIssueSearch.withArgs({q: `${ref}+type:pr`}).returns({data: {items: pullRequests}});
 
-      return assert.becomes(actions.getPullRequestsForCommit({ref}), pullRequests).then(assertAuthenticatedForOctokit);
+      assert.equal(await actions.getPullRequestsForCommit({ref}), pullRequests);
+      assert.calledWithNew(octokitFactory.default);
     });
   });
 
   test('that the PR gets requested by issue number', () => {
     const pullRequest = any.simpleObject();
-    octokitGetPr.withArgs({owner: repoOwner, repo: repoName, number: prNumber}).resolves({data: pullRequest});
+    octokitGetPr.withArgs({owner: repoOwner, repo: repoName, pull_number: prNumber}).resolves({data: pullRequest});
 
     return assert.becomes(actions.getPullRequest(repo, prNumber), pullRequest);
   });

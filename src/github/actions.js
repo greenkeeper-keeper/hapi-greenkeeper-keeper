@@ -1,4 +1,4 @@
-import octokitFactory from './octokit-factory-wrapper';
+import Octokit from './octokit-factory-wrapper';
 import {FailedCheckRunFoundError, FailedStatusFoundError, InvalidStatusFoundError, MergeFailureError} from '../errors';
 
 function allStatusesAreSuccessful(statusesResponse, url, log) {
@@ -51,9 +51,8 @@ function allCheckRunsAreSuccessful(checkRunsResponse, url, log) {
 }
 
 export default function (githubCredentials) {
-  const octokit = octokitFactory();
   const {token} = githubCredentials;
-  octokit.authenticate({type: 'token', token});
+  const octokit = new Octokit({auth: `token ${token}`});
 
   async function ensureAcceptability({repo, sha, url}, log) {
     log(['info', 'PR', 'validating'], url);
@@ -72,7 +71,7 @@ export default function (githubCredentials) {
     return octokit.pullRequests.merge({
       owner: repo.owner.login,
       repo: repo.name,
-      number: prNumber,
+      pull_number: prNumber,
       commit_title: `greenkeeper-keeper(pr: ${prNumber}): :white_check_mark:`,
       commit_message: `greenkeeper-keeper(pr: ${prNumber}): :white_check_mark:`,
       sha,
@@ -91,19 +90,23 @@ export default function (githubCredentials) {
     return octokit.issues.createComment({
       owner: repo.owner.login,
       repo: repo.name,
-      number: prNumber,
+      issue_number: prNumber,
       body: `:x: greenkeeper-keeper failed to merge the pull-request \n> ${error.message}`
     });
   }
 
   async function getPullRequestsForCommit({ref}) {
-    const response = await octokit.search.issues({q: `${ref}+type:pr`});
+    const response = await octokit.search.issuesAndPullRequests({q: `${ref}+type:pr`});
 
     return response.data.items;
   }
 
   async function getPullRequest(repository, number) {
-    const response = await octokit.pullRequests.get({owner: repository.owner.login, repo: repository.name, number});
+    const response = await octokit.pullRequests.get({
+      owner: repository.owner.login,
+      repo: repository.name,
+      pull_number: number
+    });
 
     return response.data;
   }
