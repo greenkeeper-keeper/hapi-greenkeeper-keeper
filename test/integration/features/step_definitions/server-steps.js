@@ -1,6 +1,6 @@
 import {After, Given} from 'cucumber';
 import any from '@travi/any';
-import hapi from 'hapi';
+import hapi from '@hapi/hapi';
 
 After(function () {
   return this.server.stop();

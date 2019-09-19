@@ -1,5 +1,5 @@
 import {ACCEPTED, BAD_REQUEST, NO_CONTENT, UNSUPPORTED_MEDIA_TYPE} from 'http-status-codes';
-import boom from 'boom';
+import boom from '@hapi/boom';
 import openedByGreenkeeperBot from './greenkeeper';
 import createActions from './github/actions';
 import process from './process';

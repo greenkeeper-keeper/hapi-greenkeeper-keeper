@@ -2,7 +2,7 @@ import {assert} from 'chai';
 import sinon from 'sinon';
 import {ACCEPTED, NO_CONTENT, BAD_REQUEST, UNSUPPORTED_MEDIA_TYPE} from 'http-status-codes';
 import any from '@travi/any';
-import boom from 'boom';
+import boom from '@hapi/boom';
 import * as actionsFactory from '../../src/github/actions';
 import * as greenkeeper from '../../src/greenkeeper';
 import * as process from '../../src/process';
