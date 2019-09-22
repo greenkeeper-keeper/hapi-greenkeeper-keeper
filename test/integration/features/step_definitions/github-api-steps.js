@@ -5,7 +5,7 @@ import any from '@travi/any';
 import {METHOD_NOT_ALLOWED, OK} from 'http-status-codes';
 import {GREENKEEPER_INTEGRATION_GITHUB_URL} from '../../../../src/greenkeeper';
 
-const debug = require('debug')('test');
+const debugNock = require('debug')('nock');
 
 function stubTheCommentsEndpoint(githubScope, authorizationHeader) {
   this.prProcessed = new Promise(resolve => {
@@ -13,7 +13,7 @@ function stubTheCommentsEndpoint(githubScope, authorizationHeader) {
       .matchHeader('Authorization', authorizationHeader)
       .post(`/repos/${this.repoFullName}/issues/${this.prNumber}/comments`)
       .reply(OK, (uri, requestBody) => {
-        this.errorComment = JSON.parse(requestBody).body;
+        this.errorComment = requestBody.body;
         resolve();
       });
   });
@@ -37,7 +37,7 @@ Before(function () {
 
   authorizationHeader = `token ${this.githubToken}`;
 
-  githubScope = nock('https://api.github.com').log(debug);
+  githubScope = nock('https://api.github.com').log(debugNock);
 });
 
 After(function () {
