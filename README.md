@@ -9,7 +9,7 @@ hapi plugin to automatically merge and clean up passing greenkeeper PRs
 [![Gitter](https://img.shields.io/gitter/room/greenkeeper-keeper/Lobby.svg?style=flat)](https://gitter.im/greenkeeper-keeper/Lobby)
 
 <!-- status badges -->
-[![Build Status](https://img.shields.io/travis/greenkeeper-keeper/hapi-greenkeeper-keeper.svg?style=flat&branch=master)](https://travis-ci.org/greenkeeper-keeper/hapi-greenkeeper-keeper)
+[![Build Status](https://img.shields.io/travis/com/greenkeeper-keeper/hapi-greenkeeper-keeper.svg?style=flat&branch=master)](https://travis-ci.com/greenkeeper-keeper/hapi-greenkeeper-keeper)
 [![Codecov](https://img.shields.io/codecov/c/github/greenkeeper-keeper/hapi-greenkeeper-keeper.svg?style=flat)](https://codecov.io/github/greenkeeper-keeper/hapi-greenkeeper-keeper)
 
 <!-- contribution badges -->
