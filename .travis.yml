@@ -1,16 +1,8 @@
-language: node_js
+vdrsion: ~> 1.0
 notifications:
   email: false
+import:
+  - source: form8ion/.travis-ci:node.yml
+  - source: greenkeeper-keeper/.travis-ci:authenticated-semantic-release.yml
 before_script: npm ls >/dev/null
 after_success: npm run coverage:report
-deploy:
-  provider: script
-  skip_cleanup: true
-  script: npx semantic-release
-branches:
-  except:
-  - "/^v\\d+\\.\\d+\\.\\d+$/"
-env:
-  global:
-  - FORCE_COLOR=1
-  - NPM_CONFIG_COLOR=always
