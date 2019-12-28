@@ -1,4 +1,4 @@
-vdrsion: ~> 1.0
+version: ~> 1.0
 notifications:
   email: false
 import:
