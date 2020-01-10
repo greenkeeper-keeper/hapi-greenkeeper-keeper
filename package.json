@@ -50,7 +50,7 @@
     "lib/"
   ],
   "devDependencies": {
-    "@hapi/hapi": "^18.4.0",
+    "@hapi/hapi": "^19.0.0",
     "@travi/any": "^2.0.4",
     "@travi/eslint-config-travi": "^1.8.5",
     "babel-core": "^6.26.3",
