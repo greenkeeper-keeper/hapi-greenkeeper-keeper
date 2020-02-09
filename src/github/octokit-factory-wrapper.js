@@ -1,3 +1,3 @@
-import octokitFactory from '@octokit/rest';
+import {Octokit} from '@octokit/rest';
 
-export default octokitFactory;
+export default Octokit;

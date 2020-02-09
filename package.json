@@ -86,7 +86,7 @@
     "@hapi/boom": "^9.0.0",
     "@hapi/hoek": "^9.0.3",
     "@hapi/joi": "^17.0.2",
-    "@octokit/rest": "^16.29.0",
+    "@octokit/rest": "^16.43.1",
     "btoa": "1.2.1",
     "delay": "^4.3.0",
     "http-status-codes": "1.4.0",

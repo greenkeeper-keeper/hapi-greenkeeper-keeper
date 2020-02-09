@@ -68,7 +68,7 @@ export default function (githubCredentials) {
   }
 
   function acceptPR(repo, sha, prNumber, acceptAction, log) {
-    return octokit.pullRequests.merge({
+    return octokit.pulls.merge({
       owner: repo.owner.login,
       repo: repo.name,
       pull_number: prNumber,
@@ -102,7 +102,7 @@ export default function (githubCredentials) {
   }
 
   async function getPullRequest(repository, number) {
-    const response = await octokit.pullRequests.get({
+    const response = await octokit.pulls.get({
       owner: repository.owner.login,
       repo: repository.name,
       pull_number: number

@@ -47,7 +47,7 @@ suite('github actions', () => {
 
     octokitFactory.default.withArgs({auth: `token ${token}`}).returns({
       search: {issuesAndPullRequests: octokitIssueSearch},
-      pullRequests: {
+      pulls: {
         get: octokitGetPr,
         merge: octokitMergePr
       },
