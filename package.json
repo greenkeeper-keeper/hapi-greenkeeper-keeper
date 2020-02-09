@@ -34,8 +34,6 @@
     "test:integration:focus": "run-s 'test:integration:base -- --tags @focus'",
     "test:integration:focus:debug": "DEBUG=nock,test run-s test:integration:focus",
     "test": "npm-run-all --print-label --parallel lint:* --parallel test:* --serial build",
-    "commitmsg": "commitlint -e",
-    "precommit": "npm test",
     "build": "rollup -c",
     "prepack": "run-s build"
   },
