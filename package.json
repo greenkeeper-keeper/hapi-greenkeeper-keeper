@@ -22,6 +22,7 @@
     "lint:js": "eslint . --cache",
     "lint:md": "globstar --node -- markdownlint **/*.md",
     "lint:gherkin": "gherkin-lint",
+    "lint:peer": "npm ls >/dev/null",
     "tests:unit:no-coverage": "mocha --recursive test/unit",
     "coverage": "nyc run-s tests:unit:no-coverage",
     "coverage:report": "nyc report --reporter=text-lcov > coverage.lcov && codecov",
