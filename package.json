@@ -52,7 +52,9 @@
   "devDependencies": {
     "@hapi/hapi": "^19.1.0",
     "@travi/any": "^2.0.4",
-    "@travi/eslint-config-travi": "^1.8.5",
+    "@travi/eslint-config": "1.0.32",
+    "@travi/eslint-config-cucumber": "1.0.5",
+    "@travi/eslint-config-mocha": "1.0.7",
     "babel-core": "^6.26.3",
     "babel-plugin-transform-object-rest-spread": "6.26.0",
     "babel-preset-env": "^1.7.0",

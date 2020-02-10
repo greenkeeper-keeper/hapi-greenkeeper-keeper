@@ -63,8 +63,8 @@ export default function (githubCredentials) {
       octokit.checks.listForRef({owner: repoOwner, repo: repoName, ref: sha})
     ]);
 
-    return allStatusesAreSuccessful(statusesResponse, url, log) &&
-      allCheckRunsAreSuccessful(checkRunsResponse, url, log);
+    return allStatusesAreSuccessful(statusesResponse, url, log)
+      && allCheckRunsAreSuccessful(checkRunsResponse, url, log);
   }
 
   function acceptPR(repo, sha, prNumber, acceptAction, log) {
