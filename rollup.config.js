@@ -7,10 +7,7 @@ export default {
   input: 'src/plugin.js',
   plugins: [
     autoExternal(),
-    nodeResolve({
-      module: true,
-      jsnext: true
-    }),
+    nodeResolve({mainFields: ['module']}),
     babel({
       babelrc: false,
       exclude: ['./node_modules/**'],
