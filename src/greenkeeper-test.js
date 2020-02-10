@@ -2,7 +2,7 @@ import {assert} from 'chai';
 import openedByGreenkeeperBot, {
   GREENKEEPER_INTEGRATION_GITHUB_URL,
   GREENKEEPER_BOT_GITHUB_URL
-} from '../../src/greenkeeper';
+} from './greenkeeper';
 
 suite('greenkeeper', () => {
   test('that the users are defined to match the greenkeeper bots', () => {

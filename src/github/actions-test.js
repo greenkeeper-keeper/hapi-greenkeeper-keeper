@@ -1,14 +1,14 @@
 import {assert} from 'chai';
 import sinon from 'sinon';
 import any from '@travi/any';
-import * as octokitFactory from '../../../src/github/octokit-factory-wrapper';
-import actionsFactory from '../../../src/github/actions';
+import * as octokitFactory from './octokit-factory-wrapper';
+import actionsFactory from './actions';
 import {
   FailedCheckRunFoundError,
   FailedStatusFoundError,
   InvalidStatusFoundError,
   MergeFailureError
-} from '../../../src/errors';
+} from '../errors';
 
 suite('github actions', () => {
   let

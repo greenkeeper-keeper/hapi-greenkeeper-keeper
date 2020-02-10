@@ -1,8 +1,8 @@
 import sinon from 'sinon';
 import {assert} from 'chai';
 import any from '@travi/any';
-import {plugin} from '../../src/plugin';
-import * as validatePayloadAndProcess from '../../src/handler';
+import {plugin} from './plugin';
+import * as validatePayloadAndProcess from './handler';
 
 suite('plugin', () => {
   const possibleAcceptActions = ['merge', 'squash', 'rebase'];
@@ -28,7 +28,7 @@ suite('plugin', () => {
         method: 'POST',
         path: '/payload'
       }));
-      assert.deepEqual(plugin.pkg, require('../../package.json'));
+      assert.deepEqual(plugin.pkg, require('../package.json'));
     });
   });
 

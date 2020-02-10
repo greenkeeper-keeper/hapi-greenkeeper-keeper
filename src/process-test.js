@@ -1,8 +1,8 @@
 import {assert} from 'chai';
 import sinon from 'sinon';
 import any from '@travi/any';
-import processPR from '../../src/process';
-import * as actionsFactory from '../../src/github/actions';
+import processPR from './process';
+import * as actionsFactory from './github/actions';
 
 suite('process', () => {
   let sandbox, acceptPR, postErrorComment, ensureAcceptability;
