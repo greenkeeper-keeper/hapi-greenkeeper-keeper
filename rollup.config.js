@@ -11,8 +11,7 @@ export default {
     babel({
       babelrc: false,
       exclude: ['./node_modules/**'],
-      presets: [['env', {modules: false, targets: {node: 12}}]],
-      plugins: [['transform-object-rest-spread', {useBuiltIns: true}]]
+      presets: [['@travi', {modules: false, targets: {node: 12}}]]
     })
   ],
   output: [
