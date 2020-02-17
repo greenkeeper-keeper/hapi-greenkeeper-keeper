@@ -11,8 +11,9 @@ hapi plugin to automatically merge and clean up passing greenkeeper PRs
 <!-- consumer badges -->
 [![license](https://img.shields.io/github/license/greenkeeper-keeper/hapi-greenkeeper-keeper.svg?style=flat)](LICENSE)
 [![npm](https://img.shields.io/npm/v/hapi-greenkeeper-keeper.svg?style=flat)](https://www.npmjs.com/package/hapi-greenkeeper-keeper)
-[![monthly downloads](https://img.shields.io/npm/dm/hapi-greenkeeper-keeper.svg?style=flat)](https://www.npmjs.com/package/hapi-greenkeeper-keeper)
 ![node][node-badge]
+[![Snyk Vulnerabilities for npm package][snyk-badge]][snyk-link]
+[![monthly downloads](https://img.shields.io/npm/dm/hapi-greenkeeper-keeper.svg?style=flat)](https://www.npmjs.com/package/hapi-greenkeeper-keeper)
 [![Gitter](https://img.shields.io/gitter/room/greenkeeper-keeper/Lobby.svg?style=flat)](https://gitter.im/greenkeeper-keeper/Lobby)
 
 This is a [hapi](https://hapijs.com/) plugin that you can load into your
@@ -68,3 +69,7 @@ $ npm test
 [PRs-link]: http://makeapullrequest.com
 [PRs-badge]: https://img.shields.io/badge/PRs-welcome-brightgreen.svg
 [node-badge]: https://img.shields.io/node/v/@travi/javascript-scaffolder.svg
+
+[snyk-badge]: https://img.shields.io/snyk/vulnerabilities/npm/hapi-greenkeeper-keeper
+
+[snyk-link]: https://snyk.io/test/npm/hapi-greenkeeper-keeper
