@@ -81,7 +81,7 @@
     "rollup-plugin-auto-external": "^2.0.0",
     "rollup-plugin-babel": "^4.3.3",
     "rollup-plugin-node-resolve": "^5.2.0",
-    "sinon": "^8.0.0"
+    "sinon": "^9.0.0"
   },
   "dependencies": {
     "@hapi/boom": "^9.0.0",
