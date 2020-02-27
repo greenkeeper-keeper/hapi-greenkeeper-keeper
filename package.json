@@ -12,6 +12,9 @@
   "repository": "greenkeeper-keeper/hapi-greenkeeper-keeper",
   "bugs": "https://github.com/greenkeeper-keeper/hapi-greenkeeper-keeper/issues",
   "homepage": "https://github.com/greenkeeper-keeper/hapi-greenkeeper-keeper#readme",
+  "funding": {
+    "url": "https://github.com/greenkeeper-keeper/hapi-greenkeeper-keeper?sponsor=1"
+  },
   "keywords": [
     "greenkeeper.io",
     "github",
