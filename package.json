@@ -8,9 +8,6 @@
     "node": ">= 12"
   },
   "author": "Matt Travi <npm@travi.org> (https://matt.travi.org/)",
-  "contributors": [
-      "Trevor Richardson <npm@trevorrichardson.me> (https://trevorrichardson.me)"
-  ],
   "description": "hapi plugin to automatically merge and clean up passing greenkeeper PRs",
   "repository": "greenkeeper-keeper/hapi-greenkeeper-keeper",
   "bugs": "https://github.com/greenkeeper-keeper/hapi-greenkeeper-keeper/issues",
